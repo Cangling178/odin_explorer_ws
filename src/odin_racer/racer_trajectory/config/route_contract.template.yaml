@@ -1,0 +1,11 @@
+schema_version: 1
+status: design_only_not_runtime
+route_id: null
+route_hash: null
+ordered_segments: []
+crossing_transitions: []
+progress_window_m: null
+speed_profile_fields:
+- s_m
+- speed_mps
+minimum_turn_radius_m: null

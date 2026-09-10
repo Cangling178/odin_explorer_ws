@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>racer_navigation</name>
+  <version>0.1.0</version>
+  <description>Optional Nav2 integration.</description>
+  <maintainer email="maintainer@example.invalid">Project Maintainer</maintainer>
+  <license>Proprietary</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

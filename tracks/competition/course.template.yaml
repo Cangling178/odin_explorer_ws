@@ -1,0 +1,32 @@
+schema_version: 1
+course_id: competition_course_01
+status: awaiting_rules_and_survey
+source: ../reference/course_reference.jpg
+image_annotations:
+  board_width_m: 2.0
+  board_height_m: 1.5
+  red_horizontal_extent_m: 1.61
+  red_vertical_extent_m: 1.2
+survey:
+  frame_id: null
+  origin_description: null
+  centerline_csv: null
+  measured_line_width_m: null
+  measurement_uncertainty_m: null
+  course_revision: null
+rules:
+  camera_line_detection_allowed: true
+  prior_mapping_allowed: true
+  predefined_route_allowed: true
+  stopping_allowed: null
+  reversing_allowed: null
+  required_laps: null
+  allowed_lateral_error_m: null
+  judged_robot_point: null
+route:
+  direction: null
+  ordered_segment_ids: []
+  checkpoints: []
+  crossing_transitions: []
+  start_gate: null
+  finish_gate: null

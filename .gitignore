@@ -1,0 +1,33 @@
+# Colcon and Python outputs
+/build/
+/install/
+/log/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+# Vendor underlay and generated dependencies
+/vendor_ws/src/*
+/vendor_ws/build/
+/vendor_ws/install/
+/vendor_ws/log/
+# Large captures and generated outputs
+/data/bags/*
+/data/video/*
+/data/maps/*
+/data/results/*
+*.db3
+*.mcap
+*.bag
+*.pcd
+*.ply
+# Local credentials and editor state
+.env
+.env.*
+*.pem
+*.key
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store

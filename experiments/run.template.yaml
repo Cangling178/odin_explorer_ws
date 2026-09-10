@@ -1,0 +1,29 @@
+schema_version: 1
+run_id: null
+data_kind: measured
+git_commit: null
+robot_id: null
+platform_lock_revision: null
+calibration_revision: null
+course_revision: null
+route_sha256: null
+parameter_snapshot: null
+measurement_source: null
+measurement_uncertainty_m: null
+judged_robot_point: null
+start_time_s: null
+end_time_s: null
+completed: null
+wrong_branch_events: null
+tolerance_m: null
+max_sample_hold_s: null
+conditions:
+  lighting: null
+  surface: null
+  battery_state: null
+  payload_kg: null
+evidence:
+  bag_path: null
+  independent_video_path: null
+  content_hashes: {}
+notes: null

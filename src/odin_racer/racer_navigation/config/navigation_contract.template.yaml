@@ -1,0 +1,7 @@
+schema_version: 1
+status: design_only_not_runtime
+enabled: false
+nav2_version: null
+mode: optional_general_navigation
+race_route_shortcuts_allowed: false
+output_adapter: null

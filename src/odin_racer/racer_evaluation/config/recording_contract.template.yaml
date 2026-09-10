@@ -1,0 +1,12 @@
+schema_version: 1
+status: design_only_not_runtime
+run_event_topic: null
+measurement_reference: null
+route_association_method: null
+required_streams:
+- pose
+- line_observations
+- commands
+- route_progress
+- diagnostics
+invalid_sample_policy: preserve_and_report

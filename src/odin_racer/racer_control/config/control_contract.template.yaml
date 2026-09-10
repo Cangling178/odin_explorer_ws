@@ -1,0 +1,10 @@
+schema_version: 1
+status: design_only_not_runtime
+drive_model: rear_differential_two_front_casters
+controller_type: null
+control_rate_hz_candidate: 50
+max_linear_speed_mps: null
+max_yaw_rate_radps: null
+command_gate_required: true
+arming_on_launch: false
+lower_level_controller: F4_exact_board_unknown

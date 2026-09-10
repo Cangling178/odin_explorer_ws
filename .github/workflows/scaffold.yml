@@ -1,0 +1,23 @@
+name: Scaffold checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install check and asset build dependencies
+        run: |
+          apt-get update
+          apt-get install -y python3-yaml python3-colcon-common-extensions ros-humble-xacro ros-humble-robot-state-publisher ros-humble-joint-state-publisher
+      - name: Check repository and offline behavior
+        run: |
+          python3 tools/check_workspace.py
+          python3 -m unittest discover -s tests -v
+      - name: Build package assets
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --base-paths src
