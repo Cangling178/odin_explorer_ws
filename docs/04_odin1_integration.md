@@ -1,5 +1,7 @@
 # ODIN1 integration
 
+English | [Chinese](04_odin1_integration_cn.md)
+
 ## Verified upstream context
 
 The [manufacturer product page](https://www.manifoldtech.cn/products/odin1/)

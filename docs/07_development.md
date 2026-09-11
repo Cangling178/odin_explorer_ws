@@ -1,5 +1,7 @@
 # Development workflow
 
+English | [Chinese](07_development_cn.md)
+
 ## Platform baseline
 
 Use a clean shell with the intended ROS distribution. The foundation targets

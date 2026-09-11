@@ -1,5 +1,7 @@
 # ADR-0002: Ordered course with local visual feedback
 
+English | [Chinese](0002_ordered_visual_tracking_cn.md)
+
 Status: selected design direction, 2026-09-10; camera visibility and calibration
 remain validation gates. The owner allows mapping, preloaded routes and camera use.
 

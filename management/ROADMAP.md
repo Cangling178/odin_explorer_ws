@@ -1,5 +1,7 @@
 # Roadmap
 
+English | [Chinese](ROADMAP_cn.md)
+
 Use evidence gates instead of fixed dates before the hardware and rules are known.
 Only M0 is delivered by this foundation; later milestones are not started.
 

@@ -1,5 +1,7 @@
 # Lower-level firmware
 
+English | [Chinese](README_cn.md)
+
 The owner has an F4 lower-level controller. Exact chip, board, existing firmware
 and toolchain remain unverified. The proposed responsibility is two wheel-speed
 loops, encoder capture, PWM/direction output, feedback and a command watchdog. Keep firmware

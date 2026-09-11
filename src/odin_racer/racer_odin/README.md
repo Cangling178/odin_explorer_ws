@@ -1,5 +1,7 @@
 # racer_odin
 
+English | [Chinese](README_cn.md)
+
 ODIN1 vendor adaptation and timestamp/frame contracts.
 
 ## Status

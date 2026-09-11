@@ -1,5 +1,7 @@
 # Foundation validation
 
+English | [Chinese](VALIDATION_cn.md)
+
 Date: 2026-09-10. Platform: existing x86_64 workstation, Ubuntu 22.04 userspace,
 ROS 2 Humble, Python 3.10.12. This is not Jetson or physical robot validation.
 
@@ -25,3 +27,12 @@ course image is retained unchanged; measured centerline coordinates remain empty
 The initial local Git repository has branch `main` and no remote. Generated
 build artifacts are excluded from the delivered source workspace; build again
 at its final location using the documented command.
+
+## Chinese documentation update
+
+Date: 2026-09-11. Added 51 `_cn.md` counterparts and reciprocal language links.
+Checks passed for translation coverage, local links, matching section/table counts,
+unchanged shell commands and issue-template front matter fields. The updated
+structural checker accepts Chinese only in `_cn.md` documents and requires
+paired language navigation. All ten ROS packages rebuilt successfully; each
+installed Chinese README was compared with its source. No robot runtime changed.

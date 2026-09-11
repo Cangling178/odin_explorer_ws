@@ -1,5 +1,7 @@
 # Primary references
 
+English | [Chinese](REFERENCES_cn.md)
+
 Reviewed on 2026-09-10. These are design references, not downloaded dependencies.
 Use release-specific documentation and pin actual integration revisions later.
 

@@ -1,5 +1,7 @@
 # racer_perception
 
+English | [Chinese](README_cn.md)
+
 Local visual line observations and branch candidates.
 
 ## Status

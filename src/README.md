@@ -1,5 +1,7 @@
 # First-party ROS 2 packages
 
+English | [Chinese](README_cn.md)
+
 | Package | Responsibility | State |
 | --- | --- | --- |
 | `racer_description` | Robot geometry and frame definitions | Asset preview |

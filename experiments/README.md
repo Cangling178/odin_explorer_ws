@@ -1,5 +1,7 @@
 # Experiments
 
+English | [Chinese](README_cn.md)
+
 Copy `run.template.yaml` for each real run and fill all provenance fields. Keep
 compact results in `results.csv`; store large evidence under ignored `data/` or
 external storage with a hash and path reference. Log incomplete attempts too.

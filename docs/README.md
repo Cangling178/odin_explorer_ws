@@ -1,5 +1,7 @@
 # Documentation map
 
+English | [Chinese](README_cn.md)
+
 | Document | Purpose |
 | --- | --- |
 | [Requirements](01_requirements.md) | Confirmed scope, unknown rules and acceptance |

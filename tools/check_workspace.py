@@ -23,8 +23,9 @@ def main():
             continue
         try:
             content = path.read_text(encoding="utf-8")
-            if re.search(r"[\u3400-\u9fff]", content):
-                errors.append(f"{path.relative_to(ROOT)}: non-English CJK text in authored content")
+            is_chinese_doc = path.suffix == ".md" and path.stem.endswith("_cn")
+            if not is_chinese_doc and re.search(r"[\u3400-\u9fff]", content):
+                errors.append(f"{path.relative_to(ROOT)}: CJK text is only allowed in *_cn.md documents")
             if path.suffix == ".py":
                 ast.parse(content)
             if path.suffix in {".yaml", ".yml", ".repos"}:
@@ -38,6 +39,13 @@ def main():
                     errors.append(f"{path}: missing CMakeLists.txt")
                 manifests.append(name)
             if path.suffix == ".md":
+                counterpart = path.with_name(
+                    path.stem[:-3] + ".md" if is_chinese_doc else path.stem + "_cn.md"
+                )
+                if not counterpart.is_file():
+                    errors.append(f"{path.relative_to(ROOT)}: missing language counterpart {counterpart.name}")
+                elif f"]({counterpart.name})" not in content:
+                    errors.append(f"{path.relative_to(ROOT)}: missing language navigation link")
                 for target in re.findall(r"\]\(([^)]+)\)", content):
                     target = target.split("#")[0]
                     if not target or re.match(r"[a-zA-Z]+:", target):
@@ -51,7 +59,7 @@ def main():
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
-    print(f"PASS: {len(manifests)} packages; authored syntax, English text and local links checked")
+    print(f"PASS: {len(manifests)} packages; syntax, language pairs, text policy and local links checked")
     return 0
 
 

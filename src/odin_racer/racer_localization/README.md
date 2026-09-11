@@ -1,5 +1,7 @@
 # racer_localization
 
+English | [Chinese](README_cn.md)
+
 Continuous body state and global alignment.
 
 ## Status

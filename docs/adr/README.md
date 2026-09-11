@@ -1,5 +1,7 @@
 # Architecture decision records
 
+English | [Chinese](README_cn.md)
+
 | ID | Decision | Status |
 | --- | --- | --- |
 | [0001](0001_platform.md) | Humble baseline pending target inventory | Proposed |

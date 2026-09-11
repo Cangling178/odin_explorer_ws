@@ -1,5 +1,7 @@
 # ADR-0001: Platform baseline
 
+English | [Chinese](0001_platform_cn.md)
+
 Status: proposed, 2026-09-10.
 
 Context: the target is Jetson Orin Nano with a version-sensitive ODIN1 driver.

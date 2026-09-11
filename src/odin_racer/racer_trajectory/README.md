@@ -1,5 +1,7 @@
 # racer_trajectory
 
+English | [Chinese](README_cn.md)
+
 Ordered route progress and feasible speed profiles.
 
 ## Status

@@ -1,5 +1,7 @@
 # Accuracy and speed evaluation
 
+English | [Chinese](08_evaluation_cn.md)
+
 ## Define what is measured
 
 Confirm the competition's judged point on the robot. Until then, report errors

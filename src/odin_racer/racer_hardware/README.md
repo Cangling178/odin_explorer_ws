@@ -1,5 +1,7 @@
 # racer_hardware
 
+English | [Chinese](README_cn.md)
+
 Motor transport, wheel feedback and drive integration.
 
 ## Status

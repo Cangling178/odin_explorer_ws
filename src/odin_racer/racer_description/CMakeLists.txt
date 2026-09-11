@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(racer_description)
 find_package(ament_cmake REQUIRED)
-install(FILES README.md DESTINATION share/${PROJECT_NAME})
+install(FILES README.md README_cn.md DESTINATION share/${PROJECT_NAME})
 foreach(asset_dir config launch urdf)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${asset_dir}")
     install(DIRECTORY ${asset_dir} DESTINATION share/${PROJECT_NAME})

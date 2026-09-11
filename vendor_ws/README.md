@@ -1,5 +1,7 @@
 # ODIN1 vendor underlay
 
+English | [Chinese](README_cn.md)
+
 Reserved for `src/odin_ros_driver` from the vendor repository. Vendor sources,
 SDK binaries and underlay build products are ignored in the parent Git repository.
 `COLCON_IGNORE` prevents accidental root-level discovery. The first-party build

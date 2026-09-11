@@ -6,6 +6,8 @@ labels: ""
 assignees: ""
 ---
 
+English | [Chinese](bug_cn.md)
+
 ## Expected and observed behavior
 
 ## Reproduction steps

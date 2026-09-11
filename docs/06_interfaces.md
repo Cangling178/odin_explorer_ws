@@ -1,5 +1,7 @@
 # Proposed interfaces
 
+English | [Chinese](06_interfaces_cn.md)
+
 These are first-party design contracts. No adapter or control node is implemented
 yet, and these names are not claims about the vendor driver's current API.
 Prefer standard ROS messages. Add custom messages only when branch/progress

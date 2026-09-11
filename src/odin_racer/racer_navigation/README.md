@@ -1,5 +1,7 @@
 # racer_navigation
 
+English | [Chinese](README_cn.md)
+
 Optional Nav2 integration.
 
 ## Status

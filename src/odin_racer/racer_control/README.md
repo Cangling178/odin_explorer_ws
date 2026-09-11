@@ -1,5 +1,7 @@
 # racer_control
 
+English | [Chinese](README_cn.md)
+
 Path tracking, operating state and command gating.
 
 ## Status

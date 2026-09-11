@@ -1,5 +1,7 @@
 # Supplied course reference
 
+English | [Chinese](README_cn.md)
+
 Source: project owner's image attachment on 2026-09-10, copied unchanged as
 `course_reference.jpg`. The original image's ownership and rights are unchanged.
 

@@ -1,5 +1,7 @@
 # Course tracking and speed strategy
 
+English | [Chinese](05_course_strategy_cn.md)
+
 ## What the image establishes
 
 See [reference](../tracks/reference/README.md). The annotated board dimensions

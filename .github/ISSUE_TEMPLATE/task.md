@@ -6,6 +6,8 @@ labels: ""
 assignees: ""
 ---
 
+English | [Chinese](task_cn.md)
+
 ## Objective
 
 ## Requirement and backlog IDs

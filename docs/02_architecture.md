@@ -1,5 +1,7 @@
 # System architecture
 
+English | [Chinese](02_architecture_cn.md)
+
 ## Data and command flow
 
 ```mermaid

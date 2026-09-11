@@ -1,5 +1,7 @@
 ## Problem and resulting behavior
 
+English | [Chinese](pull_request_template_cn.md)
+
 Backlog / requirement IDs:
 
 ## Validation evidence

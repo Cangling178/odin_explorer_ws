@@ -1,5 +1,7 @@
 # Local backlog
 
+English | [Chinese](BACKLOG_cn.md)
+
 States: Todo, In progress, Blocked, Done. P0 blocks basic integration; P1 advances
 the race objective; P2 is optional. Assign an owner when work starts. Every item
 needs evidence before Done, not just a directory or a successful empty build.

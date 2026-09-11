@@ -1,5 +1,7 @@
 # Hardware records
 
+English | [Chinese](README_cn.md)
+
 Start with `bom.csv` and `robot_spec.template.yaml`. The rear differential-drive layout and F4 lower-level controller are confirmed;
 identify motor, encoder and exact board specifications before selecting a driver. `platform_lock.template.yaml` records
 the future software/firmware baseline. Use `calibration/` for measured revisions,

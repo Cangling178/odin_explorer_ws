@@ -1,5 +1,7 @@
 # Course assets
 
+English | [Chinese](README_cn.md)
+
 `reference/` holds the supplied image and annotation provenance. `competition/`
 holds an unfilled survey/route specification and a CSV header for measured
 samples. No line coordinates or branch order are inferred as ground truth.

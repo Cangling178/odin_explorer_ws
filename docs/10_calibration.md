@@ -1,5 +1,7 @@
 # Calibration plan
 
+English | [Chinese](10_calibration_cn.md)
+
 ## Wheel geometry and motion
 
 Measure loaded rolling circumference and encoder counts per wheel revolution.

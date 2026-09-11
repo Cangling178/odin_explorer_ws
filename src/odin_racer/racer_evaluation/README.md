@@ -1,5 +1,7 @@
 # racer_evaluation
 
+English | [Chinese](README_cn.md)
+
 Race recording and metric export integration.
 
 ## Status

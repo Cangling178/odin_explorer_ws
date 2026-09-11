@@ -1,5 +1,7 @@
 # Odin Racer
 
+English | [Chinese](README_cn.md)
+
 A ROS 2 workspace for a four-wheel, Jetson Orin Nano robot using the Manifold
 ODIN1 sensor module. The primary objective is to follow a marked competition
 course accurately and quickly **without a dedicated line-tracking module**.
@@ -77,7 +79,7 @@ The evaluator example is synthetic; its results are not robot performance.
 
 | Capability | State |
 | --- | --- |
-| English documentation and local project management | Included |
+| English documentation, matching Chinese translations and local project management | Included |
 | ROS package discovery, asset build and model preview | Included |
 | Offline error/time report from validated CSV and metadata | Included |
 | ODIN1 driver and calibration adapter | Planned; vendor code not downloaded |

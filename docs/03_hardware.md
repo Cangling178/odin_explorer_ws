@@ -1,5 +1,7 @@
 # Hardware integration plan
 
+English | [Chinese](03_hardware_cn.md)
+
 ## Confirmed chassis and remaining measurements
 
 Record wheel layout, steering linkage, wheel diameter under load, wheelbase,

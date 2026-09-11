@@ -1,5 +1,7 @@
 # Simulation plan
 
+English | [Chinese](README_cn.md)
+
 No physics simulator is configured yet. The URDF preview is visual only.
 Select the simulator after the ROS/JetPack and drive-model decisions.
 Run compute-heavy simulation on the workstation where practical.

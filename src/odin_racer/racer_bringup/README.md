@@ -1,5 +1,7 @@
 # racer_bringup
 
+English | [Chinese](README_cn.md)
+
 Launch composition and robot operating profiles.
 
 ## Status

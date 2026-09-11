@@ -1,5 +1,7 @@
 # Motor transport contract, proposed
 
+English | [Chinese](README_cn.md)
+
 Choose the Jetson-to-F4 transport after inspecting the board; CAN or UART/USB
 serial are candidates, not confirmed wiring.
 Document physical transport, bitrate, packet framing, byte order and scaling.

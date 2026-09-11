@@ -1,5 +1,7 @@
 # Bringup and operation plan
 
+English | [Chinese](09_bringup_cn.md)
+
 ## Stage 0: foundation, available now
 
 Build packages, run offline checks and launch the model preview. Inspect links,

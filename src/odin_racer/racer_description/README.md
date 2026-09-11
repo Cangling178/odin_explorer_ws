@@ -1,5 +1,7 @@
 # racer_description
 
+English | [Chinese](README_cn.md)
+
 Robot geometry and frame definitions.
 
 ## Status

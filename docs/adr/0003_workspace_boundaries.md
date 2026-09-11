@@ -1,5 +1,7 @@
 # ADR-0003: Workspace and dependency boundaries
 
+English | [Chinese](0003_workspace_boundaries_cn.md)
+
 Status: accepted for foundation, 2026-09-10.
 
 Context: hardware, perception, control and experiments evolve together, while

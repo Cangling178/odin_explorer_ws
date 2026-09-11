@@ -1,5 +1,7 @@
 # Risk register
 
+English | [Chinese](RISKS_cn.md)
+
 Ratings are initial engineering judgments, not measured probabilities.
 
 | ID | Risk | Impact | Trigger / evidence | Mitigation / next decision |
