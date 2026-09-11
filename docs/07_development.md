@@ -73,4 +73,4 @@ Tag actual milestones after recording evidence; do not tag untested autonomy.
 
 No remote is configured. Choosing an open-source license and publishing are
 separate future decisions. The local templates work without GitHub: copy a
-task entry into `management/BACKLOG.md` and record evidence beside it.
+task entry into [project plan](planning/README.md) and record evidence beside it.

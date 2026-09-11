@@ -17,5 +17,9 @@
 | [仓库规范](11_repository_guide_cn.md) | 文件归属、配置和数据管理 |
 | [参考资料](REFERENCES_cn.md) | 2026-09-10 核对的一手资料 |
 | [架构决策](adr/README_cn.md) | 长期设计选择的依据 |
+| [项目计划](planning/README_cn.md) | 里程碑、任务、风险和决策 |
+| [验证记录](planning/VALIDATION_cn.md) | 带日期的构建与检查依据 |
+| [协作规范](CONTRIBUTING_cn.md) | 协作方式和完成标准 |
+| [更新日志](CHANGELOG_cn.md) | 项目变更历史 |
 
-项目状态记录在 `management/`，硬件实测信息记录在 `hardware/`，实验依据记录在 `experiments/`。通过链接引用信息，避免在多个位置维护相互冲突的参数副本。
+项目状态记录在 [planning/](planning/README_cn.md)，硬件实测信息记录在 `hardware/`，实验依据记录在 `experiments/`。通过链接引用信息，避免在多个位置维护相互冲突的参数副本。

@@ -13,6 +13,8 @@ Vendor source belongs in the separate ignored `vendor_ws/src/` underlay. Use a
 fixed commit and record any patches when integrating. Do not copy vendor SDK
 binaries into first-party packages or lose upstream license notices.
 
+Keep milestones, tasks, risks and project decisions in `docs/planning/README.md`, with validation evidence beside it. Do not create separate roadmap or backlog files. Keep the workspace root focused on project directories, entrypoint READMEs and required configuration; collaboration guidance and change history live in `docs/`.
+
 ## Template versus runtime configuration
 
 `*.template.yaml` files are human-reviewed specification forms. They contain

@@ -17,7 +17,11 @@ English | [Chinese](README_cn.md)
 | [Repository guide](11_repository_guide.md) | Ownership, configuration and artifact policy |
 | [References](REFERENCES.md) | Primary sources checked on 2026-09-10 |
 | [Architecture decisions](adr/README.md) | Reasons for durable design choices |
+| [Project plan](planning/README.md) | Milestones, tasks, risks and decisions |
+| [Validation](planning/VALIDATION.md) | Dated build and check evidence |
+| [Contributing](CONTRIBUTING.md) | Collaboration and completion criteria |
+| [Changelog](CHANGELOG.md) | Project change history |
 
-Project status lives in `management/`; measured hardware facts live in
+Project status lives in [planning/](planning/README.md); measured hardware facts live in
 `hardware/`; experiment evidence lives in `experiments/`. Use links instead of
 maintaining conflicting copies of the same parameter.

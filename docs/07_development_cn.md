@@ -48,4 +48,4 @@ git diff --check
 
 保持 `main` 为经过检查的基础版本。开发时使用聚焦任务的分支，如 `codex/encoder-odometry`。需要时在提交中关联需求/任务编号。提交说明保持简洁，例如 `feat(hardware): add wheel feedback parser` 或 `docs(course): record crossing order`。合并前执行相关检查。记录真实里程碑依据后再打标签，不给未经测试的自主行驶能力打标签。
 
-当前没有远程仓库。选择开源许可证和发布是后续独立决定。即使不用 GitHub，也可以将任务条目复制到 `management/BACKLOG.md`，并在旁边记录验证依据。
+当前没有远程仓库。选择开源许可证和发布是后续独立决定。即使不用 GitHub，也可以将任务条目复制到 [项目计划](planning/README_cn.md)，并在旁边记录验证依据。
