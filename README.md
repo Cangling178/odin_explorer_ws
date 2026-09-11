@@ -27,7 +27,7 @@ A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 contro
 | `tools/`, `tests/` | Runnable offline evaluator, repository checker and evaluator tests |
 | `experiments/` | Run records, result table and synthetic examples |
 | `data/` | Large local captures and generated results, excluded from Git |
-| `vendor_ws/` | Separate vendor driver workspace; driver not imported yet |
+| `vendor_ws/` | Separate vendor driver workspace; v0.14.4 built locally; point cloud display confirmed |
 | `simulation/` | Reserved for simulation; currently planning notes only |
 | `docs/` | Technical docs, contribution guide and changelog; plans in `planning/` |
 
