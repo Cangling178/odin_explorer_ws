@@ -8,6 +8,9 @@ jobs:
     container: ros:humble-ros-base-jammy
     steps:
       - uses: actions/checkout@v4
+      - name: Trust workspace for Git commands in container
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install check and asset build dependencies
         run: |
           apt-get update
