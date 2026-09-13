@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Official STEP geometry and approx 280 g specification.
+       odin_link = bottom mounting-hole group center, NOT device IMU frame.
+       User-directed front four-hole location interpreted as central 84x30.3 mm
+       pattern, not the four widely separated ball-transfer mounting holes. -->
+  <xacro:include filename="odin1_sensors.xacro"/>
+  <xacro:macro name="odin1_assembly" params="mount_x mount_y mount_z">
+    <link name="odin_link">
+      <visual>
+        <geometry><mesh filename="package://racer_description/meshes/odin1.stl"/></geometry>
+        <material name="odin_shell"><color rgba="0.16 0.18 0.20 1"/></material>
+      </visual>
+      <!-- Estimated uniform body box COM/inertia; manufacturer's mass only.
+           Body CAD depth -3..40 mm; hole-group midpoint depth 20.4 mm. -->
+      <inertial>
+        <origin xyz="-0.0019 0 0.031"/>
+        <mass value="0.280"/>
+        <inertia ixx="${0.280*(0.100**2+0.062**2)/12}" ixy="0" ixz="0"
+                 iyy="${0.280*(0.043**2+0.062**2)/12}" iyz="0"
+                 izz="${0.280*(0.043**2+0.100**2)/12}"/>
+      </inertial>
+    </link>
+    <joint name="odin_mount" type="fixed">
+      <parent link="base_link"/><child link="odin_link"/>
+      <origin xyz="${mount_x} ${mount_y} ${mount_z}"/>
+    </joint>
+    <xacro:odin_sensor_frames parent="odin_link"/>
+  </xacro:macro>
+</robot>

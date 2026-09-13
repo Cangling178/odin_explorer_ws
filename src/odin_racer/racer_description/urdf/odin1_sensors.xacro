@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Sim-only frame names avoid conflicts with vendor TF.
+       Housing->lidar is an APPROXIMATE CAD RX lens center, not calibrated.
+       Camera transform is inverse Tcl_0 from device O1-P040100136 (rotation
+       orthonormalized). IMU->lidar translation is from official data-output page. -->
+  <xacro:macro name="odin_sensor_frames" params="parent">
+    <link name="odin_sim_lidar"/>
+    <joint name="odin_sim_lidar_mount" type="fixed">
+      <parent link="${parent}"/><child link="odin_sim_lidar"/>
+      <origin xyz="0.01555 0.0055 0.031"/>
+    </joint>
+    <link name="odin_sim_imu"/>
+    <joint name="odin_sim_imu_mount" type="fixed">
+      <parent link="odin_sim_lidar"/><child link="odin_sim_imu"/>
+      <origin xyz="0.02663 -0.03447 -0.02174"/>
+    </joint>
+    <link name="odin_sim_camera_optical"/>
+    <joint name="odin_sim_camera_mount" type="fixed">
+      <parent link="odin_sim_lidar"/><child link="odin_sim_camera_optical"/>
+      <origin xyz="0.00716939 0.02923530 -0.00460279" rpy="-1.56653687 0.00366154 -1.57384855"/>
+    </joint>
+  </xacro:macro>
+</robot>

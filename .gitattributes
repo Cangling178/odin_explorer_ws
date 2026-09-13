@@ -2,3 +2,7 @@
 *.jpg binary
 *.png binary
 *.pdf binary
+*.stl binary
+*.SLDPRT binary
+*.STEP binary
+*.stp binary

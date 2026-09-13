@@ -6,7 +6,8 @@
 
 ## 状态
 
-已提供：后双驱动轮/前双万向轮示意 Xacro，以及不驱动硬件的模型预览。待完成：实测几何、碰撞/惯性模型和实际传感器光学变换。
+已提供：车板和 Odin1 CAD 网格、后驱动轮和前万向球、RViz 预览、已有 0.877 kg 质量
+对应的估算惯性，以及独立 Odin 传感器场景。整车碰撞、接触与驱动仿真仍待完成。
 
 ## 职责与验收
 
@@ -16,3 +17,21 @@
 ## 配置
 
 所有 `*.template.yaml` 都是规格表，不是运行中的 ROS 参数文件。实现组件时再添加运行依赖、可执行程序和经过测试的参数。厂商代码和大型录制数据不放在本包中。
+
+## CAD 预览
+
+在工作空间根目录执行：
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description racer_bringup
+source install/local_setup.bash
+ros2 launch racer_description preview.launch.py
+```
+
+不打开窗口时追加 `rviz:=false`。预览不需要 Odin 或 F4；不发布电机指令。
+
+## Odin1
+
+已加入官方 STEP 转换的 Odin1 外形与约 280 g 质量，安装与假设详见
+[安装记录](../../../hardware/mechanical/odin1/README_cn.md)。

@@ -4,6 +4,7 @@
 import ast
 from pathlib import Path
 import re
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from urllib.parse import unquote
@@ -17,9 +18,15 @@ IGNORED = {".git", "build", "install", "log", "__pycache__", ".venv"}
 def main():
     errors = []
     manifests = []
-    files = [p for p in ROOT.rglob("*") if p.is_file() and not IGNORED.intersection(p.relative_to(ROOT).parts)]
+    # Honor repository exclusions, including the vendor underlay and nested builds.
+    # Include new authored files so this also checks changes before staging.
+    candidates = subprocess.check_output(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=ROOT
+    ).decode("utf-8").split("\0")
+    files = [ROOT / name for name in sorted(set(candidates)) if name
+             and (ROOT / name).is_file() and not IGNORED.intersection(Path(name).parts)]
     for path in files:
-        if path.suffix.lower() in {".jpg", ".png", ".pdf"}:
+        if path.suffix.lower() in {".jpg", ".png", ".pdf", ".stl", ".sldprt", ".step", ".stp"}:
             continue
         try:
             content = path.read_text(encoding="utf-8")

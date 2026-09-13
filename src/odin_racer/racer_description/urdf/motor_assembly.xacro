@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- MG513X GMR geometry with reference mass and estimated inertia. See chassis_plate/README for provenance.
+       Confirmed: 35 mm forward axis offset, same height, mirrored installation.
+       Reference dimensions below were supplied by user, not independently verified. -->
+  <!-- User-adopted catalog masses, kg; not scale measurements.
+       Motor total includes gearbox, encoder and shaft; do not add shaft mass again.
+       Uniform bounding-box COM/inertia are APPROXIMATIONS, not manufacturer data. -->
+  <xacro:property name="motor_mass" value="0.170"/>
+  <xacro:property name="motor_bracket_mass" value="0.047"/>
+  <xacro:macro name="estimated_box_inertia" params="mass x y z sx sy sz">
+    <inertial>
+      <origin xyz="${x} ${y} ${z}"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(sy*sy+sz*sz)/12}" ixy="0" ixz="0"
+               iyy="${mass*(sx*sx+sz*sz)/12}" iyz="0"
+               izz="${mass*(sx*sx+sy*sy)/12}"/>
+    </inertial>
+  </xacro:macro>
+  <xacro:property name="motor_axis_offset" value="0.035"/>
+  <xacro:property name="motor_diameter" value="0.0326"/>
+  <xacro:property name="encoder_diameter" value="0.0328"/>
+  <xacro:property name="motor_total_depth" value="0.0455"/>
+  <xacro:property name="gearbox_length" value="0.0645"/>
+  <xacro:property name="gearbox_height" value="0.038"/>
+  <xacro:property name="shaft_diameter" value="0.006"/>
+  <xacro:property name="shaft_length" value="0.0145"/>
+  <!-- ASSUMED visualization values; edit after actual measurement. -->
+  <xacro:property name="assumed_gearbox_depth" value="0.010"/>
+  <xacro:property name="assumed_encoder_depth" value="0.005"/>
+  <xacro:property name="assumed_wheel_gap" value="0.004"/>
+  <xacro:property name="assumed_bracket_thickness" value="0.002"/>
+  <xacro:property name="assumed_bracket_length" value="0.0643"/>
+  <xacro:property name="assumed_bracket_reach" value="0.0207"/>
+  <!-- Gearbox rectangle centered halfway between axes (ASSUMPTION).
+       Bracket is an inferred L profile, no bolt holes, not fabrication geometry. -->
+  <material name="motor_metal"><color rgba="0.52 0.54 0.57 1"/></material>
+  <material name="motor_black"><color rgba="0.055 0.06 0.065 1"/></material>
+  <xacro:macro name="motor_assembly" params="side sign">
+    <xacro:property name="outer_y" value="${wheel_track/2-wheel_width/2-assumed_wheel_gap}"/>
+    <xacro:property name="can_depth" value="${motor_total_depth-assumed_gearbox_depth-assumed_encoder_depth}"/>
+    <xacro:property name="bracket_height" value="${plate_bottom_z+gearbox_height/2}"/>
+    <link name="${side}_motor_link">
+      <!-- Lump entire motor assembly into this fixed link. Rotating internal
+           inertia and separate shaft mass are not modeled at this stage. -->
+      <xacro:estimated_box_inertia mass="${motor_mass}"
+        x="${motor_axis_offset/2}" y="${-sign*motor_total_depth/2}" z="0"
+        sx="${gearbox_length}" sy="${motor_total_depth}" sz="${gearbox_height}"/>
+      <visual name="gearbox_envelope">
+        <origin xyz="${motor_axis_offset/2} ${-sign*assumed_gearbox_depth/2} 0"/>
+        <geometry><box size="${gearbox_length} ${assumed_gearbox_depth} ${gearbox_height}"/></geometry>
+        <material name="motor_metal"/>
+      </visual>
+      <visual name="motor_can">
+        <origin xyz="${motor_axis_offset} ${-sign*(assumed_gearbox_depth+can_depth/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${motor_diameter/2}" length="${can_depth}"/></geometry>
+        <material name="motor_metal"/>
+      </visual>
+      <visual name="gmr_cover">
+        <origin xyz="${motor_axis_offset} ${-sign*(motor_total_depth-assumed_encoder_depth/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${encoder_diameter/2}" length="${assumed_encoder_depth}"/></geometry>
+        <material name="motor_black"/>
+      </visual>
+    </link>
+    <joint name="${side}_motor_mount" type="fixed">
+      <parent link="base_link"/><child link="${side}_motor_link"/>
+      <origin xyz="0 ${sign*outer_y} 0"/>
+    </joint>
+    <link name="${side}_motor_bracket_link">
+      <!-- Uniform L-bracket bounding-box estimate, not a measured COM. -->
+      <xacro:estimated_box_inertia mass="${motor_bracket_mass}"
+        x="${motor_axis_offset/2}"
+        y="${sign*(assumed_bracket_thickness-assumed_bracket_reach/2)}"
+        z="${(plate_bottom_z-gearbox_height/2)/2}"
+        sx="${assumed_bracket_length}" sy="${assumed_bracket_reach}" sz="${bracket_height}"/>
+      <visual name="vertical_web">
+        <origin xyz="${motor_axis_offset/2} ${sign*assumed_bracket_thickness/2} ${(plate_bottom_z-gearbox_height/2)/2}"/>
+        <geometry><box size="${assumed_bracket_length} ${assumed_bracket_thickness} ${bracket_height}"/></geometry>
+        <material name="motor_black"/>
+      </visual>
+      <visual name="top_flange">
+        <origin xyz="${motor_axis_offset/2} ${sign*(assumed_bracket_thickness-assumed_bracket_reach/2)} ${plate_bottom_z-assumed_bracket_thickness/2}"/>
+        <geometry><box size="${assumed_bracket_length} ${assumed_bracket_reach} ${assumed_bracket_thickness}"/></geometry>
+        <material name="motor_black"/>
+      </visual>
+    </link>
+    <joint name="${side}_motor_bracket_mount" type="fixed">
+      <parent link="${side}_motor_link"/><child link="${side}_motor_bracket_link"/>
+    </joint>
+    <!-- Shaft follows the wheel, not the stationary motor housing.
+         Round shaft approximation; D flat and hub engagement are omitted. -->
+    <link name="${side}_output_shaft_link">
+      <visual>
+        <origin xyz="0 ${sign*(outer_y+shaft_length/2-wheel_track/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${shaft_diameter/2}" length="${shaft_length}"/></geometry>
+        <material name="motor_metal"/>
+      </visual>
+    </link>
+    <joint name="${side}_output_shaft_mount" type="fixed">
+      <parent link="${side}_wheel_link"/><child link="${side}_output_shaft_link"/>
+    </joint>
+  </xacro:macro>
+</robot>

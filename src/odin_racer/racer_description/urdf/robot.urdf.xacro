@@ -1,23 +1,64 @@
 <?xml version="1.0"?>
-<!-- Illustrative dimensions only. Two rear driven wheels and two front casters.
-     Visual preview only: no physics, actuator plugin or measured calibration. -->
+<!-- CAD-based geometry and approximate inertias for preview; no contact or drive simulation. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="odin_racer_preview">
+  <!-- SI units. Dimensions reported by the user; level plate height is a
+       modeling choice (62 mm replaces the earlier 57 mm ball assembly height).
+       Plate edge offsets use the longitudinal CAD bounding-box extremes. -->
+  <xacro:property name="plate_length" value="0.24741600036621094"/>
+  <xacro:property name="plate_height" value="0.062"/>
+  <xacro:property name="wheel_radius" value="0.03325"/>
+  <!-- User-adopted tire + hub mass, kg. Fasteners ignored by instruction. -->
+  <xacro:property name="wheel_mass" value="0.046"/>
+  <xacro:property name="wheel_width" value="0.026"/>
+  <xacro:property name="wheel_track" value="0.257"/>
+  <xacro:property name="rear_axle_inset" value="0.020"/>
+  <xacro:property name="ball_radius" value="0.0079375"/>
+  <!-- Front mounting-hole axes extracted from STEP, in the mesh convention.
+       The ball center uses the pair midpoint per user instruction. -->
+  <xacro:property name="ball_track" value="0.206223608603714"/>
+  <xacro:property name="pillar_hole_spacing" value="0.0383"/>
+  <!-- CY-15A product dimensions. Mounting follows CAD 38.3 mm per user instruction;
+       product drawing 40 mm retained as a documented discrepancy. -->
+  <!-- User-selected mean of 29 g and 42 g product variants; excludes pillars. -->
+  <xacro:property name="caster_mass" value="0.0355"/>
+  <xacro:property name="caster_height" value="0.020"/>
+  <xacro:property name="housing_height" value="0.016"/>
+  <xacro:property name="housing_radius" value="0.0135"/>
+  <!-- 4.5 mm across flats confirmed by the user. -->
+  <xacro:arg name="pillar_across_flats" default="0.0045"/>
+  <xacro:property name="pillar_width" value="$(arg pillar_across_flats)"/>
+  <xacro:property name="pillar_length" value="${plate_height-caster_height}"/>
+  <xacro:property name="ball_front_inset" value="0.031067559623974"/>
+  <xacro:property name="plate_center_x" value="${plate_length/2-rear_axle_inset}"/>
+  <xacro:property name="plate_bottom_z" value="${plate_height-wheel_radius}"/>
+  <xacro:property name="ball_x" value="${plate_length-rear_axle_inset-ball_front_inset}"/>
+  <xacro:property name="ball_z" value="${ball_radius-wheel_radius}"/>
   <material name="body"><color rgba="0.12 0.35 0.55 1"/></material>
   <material name="rubber"><color rgba="0.12 0.12 0.12 1"/></material>
-  <material name="sensor"><color rgba="0.9 0.55 0.15 1"/></material>
+  <material name="brass"><color rgba="0.65 0.45 0.16 1"/></material>
+  <material name="steel"><color rgba="0.65 0.68 0.72 1"/></material>
   <!-- Control origin at rear axle center, x forward, y left, z up. -->
   <link name="base_link">
     <visual>
-      <origin xyz="0.10 0 0.055"/>
-      <geometry><box size="0.34 0.22 0.07"/></geometry>
+      <origin xyz="${plate_center_x} 0 ${plate_bottom_z}" rpy="0 0 0"/>
+      <geometry><mesh filename="package://racer_description/meshes/chassis_plate.stl"/></geometry>
       <material name="body"/>
     </visual>
   </link>
   <xacro:macro name="drive_wheel" params="side y">
     <link name="${side}_wheel_link">
+      <!-- Uniform solid cylinder approximation, axle along Y. -->
+      <inertial>
+        <origin xyz="0 0 0"/>
+        <mass value="${wheel_mass}"/>
+        <inertia ixx="${wheel_mass*(3*wheel_radius*wheel_radius+wheel_width*wheel_width)/12}"
+          iyy="${wheel_mass*wheel_radius*wheel_radius/2}"
+          izz="${wheel_mass*(3*wheel_radius*wheel_radius+wheel_width*wheel_width)/12}"
+          ixy="0" ixz="0" iyz="0"/>
+      </inertial>
       <visual>
         <origin rpy="${pi/2} 0 0"/>
-        <geometry><cylinder radius="0.045" length="0.025"/></geometry>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
         <material name="rubber"/>
       </visual>
     </link>
@@ -26,24 +67,69 @@
       <origin xyz="0 ${y} 0"/><axis xyz="0 1 0"/>
     </joint>
   </xacro:macro>
-  <xacro:drive_wheel side="left" y="0.125"/>
-  <xacro:drive_wheel side="right" y="-0.125"/>
-  <!-- Casters are symbolic spheres; measured swivel/rolling joints are pending. -->
+  <xacro:drive_wheel side="left" y="${wheel_track/2}"/>
+  <xacro:drive_wheel side="right" y="${-wheel_track/2}"/>
+  <xacro:include filename="motor_assembly.xacro"/>
+  <xacro:motor_assembly side="left" sign="1"/>
+  <xacro:motor_assembly side="right" sign="-1"/>
+  <!-- Effective hex bodies; threads, nuts and seams are omitted. -->
+  <xacro:macro name="pillar_mount" params="side end x y">
+    <link name="${side}_${end}_pillar_mount_link">
+      <visual>
+        <geometry><mesh filename="package://racer_description/meshes/standoff_unit_hex.stl"
+          scale="${pillar_width} ${pillar_width} ${pillar_length}"/></geometry>
+        <material name="brass"/>
+      </visual>
+    </link>
+    <joint name="${side}_${end}_pillar_mount_joint" type="fixed">
+      <parent link="base_link"/><child link="${side}_${end}_pillar_mount_link"/>
+      <origin xyz="${x} ${y} ${plate_bottom_z}"/>
+    </joint>
+  </xacro:macro>
+  <xacro:macro name="pillar_pair" params="side y">
+    <xacro:pillar_mount side="${side}" end="front" x="${ball_x+pillar_hole_spacing/2}" y="${y}"/>
+    <xacro:pillar_mount side="${side}" end="rear" x="${ball_x-pillar_hole_spacing/2}" y="${y}"/>
+  </xacro:macro>
+  <xacro:pillar_pair side="left" y="${ball_track/2}"/>
+  <xacro:pillar_pair side="right" y="${-ball_track/2}"/>
+  <!-- Ball transfers, not swivel casters. Fixed visual spheres;
+       no rolling or friction model yet.
+       Housing is an envelope; flange
+       width/thickness and hole diameters are absent from the product drawing.
+       Do not interpret the simplified shell as machining geometry. -->
   <xacro:macro name="caster" params="side y">
     <link name="front_${side}_caster_link">
-      <visual><geometry><sphere radius="0.025"/></geometry><material name="rubber"/></visual>
+      <!-- Lump ball + housing + flange mass here once. Uniform cylinder
+           COM/inertia approximation, axis Z, full assembly height.
+           Not measured; no separate rolling-ball mass distribution. -->
+      <inertial>
+        <origin xyz="0 0 ${caster_height/2-ball_radius}"/>
+        <mass value="${caster_mass}"/>
+        <inertia
+          ixx="${caster_mass*(3*housing_radius*housing_radius+caster_height*caster_height)/12}"
+          iyy="${caster_mass*(3*housing_radius*housing_radius+caster_height*caster_height)/12}"
+          izz="${caster_mass*housing_radius*housing_radius/2}"
+          ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+      <visual><geometry><sphere radius="${ball_radius}"/></geometry><material name="steel"/></visual>
+      <visual>
+        <origin xyz="0 0 ${caster_height-ball_radius-housing_height/2}"/>
+        <geometry><cylinder radius="${housing_radius}" length="${housing_height}"/></geometry>
+        <material name="steel"/>
+      </visual>
     </link>
     <joint name="front_${side}_caster_mount" type="fixed">
       <parent link="base_link"/><child link="front_${side}_caster_link"/>
-      <origin xyz="0.22 ${y} -0.02"/>
+      <origin xyz="${ball_x} ${y} ${ball_z}"/>
     </joint>
   </xacro:macro>
-  <xacro:caster side="left" y="0.085"/>
-  <xacro:caster side="right" y="-0.085"/>
-  <link name="odin_link">
-    <visual><geometry><box size="0.05 0.10 0.06"/></geometry><material name="sensor"/></visual>
-  </link>
-  <joint name="odin_mount" type="fixed">
-    <parent link="base_link"/><child link="odin_link"/><origin xyz="0.20 0 0.13"/>
-  </joint>
+  <xacro:caster side="left" y="${ball_track/2}"/>
+  <xacro:caster side="right" y="${-ball_track/2}"/>
+  <!-- CAD central front hole group: CAD X=-41.742355/42.257645,
+       CAD Z=-140.688953/-110.388953 mm; top surface CAD Y=3.5 mm.
+       Official Odin bottom pattern 84.3x30.7 differs from plate 84x30.3 mm.
+       Center alignment only, direct mounting assumption; no invented adapter. -->
+  <xacro:include filename="odin1.xacro"/>
+  <xacro:odin1_assembly mount_x="${plate_center_x+0.1255389526560728-(plate_length/2-0.100)}"
+    mount_y="0.000257644845562" mount_z="${plate_bottom_z+0.0035}"/>
 </robot>
