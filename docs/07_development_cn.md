@@ -38,7 +38,7 @@ python3 tools/evaluate_run.py experiments/examples/synthetic_samples.csv \
 git diff --check
 ```
 
-结构检查器依赖 PyYAML，评测器及其测试仅使用 Python 标准库，见 `tools/requirements-dev.txt`。可选 GitHub 工作流执行结构检查、离线测试和资源构建；只有后续将仓库托管到 GitHub 时才会运行。
+结构检查器依赖 PyYAML，评测器及其测试仅使用 Python 标准库。接触模型测试还需 NumPy、PyYAML 和已加载的 ROS xacro 环境，见 `tools/requirements-dev.txt`。可选 GitHub 工作流执行结构检查、离线测试和资源构建；只有后续将仓库托管到 GitHub 时才会运行。
 
 ## 厂商底层工作空间
 

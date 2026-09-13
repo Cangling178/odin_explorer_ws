@@ -36,3 +36,18 @@ unchanged shell commands and issue-template front matter fields. The updated
 structural checker accepts Chinese only in `_cn.md` documents and requires
 paired language navigation. All ten ROS packages rebuilt successfully; each
 installed Chinese README was compared with its source. No robot runtime changed.
+
+## ros2_control basic motion validation — 2026-09-13
+
+Local Gazebo Classic 11.10.2 / ROS 2 Humble, not F4 or Jetson hardware acceptance.
+The existing 0.877 kg mass and 25 collisions are preserved. A differential-drive
+controller commands both wheel velocity interfaces; wheel odometry is separate
+from Gazebo truth. Build and 14 unit tests pass. Forward/reverse, both in-place
+turns, arc, excessive input, zero-command stop, publisher loss and stale-command
+checks pass, including speed/acceleration/effort limits, wheel feedback and TF.
+Settings, the simulator-only 1.10 separation fit and reproduction commands are in
+the [simulation guide](../../simulation/README.md#ros2_control-vehicle-motion-simulation).
+`tools/validate_sim_drive.py` produces full metrics. Race arbitration, hardware
+communication and moving sensor generation remain unimplemented. Commit preparation corrected full
+repository checker binary/vendor scanning and temporary-document language pairing;
+full repository checks pass.

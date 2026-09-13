@@ -9,7 +9,7 @@ Robot geometry and frame definitions.
 Available: CAD plate and Odin1 meshes, rear drive wheels/front ball transfers,
 RViz preview, approximate inertias for the existing 0.877 kg mass subtotal, and
 primitive collision geometry. The level plate height is a user-selected 62 mm.
-Chassis contact tests pass; drive integration and measured calibration remain pending.
+Chassis contact and ros2_control motion tests pass; measured calibration remains pending.
 
 ## Responsibility and acceptance
 
@@ -80,3 +80,5 @@ current Xacro, preserving all collisions and the 0.877 kg mass subtotal.
 This scene tests gravity, support and settling. It accepts no drive commands and
 publishes no vehicle TF or Odin sensor data. Settings, isolated launch commands
 and passed drop checks are in the [simulation guide](../../../simulation/README.md#chassis-ground-contact-test).
+
+The motion scene starts through `racer_bringup simulation.launch.py`. The optional sim_control Xacro argument declares control interfaces; the existing contact generator gains the Gazebo control plugin. See [motion simulation](../../../simulation/README.md#ros2_control-vehicle-motion-simulation).

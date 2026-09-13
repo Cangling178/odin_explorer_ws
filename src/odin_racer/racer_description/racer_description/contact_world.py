@@ -104,10 +104,10 @@ def aggregate(entries):
     return mass, center, tensor
 
 
-def build_world(share, config_path=None):
+def build_world(share, config_path=None, robot_xml=None):
     share = Path(share)
     config = load_config(config_path or share/"config/ground_contact.yaml")
-    robot = ET.fromstring(xacro.process_file(str(share/"urdf/robot.urdf.xacro")).toxml())
+    robot = ET.fromstring(robot_xml or xacro.process_file(str(share/"urdf/robot.urdf.xacro")).toxml())
     links = {link.get("name"): link for link in robot.findall("link")}
     joints = robot.findall("joint")
     roots = set(links)-{j.find("child").get("link") for j in joints}
@@ -244,6 +244,11 @@ def build_world(share, config_path=None):
         # SDF joint frame defaults to the child link frame, matching this URDF.
         axis = element(node, "axis")
         element(axis, "xyz", joint.find("axis").get("xyz"))
+        source_limit = joint.find("limit")
+        if source_limit is not None:
+            limit = element(axis, "limit")
+            for key in ("effort", "velocity"):
+                element(limit, key, source_limit.get(key))
         element(element(axis, "dynamics"), "damping", config["wheel_joint_damping_nms_per_rad"])
     element(model, "pose", numbers([0, 0, -lowest+config["initial_clearance_m"], 0, 0, 0]))
     ET.indent(sdf)

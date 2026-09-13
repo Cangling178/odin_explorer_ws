@@ -2,7 +2,7 @@
 
 English | [Chinese](README_cn.md)
 
-A Gazebo Classic 11 standalone Odin sensor bench and a dynamic chassis contact test using the existing masses are available; vehicle drive is pending.
+A Gazebo Classic 11 standalone Odin sensor bench and a dynamic chassis contact test using the existing masses are available; ros2_control vehicle drive is integrated.
 Select the simulator after the ROS/JetPack and drive-model decisions.
 Run compute-heavy simulation on the workstation where practical.
 
@@ -132,3 +132,114 @@ speed was about 0.0000323 m/s, angular speed 0.0000541 rad/s and orientation ang
 contained 987 records for each of the four supports, with no other parts touching
 the floor. Driven traction, turning, braking, real ground/ball behavior and hardware
 equivalence with omitted masses remain unvalidated.
+
+Commit preparation corrected CAD binary scanning and vendor directory boundaries,
+and added the English gap-list counterpart. Full repository checks, builds and
+unit tests pass; dynamic results retain the scope stated above.
+
+## ros2_control vehicle motion simulation
+
+The racer_bringup simulation.launch.py entry reuses the existing collision,
+contact and inertia aggregation. The simulation URDF enables sim_control:=true
+and declares velocity commands with position/velocity/effort feedback for both
+wheel joints. GazeboSystem realizes velocity commands using a PI effort loop.
+Only joint_state_broadcaster and diff_drive_controller are activated; no real F4
+interface or line-following algorithm runs. The preview joint_state_publisher is
+not started, so it cannot overwrite actual wheel feedback.
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 launch racer_bringup simulation.launch.py
+```
+
+Append gui:=false for headless use. Run this instead of the standalone contact
+scene; only one server may use the same Gazebo master. In another terminal with
+the same environment, confirm both controllers are active:
+
+```bash
+source /opt/ros/humble/setup.bash
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 control list_controllers -c /sim/racer/controller_manager
+ros2 topic pub --use-sim-time -r 20 -t 60 \
+  /sim/racer/diff_drive_controller/cmd_vel geometry_msgs/msg/TwistStamped \
+  '{header: {stamp: now, frame_id: base_link}, twist: {linear: {x: 0.1}, angular: {z: 0.0}}}'
+```
+
+Command stamps must use /clock. When publishing ends, the controller times out
+and brakes. The 0.25 s deadline starts timeout handling; physical stopping also
+includes acceleration limiting and wheel-loop response. The timeout pauses with
+simulation time and does not replace the independent F4 watchdog. Launch activates
+simulation controllers but sends no nonzero velocity.
+
+| Setting | Value / meaning |
+| --- | --- |
+| Control / odometry publication | 100 Hz / 50 Hz, simulation time |
+| Wheel radius / nominal separation | Read from Xacro: 0.03325 m / 0.257 m |
+| Effective separation multiplier | 1.10 for current simulated contacts only; effective separation 0.2827 m |
+| Linear / angular speed limits | +/-0.2 m/s / +/-1.0 rad/s |
+| Linear / angular acceleration limits | +/-0.3 m/s^2 / +/-1.5 rad/s^2 |
+| Command age | TwistStamped, cmd_vel_timeout=0.25 s |
+| Wheel velocity / effort limits | +/-12 rad/s / +/-0.1 N m, simulation initial values |
+| Wheel PI | Kp=0.02, Ki=0.05, Kd=0; integral torque clamp +/-0.03 N m, antiwindup |
+| Odometry | position_feedback=true, open_loop=false; wheel position feedback |
+
+Controller settings are in [simulation_controllers.yaml](../src/odin_racer/racer_control/config/simulation_controllers.yaml),
+actuator initial values in [sim_actuation.yaml](../src/odin_racer/racer_description/config/sim_actuation.yaml).
+The generator injects geometry into temporary runtime YAML and rejects combined
+linear/angular limits exceeding wheel velocity limits. Joint effort/velocity
+limits are written to both URDF and SDF. Override controller settings with
+controllers:=/absolute/path/file.yaml; restart after model/contact/config edits.
+
+Effective separation evidence: with nominal separation and PI wheel feedback,
+the ratio of wheel-derived yaw rate to Gazebo world yaw rate was approximately
+1.101 in both in-place directions and an arc. This reflects contact/sliding of
+the current wide cylinder tires. A 1.10 multiplier was then checked in a separate
+run; CAD separation remains unchanged. This is simulator calibration, not measured
+hardware geometry. Revalidate after changing tires, contact settings or ground.
+
+| Interface | Publisher / meaning |
+| --- | --- |
+| /sim/racer/diff_drive_controller/cmd_vel | External test input, TwistStamped |
+| /sim/racer/diff_drive_controller/cmd_vel_out | Limited command from controller |
+| /sim/racer/diff_drive_controller/odom | Wheel-derived controller odometry |
+| /sim/racer/joint_states | Actual simulated wheel states from joint_state_broadcaster |
+| /sim/racer/tf, /sim/racer/tf_static | Controller owns odom to base_link; robot_state_publisher owns internal transforms |
+| /contact_test/get_entity_state, /contact_test/link_states | Independent Gazebo truth for comparison, not an odometry input |
+
+odom is a local planar reference initialized at startup; Gazebo world is the
+physical world. No artificial world-to-odom transform is published. Odometry z=0
+is not Gazebo ground height. Odin has moving geometry/TF only, without integrated
+on-vehicle sensor generation.
+
+```bash
+# Same isolated ROS domain as the simulation; this actively moves the robot.
+python3 tools/validate_sim_drive.py --output data/generated/sim_drive_validation.json
+```
+
+The validator runs forward, reverse, both in-place turns, an arc and excessive
+commands. It compares wheel feedback and odometry against world truth, checking
+zero-command stops, publisher silence, stale commands, limits, effort and TF
+publishers; it sends zero on exit. Test speeds and thresholds assume the default
+configuration. It does not reset the world; run without other command publishers.
+Interface references: [gazebo_ros2_control](https://control.ros.org/humble/doc/gazebo_ros2_control/doc/index.html),
+[diff_drive_controller](https://control.ros.org/humble/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html).
+
+Motion validation (2026-09-13, Gazebo 11.10.2 / ROS 2 Humble): the initial configured
+run and subsequent repeat passed. Final repeat forward/reverse speeds were about
++0.1000/-0.1000 m/s; left/right turns +0.4998/-0.5057 rad/s; arc 0.1002 m/s and
+0.4983 rad/s. Excessive input was limited to 0.2 m/s and 1 rad/s. After publisher
+silence, observed braking began at about 0.30 s and the stop threshold was reached
+at 0.60 s, after about 44.9 mm additional travel. Zero-command stops took about
+0.4-0.9 s across scenarios. Stop thresholds are |v|<0.005 m/s, |w|<0.02 rad/s,
+and near-zero limited commands. Across six stages, maximum odometry displacement
+increment error was about 11.3 mm and yaw increment error about 0.0079 rad.
+Displacement comparison uses world/odom axes separately, so accumulated heading
+drift also contributes. Speed, acceleration, effort, stale-command, height and
+TF checks passed; 14 unit tests passed. This demonstrates basic planar motion,
+not competition line following or real motor performance. The script produces full metrics.

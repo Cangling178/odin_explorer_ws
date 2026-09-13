@@ -51,7 +51,7 @@ needs evidence before Done, not just a directory or a successful empty build.
 | EVAL-002 | P1 | Export associated errors and report real trials | Blocked | EVAL-001; no invalid-data masking |
 | SPEED-001 | P1 | Add curvature and braking speed limits | Blocked | Accurate full-route baseline |
 | RACE-001 | P1 | Implement mode/state manager and race launch | Blocked | Healthy-device and route gates enforced |
-| SIM-001 | P2 | Add drive-model simulation and sensor replay | Blocked | HW-001 and selected simulator |
+| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Gazebo Classic 11 / ros2_control basic motion validated; unknown masses deferred, moving sensors/replay pending; see simulation/README.md |
 | NAV-001 | P2 | Evaluate optional Nav2 mode | Todo | Separate scope; shared command gate |
 
 For each started item add: owner, branch, requirement IDs, design note, validation

@@ -74,3 +74,7 @@ Tag actual milestones after recording evidence; do not tag untested autonomy.
 No remote is configured. Choosing an open-source license and publishing are
 separate future decisions. The local templates work without GitHub: copy a
 task entry into [project plan](planning/README.md) and record evidence beside it.
+
+Contact-model tests additionally require NumPy, PyYAML and xacro from a sourced
+ROS environment; see `tools/requirements-dev.txt`. The evaluator tests themselves
+still use only the Python standard library.

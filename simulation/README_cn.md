@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-已添加 Gazebo Classic 11 独立 Odin1 传感器测试场景，以及采用现有质量的整车落地接触测试；整车驱动尚未接入。确定 ROS/JetPack 和驱动模型后再选择仿真器；条件允许时，在工作站运行计算量大的仿真。
+已添加 Gazebo Classic 11 独立 Odin1 传感器测试场景，以及采用现有质量的整车落地接触测试；ros2_control 整车驱动已接入。确定 ROS/JetPack 和驱动模型后再选择仿真器；条件允许时，在工作站运行计算量大的仿真。
 
 先进行确定性的平面测试：直线、等半径圆弧、S 曲线、坐标重复的交叉点、尖角以及受控数据丢失。之后加入实测车轮几何、执行延迟、饱和、打滑和相机视野，验证底盘能否通过实测走廊。
 
@@ -118,3 +118,97 @@ python3 -m unittest discover -s tests -v
 静置阶段最大线速度约 0.0000323 m/s、角速度约 0.0000541 rad/s、姿态偏转约 0.00460°。
 独立采集约 1 秒 Gazebo contacts，四个支撑各出现 987 条接触记录，没有其他部件触地。
 未验证带驱动的牵引、转向和制动，也未验证真实地面、真实球滚动或缺省质量的实车一致性。
+
+提交整理时已修正仓库检查器的 CAD 二进制扫描和厂商目录边界，并补齐临时不足清单英文版；
+全量仓库检查、包构建和单元测试通过。动态验证结果保持上面的适用范围。
+
+## ros2_control 整车运动仿真
+
+启动入口为 racer_bringup 的 simulation.launch.py，复用已有碰撞、接触和惯性合并。
+仿真 URDF 通过 sim_control:=true 声明两个轮关节的 velocity 命令接口及
+position/velocity/effort 状态接口；GazeboSystem 在仿真中使用 PI 轮速反馈施加力矩。
+仅激活 joint_state_broadcaster 与 diff_drive_controller；未启动真实 F4 接口或循线算法。
+不再运行预览用 joint_state_publisher，避免覆盖实际轮状态。
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 launch racer_bringup simulation.launch.py
+```
+
+无窗口追加 gui:=false。与独立落地场景二选一运行；相同 Gazebo master 只能运行一个 server。
+另一终端设置相同环境，确认两个控制器 active：
+
+```bash
+source /opt/ros/humble/setup.bash
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 control list_controllers -c /sim/racer/controller_manager
+ros2 topic pub --use-sim-time -r 20 -t 60 \
+  /sim/racer/diff_drive_controller/cmd_vel geometry_msgs/msg/TwistStamped \
+  '{header: {stamp: now, frame_id: base_link}, twist: {linear: {x: 0.1}, angular: {z: 0.0}}}'
+```
+
+命令时间戳必须来自 /clock；命令停止后由控制器超时制动。0.25 秒是开始超时处理的期限，
+不是物理车速归零时间；制动还受加速度限制与轮速闭环响应影响。仿真暂停时该时限也暂停，
+不等同于实车 F4 的独立看门狗。启动只激活仿真控制器，不自动发送非零速度。
+
+| 设置 | 值 / 说明 |
+| --- | --- |
+| 控制 / 里程计发布频率 | 100 Hz / 50 Hz，使用仿真时间 |
+| 轮半径 / 名义轮距 | 从 Xacro 读取 0.03325 m / 0.257 m，不重复维护 |
+| 有效轮距修正 | 1.10，仅当前仿真接触模型；有效轮距 0.2827 m |
+| 线速度 / 角速度上限 | ±0.2 m/s / ±1.0 rad/s |
+| 线加速度 / 角加速度上限 | ±0.3 m/s² / ±1.5 rad/s² |
+| 指令时效 | TwistStamped，cmd_vel_timeout=0.25 s |
+| 轮速度 / 力矩上限 | ±12 rad/s / ±0.1 N·m，初始仿真值 |
+| 轮速 PI | Kp=0.02、Ki=0.05、Kd=0；积分力矩限幅 ±0.03 N·m，抗积分饱和 |
+| 里程计 | position_feedback=true、open_loop=false，使用轮位置反馈 |
+
+控制参数在 [simulation_controllers.yaml](../src/odin_racer/racer_control/config/simulation_controllers.yaml)，
+执行器初值在 [sim_actuation.yaml](../src/odin_racer/racer_description/config/sim_actuation.yaml)。
+生成器将几何填入临时运行 YAML，并检查组合线/角速度不超过轮速度上限。轮关节力矩、速度限值
+同时写入仿真 URDF 与 SDF。控制器配置可用 controllers:=/absolute/path/file.yaml 替换；
+修改模型、接触或配置后应重新启动场景。
+
+有效轮距的依据：最初采用名义轮距和 PI 轮速反馈时，左右原地转向及圆弧的
+“按名义轮距计算的轮式角速度 / Gazebo 实际角速度”约为 1.101。
+这反映当前宽圆柱轮胎的接触/滑动行为，采用 1.10 后再独立运行测试；CAD 轮距没有修改。
+修正只属于这套仿真参数，不能作为实车轮距标定；更换轮胎、接触参数或地面后需重新验证。
+
+| 接口 | 发布者 / 含义 |
+| --- | --- |
+| /sim/racer/diff_drive_controller/cmd_vel | 外部测试输入，TwistStamped |
+| /sim/racer/diff_drive_controller/cmd_vel_out | 控制器输出的限幅指令 |
+| /sim/racer/diff_drive_controller/odom | 控制器计算的轮式里程计 |
+| /sim/racer/joint_states | joint_state_broadcaster，实际仿真轮状态 |
+| /sim/racer/tf、/sim/racer/tf_static | 控制器负责 odom→base_link；robot_state_publisher 负责车内变换 |
+| /contact_test/get_entity_state、/contact_test/link_states | 独立 Gazebo 真值，用于对照，不参与轮式里程计 |
+
+odom 是以启动时车体位姿为基准的局部平面参考系，Gazebo world 是物理世界；没有伪造 world→odom
+变换。里程计中的 z=0 不等于 Gazebo 地面高度。Odin 仅有随车几何/TF，仍未产生随车传感器数据。
+
+```bash
+# Same isolated ROS domain as the simulation; this actively moves the robot.
+python3 tools/validate_sim_drive.py --output data/generated/sim_drive_validation.json
+```
+
+验证脚本运行前进、后退、左右原地转向、圆弧和超限指令，比较轮反馈、轮式里程计与世界真值，
+检查零速停车、发布中断、过期指令、限幅、力矩和 TF 发布者；结束时发送零速。
+脚本使用默认配置的测试速度和验收阈值，不重置世界；不要同时运行其他指令发布者。
+接口依据：[gazebo_ros2_control](https://control.ros.org/humble/doc/gazebo_ros2_control/doc/index.html)、
+[diff_drive_controller](https://control.ros.org/humble/doc/ros2_controllers/diff_drive_controller/doc/userdoc.html)。
+
+运动验证记录（2026-09-13，Gazebo 11.10.2 / ROS 2 Humble）：首次配置检查以及随后复测均通过。
+最终复测的前/后直行约 +0.1000/-0.1000 m/s，左右转向约 +0.4998/-0.5057 rad/s，
+圆弧约 0.1002 m/s、0.4983 rad/s；超限指令被限制为 0.2 m/s 和 1 rad/s。
+断流测试观测约 0.30 s 开始减速、0.60 s 达到停车阈值，额外距离约 44.9 mm。
+零速停车各场景约 0.4–0.9 s；停车阈值为 |v|<0.005 m/s、|w|<0.02 rad/s 且限幅指令接近零。
+六项测试中，分段里程计位移增量误差最大约 11.3 mm、航向增量误差最大约 0.0079 rad。
+分段位移比较使用 world 与 odom 的各自坐标轴，长期累积方向漂移也会贡献该误差。
+速度、加速度、力矩、过期命令、静止高度和 TF 完整性检查全部通过；14 项单元测试通过。
+本记录仅证明基础平面运动可用，不代表比赛循线或真实电机性能。完整指标由上面的脚本生成。

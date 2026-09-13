@@ -6,19 +6,19 @@ Main functions belong in packages under `src/odin_racer/`. There is no single `m
 
 | Package | Responsibility | State |
 | --- | --- | --- |
-| [racer_description](odin_racer/racer_description/README.md) | Robot geometry and frame definitions | Asset preview |
+| [racer_description](odin_racer/racer_description/README.md) | Robot geometry and frame definitions | Preview, physics model and simulation generation |
 | [racer_hardware](odin_racer/racer_hardware/README.md) | Motor transport, wheel feedback and drive integration | Planned subsystem |
 | [racer_odin](odin_racer/racer_odin/README.md) | ODIN1 vendor adaptation and timestamp/frame contracts | Planned subsystem |
 | [racer_localization](odin_racer/racer_localization/README.md) | Continuous body state and global alignment | Planned subsystem |
 | [racer_perception](odin_racer/racer_perception/README.md) | Local visual line observations and branch candidates | Planned subsystem |
 | [racer_trajectory](odin_racer/racer_trajectory/README.md) | Ordered route progress and feasible speed profiles | Planned subsystem |
-| [racer_control](odin_racer/racer_control/README.md) | Path tracking, operating state and command gating | Planned subsystem |
+| [racer_control](odin_racer/racer_control/README.md) | Path tracking, operating state and command gating | Simulation drive config; tracking/race state pending |
 | [racer_navigation](odin_racer/racer_navigation/README.md) | Optional Nav2 integration | Planned subsystem |
-| [racer_bringup](odin_racer/racer_bringup/README.md) | Launch composition and robot operating profiles | Asset preview |
+| [racer_bringup](odin_racer/racer_bringup/README.md) | Launch composition and robot operating profiles | Preview and vehicle motion simulation |
 | [racer_evaluation](odin_racer/racer_evaluation/README.md) | Race recording and metric export integration | Planned subsystem |
 
-All ten are discoverable ament_cmake asset packages. Only the description/bringup
-preview has a launch implementation. Use `colcon build --base-paths src` from
+All ten are discoverable ament_cmake asset packages. Description/bringup provide
+preview, standalone sensors, contact and vehicle-motion launch implementations. Use `colcon build --base-paths src` from
 the workspace root. Vendor code is isolated under `vendor_ws/`. The maintainer
 address is an intentional non-deliverable placeholder until the owner chooses
 a project contact; it is not used as the Git commit identity.
@@ -27,6 +27,7 @@ a project contact; it is not used as the Git commit identity.
 
 | File | Function |
 | --- | --- |
+| [simulation.launch.py](odin_racer/racer_bringup/launch/simulation.launch.py) | ros2_control vehicle motion simulation |
 | [preview.launch.py](odin_racer/racer_bringup/launch/preview.launch.py) | User launch entry; composes model preview |
 | [Model preview implementation](odin_racer/racer_description/launch/preview.launch.py) | Publishes model and stationary joint states |
 | [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | Illustrative geometry |

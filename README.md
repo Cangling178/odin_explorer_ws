@@ -4,7 +4,7 @@ English | [Chinese](README_cn.md)
 
 A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 controller. The goal is accurate, fast tracking of a marked competition course without a dedicated line-tracking module.
 
-**This is a project scaffold. Model preview and offline evaluation run; autonomous hardware control is not implemented.**
+**This is a project scaffold. Model preview, ros2_control vehicle simulation and offline evaluation run; autonomous hardware control is not implemented.**
 
 ## Start here
 
@@ -28,7 +28,7 @@ A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 contro
 | `experiments/` | Run records, result table and synthetic examples |
 | `data/` | Large local captures and generated results, excluded from Git |
 | `vendor_ws/` | Separate vendor driver workspace; v0.14.4 built locally; point cloud display confirmed |
-| `simulation/` | Reserved for simulation; currently planning notes only |
+| `simulation/` | Usage and validation for sensor, ground-contact and vehicle-motion simulation |
 | `docs/` | Technical docs, contribution guide and changelog; plans in `planning/` |
 
 The root is also the colcon workspace root. `build/`, `install/` and `log/` are generated build outputs. `*.template.yaml` files are specification forms, not runtime ROS parameters.
