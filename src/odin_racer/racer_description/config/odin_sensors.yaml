@@ -1,0 +1,20 @@
+# Shared sensor settings for the bench and moving vehicle; simulation only.
+# Extrinsics come from the expanded URDF, not from this file.
+camera:
+  width: 1600
+  height: 1296
+  rate_hz: 10.0
+  horizontal_fov_rad: 2.2514747351
+  near_m: 0.02
+  far_m: 70.0
+lidar:
+  horizontal_samples: 240
+  vertical_samples: 180
+  horizontal_fov_rad: 2.0943951024
+  vertical_fov_rad: 1.5707963268
+  rate_hz: 10.0
+  near_m: 0.2
+  far_m: 30.0
+  resolution_m: 0.001
+imu:
+  rate_hz: 400.0

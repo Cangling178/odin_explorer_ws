@@ -12,9 +12,14 @@ tracking on this course. Validate local observations and independent error.
 The [vendor driver README](https://github.com/manifoldsdk/odin_ros_driver)
 recommends Humble on Ubuntu 22.04 and identifies version-specific firmware
 requirements. On 2026-09-10 the live README listed driver v0.14.4 with firmware
-v0.14.0; search indexes showed older versions. No release or revision is pinned
-in this workspace until the device is checked. Ubuntu 24.04 was not officially
+v0.14.0; search indexes showed older versions. Ubuntu 24.04 was not officially
 supported by that README at the time of review.
+
+Driver v0.14.4 was imported on 2026-09-11 with its exact commit recorded. It has
+been built on the development laptop, and the user confirmed RViz point cloud display;
+see [vendor integration notes](../vendor_ws/README.md). This identifies the local
+source revision, but the device firmware and Jetson platform pair are not yet accepted
+or locked. The `racer_odin` adapter, image/IMU quality and vehicle integration remain pending.
 
 ## Integration sequence
 

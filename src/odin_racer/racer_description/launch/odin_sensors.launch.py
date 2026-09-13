@@ -10,16 +10,12 @@ from launch.event_handlers import OnShutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from racer_description.sensor_world import build_sensor_bench
 
 
 def generate_launch_description():
     share = Path(get_package_share_directory('racer_description'))
     gazebo = Path(get_package_share_directory('gazebo_ros'))
-    world = (share/'worlds/odin_sensors.world').read_text().replace(
-        'ODIN_MESH_PATH', str(share/'meshes/odin1.stl'))
-    fd, path = tempfile.mkstemp(prefix='odin_sensors_', suffix='.world')
-    with os.fdopen(fd, 'w') as f:
-        f.write(world)
     # Match the standalone SDF model pose. No duplicate base_link or full-robot TF.
     frames = f'''<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="odin_bench">
       <xacro:include filename="{share}/urdf/odin1_sensors.xacro"/>
@@ -30,6 +26,9 @@ def generate_launch_description():
     </robot>'''
     doc = xacro.parse(frames)
     xacro.process_doc(doc)
+    fd, path = tempfile.mkstemp(prefix='odin_sensors_', suffix='.world')
+    with os.fdopen(fd, 'w') as f:
+        f.write(build_sensor_bench(share, doc.toxml()))
     def cleanup(context):
         Path(path).unlink(missing_ok=True)
         return []

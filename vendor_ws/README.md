@@ -12,10 +12,12 @@ script. Keep the vendor package directly under this underlay's `src/` directory
 because the vendor documents layout assumptions. Use the audited vendor build
 procedure within this directory; the first-party foundation does not invoke it.
 
-After a successful import/build, record commit SHA, license, SDK provenance,
-firmware, local patches and a smoke-test report. Source this underlay before
-the first-party overlay. See `docs/04_odin1_integration.md` for acceptance.
-No vendor driver is installed by the foundation.
+The imported commit, license, SDK provenance, local build and initial point cloud
+check are recorded below; device firmware and target-platform acceptance remain pending.
+Source this underlay before the first-party overlay. See
+[ODIN1 integration](../docs/04_odin1_integration.md) for acceptance.
+The vendor driver has been built separately into local `vendor_ws/install/`;
+the root first-party build does not automatically download, build or install it.
 
 ## Source import record — 2026-09-11
 

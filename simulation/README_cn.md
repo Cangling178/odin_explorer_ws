@@ -1,10 +1,19 @@
-# 仿真计划
+# 仿真使用与验证
 
 [English](README.md) | 简体中文
 
-已添加 Gazebo Classic 11 独立 Odin1 传感器测试场景，以及采用现有质量的整车落地接触测试；ros2_control 整车驱动已接入。确定 ROS/JetPack 和驱动模型后再选择仿真器；条件允许时，在工作站运行计算量大的仿真。
+逐部件的模拟内容、参数近似与实车差异见[各部件仿真范围与实车差异](COMPONENT_SIMULATION_cn.md)；
+后续工作优先级见[模型不足清单](MODEL_GAPS_TEMP_cn.md)。
 
-先进行确定性的平面测试：直线、等半径圆弧、S 曲线、坐标重复的交叉点、尖角以及受控数据丢失。之后加入实测车轮几何、执行延迟、饱和、打滑和相机视野，验证底盘能否通过实测走廊。
+当前使用 Gazebo Classic 11 / ROS 2 Humble，已验证独立 Odin1 传感器输出、采用已有质量的整车落地接触，
+以及 ros2_control 基础运动。长期仿真器选型仍待目标 ROS/JetPack 与实车驱动方案明确；
+条件允许时，在工作站运行计算量大的仿真。
+
+已完成直行、原地转向、圆弧、指令限幅及断流停车测试，并接入随车图像、点云和 IMU，
+通过已知目标投影与运动响应检查。下一步验证实际安装下的黑线视野，建立直线和圆弧循线闭环，
+再扩展 S 曲线、坐标重复的交叉点、尖角及受控观测丢失测试。
+当前接触、执行器和投影采用注明来源的近似；后续用实测几何、执行延迟、打滑与传感器数据校准，
+验证底盘能否通过实测走廊。
 
 验收要求：正确的有序进度、有界控制输出、观测缺失时明确标记无效、不切弯抄近路，以及可复现的误差/时间报告。仿真结果不能替代独立实车试验。
 
@@ -117,7 +126,8 @@ python3 -m unittest discover -s tests -v
 从 base_link 高 53.25 mm 释放，观察 10.036 s，稳定高度约 33.1267 mm（名义值 33.25 mm），
 静置阶段最大线速度约 0.0000323 m/s、角速度约 0.0000541 rad/s、姿态偏转约 0.00460°。
 独立采集约 1 秒 Gazebo contacts，四个支撑各出现 987 条接触记录，没有其他部件触地。
-未验证带驱动的牵引、转向和制动，也未验证真实地面、真实球滚动或缺省质量的实车一致性。
+该落地检查不覆盖带驱动的牵引、转向和制动；后续基础运动验证见下节。
+真实地面、真实球滚动及未计入质量对实车一致性的影响仍未验证。
 
 提交整理时已修正仓库检查器的 CAD 二进制扫描和厂商目录边界，并补齐临时不足清单英文版；
 全量仓库检查、包构建和单元测试通过。动态验证结果保持上面的适用范围。
@@ -190,7 +200,7 @@ ros2 topic pub --use-sim-time -r 20 -t 60 \
 | /contact_test/get_entity_state、/contact_test/link_states | 独立 Gazebo 真值，用于对照，不参与轮式里程计 |
 
 odom 是以启动时车体位姿为基准的局部平面参考系，Gazebo world 是物理世界；没有伪造 world→odom
-变换。里程计中的 z=0 不等于 Gazebo 地面高度。Odin 仅有随车几何/TF，仍未产生随车传感器数据。
+变换。里程计中的 z=0 不等于 Gazebo 地面高度。Odin 默认产生随车图像、点云和 IMU，接口与验证见下节。
 
 ```bash
 # Same isolated ROS domain as the simulation; this actively moves the robot.
@@ -212,3 +222,69 @@ python3 tools/validate_sim_drive.py --output data/generated/sim_drive_validation
 分段位移比较使用 world 与 odom 的各自坐标轴，长期累积方向漂移也会贡献该误差。
 速度、加速度、力矩、过期命令、静止高度和 TF 完整性检查全部通过；14 项单元测试通过。
 本记录仅证明基础平面运动可用，不代表比赛循线或真实电机性能。完整指标由上面的脚本生成。
+
+## 随车 Odin 传感器
+
+整车运动入口默认 `sensors:=true`。传感器直接挂在固定部件合并后的 `base_link` 物理刚体上，
+安装位姿沿展开后的 Xacro 固定关节链计算，包含 Odin 安装与传感器相对外参。
+相机生成器将 ROS 光学坐标轴换算为 Gazebo 渲染坐标轴；消息仍使用光学坐标系。
+不新增刚体或质量，整车仍为三个刚体、0.877 kg、25 个碰撞体。
+
+[odin_sensors.yaml](../src/odin_racer/racer_description/config/odin_sensors.yaml) 为独立台架与整车共用的
+传感器参数，包含分辨率、频率、FOV 和量程；外参仍以 Xacro 为来源。
+[sensor_world.py](../src/odin_racer/racer_description/racer_description/sensor_world.py) 负责生成两种场景的传感器。
+`worlds/odin_sensors.world` 现在是独立台架模板，通过原有 launch 生成可运行世界，不能直接作为完整传感器世界启动。
+设备原始 `calib_device.yaml` 未修改；当前针孔、射线和理想 IMU 近似仍适用，不模拟 FishPoly 或厂商 SLAM。
+
+| 话题 | 类型 / 坐标系 | 订阅建议 |
+| --- | --- | --- |
+| `/sim/racer/odin1/image` | Image / `odin_sim_camera_optical` | Reliable、Volatile、depth=5 |
+| `/sim/racer/odin1/camera_info` | CameraInfo / `odin_sim_camera_optical` | Reliable、Volatile、depth=5 |
+| `/sim/racer/odin1/cloud_raw` | PointCloud2 / `odin_sim_lidar` | sensor_data QoS |
+| `/sim/racer/odin1/imu` | Imu / `odin_sim_imu` | sensor_data QoS |
+
+消费者设置 `use_sim_time=true`，并将 `/tf`、`/tf_static` 重映射到 `/sim/racer/tf`、`/sim/racer/tf_static`。
+整车只由 robot_state_publisher 发布车内 TF，差速控制器发布 odom→base_link；没有独立台架 TF 发布节点。
+本机用尽力传输订阅大图像时出现明显丢帧，Reliable 订阅恢复约 10 帧/仿真秒。
+跨机器或换 DDS 实现时需重新测量传输和时延。
+
+| 启动参数 | 默认值 / 用途 |
+| --- | --- |
+| `sensors` | true；false 时只运行底盘，适用于没有渲染环境的运动测试 |
+| `sensor_config` | 共用 odin_sensors.yaml；可替换整车传感器配置，需重新启动 |
+| `sensor_targets` | false；true 添加前方红色方块和蓝色地面标记，用于验证 |
+| `gui` | true；false 只关闭窗口，相机仍需要可用的 DISPLAY/渲染环境 |
+
+使用新启动的专用世界，不与其他命令发布者共用。测试会主动移动车辆，不重置世界；
+重复传感器验证前重新启动场景。以下使用默认模型及传感器参数：
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 launch racer_bringup simulation.launch.py gui:=false sensor_targets:=true
+```
+
+另一终端加载相同 ROS 环境和 domain 后运行：
+
+```bash
+python3 tools/validate_sim_sensors.py --output data/generated/sim_sensors_validation.json
+python3 tools/validate_sim_drive.py --output data/generated/sim_drive_with_sensors_validation.json
+```
+
+传感器验证覆盖静止、0.1 m/s 前进、左右 0.25 rad/s 转向及加减速。
+停车后的图像与点云对照已知目标：红色方块中心 (2,0,0.2) m、尺寸 (0.1,0.3,0.4) m；
+蓝色标记中心 (0.8,0,0.001) m、尺寸 (0.3,0.12,0.001) m，仅有外观，不影响地面接触。
+图像按 CameraInfo 投影比较可见边界（包括标记移出画面的裁剪），阈值 8 px；
+点云目标表面 P95 误差阈值 20 mm、地平面 10 mm。IMU 检查左右角速度、加速/制动符号、
+匀速与静止响应；同时检查 TF、发布者、时间戳、消息新鲜度和实收频率。
+Gazebo link_states 没有采集时间戳：几何比较仅在停车后进行，运动 IMU 对照使用最近真值，
+属于基础响应验证，不能作为精密时延或实车标定报告。
+
+2026-09-13 本机验收通过：图像/CameraInfo 约 10 Hz、点云约 10 Hz、IMU 约 399.9 Hz，
+均按仿真时间计。四个停车位姿的红色目标边界最大误差约 3.13 px，地面标记约 3.63 px；
+左右转向 IMU 与真值的稳态角速度平均绝对误差均低于 0.0002 rad/s。
+测得实时因子约 0.62，未达到实时运行；这是当前电脑、渲染和订阅负载下的结果。
+该标记可见性不代表全部近地视野或真实黑线可见性验收。后续仍需黑线场景、遮挡/丢帧测试和算法闭环。

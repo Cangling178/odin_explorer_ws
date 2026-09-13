@@ -6,7 +6,7 @@ Launch composition and robot operating profiles.
 
 ## Status
 
-Available: model preview wrapper and ros2_control vehicle simulation.launch.py. Pending: validated sensor, base and race compositions with explicit readiness and arming.
+Available: model preview wrapper and ros2_control vehicle simulation.launch.py. Onboard simulated sensors are integrated. Pending: hardware sensor, base and race compositions with explicit readiness and arming.
 
 ## Responsibility and acceptance
 
@@ -27,3 +27,7 @@ simulation controllers in /sim/racer. Append gui:=false for headless use.
 Controller activation failure terminates the launch; success waits for commands
 stamped in simulation time. No real motor interface starts.
 See the [simulation guide](../../../simulation/README.md#ros2_control-vehicle-motion-simulation) for commands, settings and validation.
+
+Onboard Odin output is enabled by default; append sensors:=false for base-only tests.
+sensor_targets:=true adds known fixtures. The camera requires rendering even with gui:=false;
+see [onboard sensors](../../../simulation/README.md#onboard-odin-sensors) for interfaces and validation.

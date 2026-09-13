@@ -18,7 +18,10 @@ ros2 launch racer_bringup preview.launch.py --show-args
 ros2 launch racer_bringup preview.launch.py
 ```
 
-预览需要对应 ROS 安装中的 `robot_state_publisher`、`joint_state_publisher` 和 `xacro`。如需可视化，在另一个已加载环境的终端中运行 `rviz2`，将 Fixed Frame 设为 `base_link`，添加 RobotModel 和 TF。有时钟源时，也支持 `use_sim_time:=true`。静止关节只是示意，不是物理仿真。
+预览需要对应 ROS 安装中的 `robot_state_publisher`、`joint_state_publisher`、`xacro` 和 `rviz2`。
+启动文件默认打开带模型与 TF 配置的 RViz；追加 `rviz:=false` 可关闭窗口。
+有时钟源时，也支持 `use_sim_time:=true`。预览中的轮关节状态为静止示意。
+独立传感器、落地接触与整车运动仿真的启动和验证命令见[仿真说明](../simulation/README_cn.md)。
 
 安装并初始化 ROS 和 rosdep 后，可按需执行标准依赖安装步骤：
 

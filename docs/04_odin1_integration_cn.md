@@ -6,7 +6,11 @@
 
 [厂商产品页面](https://www.manifoldtech.cn/products/odin1/)描述了 RGB、IMU、点云和位姿输出，列出的 SLAM 精度约为 ±5 cm + 1%。这不保证在本赛道上实现厘米级循线精度，需要验证局部观测和独立测量误差。
 
-[厂商驱动 README](https://github.com/manifoldsdk/odin_ros_driver)推荐 Ubuntu 22.04 上的 Humble，并列明了各版本对应的固件要求。2026-09-10 访问的实时 README 列出驱动 v0.14.4 和固件 v0.14.0，而搜索索引仍显示旧版本。核对实物之前，本工作空间不锁定驱动版本或提交。查阅时该 README 尚未正式支持 Ubuntu 24.04。
+[厂商驱动 README](https://github.com/manifoldsdk/odin_ros_driver)推荐 Ubuntu 22.04 上的 Humble，并列明了各版本对应的固件要求。2026-09-10 访问的实时 README 列出驱动 v0.14.4 和固件 v0.14.0，而搜索索引仍显示旧版本。查阅时该 README 尚未正式支持 Ubuntu 24.04。
+
+2026-09-11 已导入驱动 v0.14.4，并记录精确提交；开发笔记本已构建，用户已确认 RViz 点云显示。
+详见[厂商接入记录](../vendor_ws/README_cn.md)。该记录明确了本地源码版本，但实物固件及
+Jetson 平台组合尚未验收锁定；`racer_odin` 适配层、图像/IMU 质量和整车集成仍待完成。
 
 ## 接入顺序
 

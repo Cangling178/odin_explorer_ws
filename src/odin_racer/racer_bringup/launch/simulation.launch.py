@@ -10,6 +10,7 @@ from launch.event_handlers import OnProcessExit, OnShutdown
 from launch.events import Shutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 
 from racer_description.drive_world import build_drive_resources
@@ -20,7 +21,10 @@ def start(context):
     directory = tempfile.TemporaryDirectory(prefix="odin_drive_")
     description, world = build_drive_resources(
         share, LaunchConfiguration("controllers").perform(context), directory.name,
-        LaunchConfiguration("contact_config").perform(context))
+        LaunchConfiguration("contact_config").perform(context),
+        sensors=IfCondition(LaunchConfiguration("sensors")).evaluate(context),
+        sensor_targets=IfCondition(LaunchConfiguration("sensor_targets")).evaluate(context),
+        sensor_config=LaunchConfiguration("sensor_config").perform(context))
 
     def cleanup(context):
         directory.cleanup()
@@ -55,6 +59,9 @@ def generate_launch_description():
     control = Path(get_package_share_directory("racer_control"))
     return LaunchDescription([
         DeclareLaunchArgument("gui", default_value="true"),
+        DeclareLaunchArgument("sensors", default_value="true", description="Enable onboard Odin sensor output"),
+        DeclareLaunchArgument("sensor_targets", default_value="false", description="Add known sensor test fixtures"),
+        DeclareLaunchArgument("sensor_config", default_value=str(share/"config/odin_sensors.yaml")),
         DeclareLaunchArgument("controllers", default_value=str(control/"config/simulation_controllers.yaml")),
         DeclareLaunchArgument("contact_config", default_value=str(share/"config/ground_contact.yaml")),
         OpaqueFunction(function=start),

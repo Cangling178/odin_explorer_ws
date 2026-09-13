@@ -4,7 +4,8 @@ English | [Chinese](MODEL_GAPS_TEMP_cn.md)
 
 This is a code-state snapshot, not hardware acceptance. Work proceeds from stable
 ground contact and motion to perception integration and then hardware fidelity.
-Update, 2026-09-13: contact and ros2_control motion checks pass; moving sensors are next.
+For modeled behavior and hardware differences by component, see the [component comparison](COMPONENT_SIMULATION.md).
+Update, 2026-09-13: contact, ros2_control motion and onboard sensor checks pass; black-line visibility and algorithm closure are next.
 
 ## Completed
 
@@ -15,7 +16,7 @@ Update, 2026-09-13: contact and ros2_control motion checks pass; moving sensors 
 - 25 primitive collisions on 16 visual links, all retained in the dynamic model.
 - RViz preview of the assembly and sensor frames.
 - Standalone Odin image, CameraInfo, cloud and stationary IMU checks.
-- Drop/settling, forward/reverse, turns, arc, limits and stops checked; moving sensor generation is pending.
+- Drop/settling, forward/reverse, turns, arc, limits and stops checked; onboard image, CameraInfo, cloud and IMU generation and basic motion response are checked.
 
 ## 1. Existing inertias defined; unknown masses deferred
 
@@ -77,19 +78,29 @@ The timeout is not the complete stopping time. Maximum stage odometry displaceme
 increment error was about 11.3 mm and yaw increment error about 0.0079 rad.
 These are planar simulation results, not hardware positioning accuracy.
 
-F4 communication, race arbitration, line tracking and on-vehicle sensors remain
+F4 communication, race arbitration and line tracking remain
 unimplemented. PI, effort, contact and effective separation are simulation estimates;
 simulation-time timeout does not replace an independent lower-controller watchdog.
 See [motion guide](README.md#ros2_control-vehicle-motion-simulation) and
 [validator](../tools/validate_sim_drive.py).
 
-## 4. High priority: moving sensor integration pending
+## 4. Onboard sensor integration and basic motion checks complete
 
-The vehicle has odin_sim_* frames, but data comes from a separate fixed sensor at
-0.5 m, not the actual front mounting height. Standalone bench and preview can
-publish duplicate sensor TF. Integrate sensor generation with the vehicle and share
-geometry, /clock, use_sim_time, topic/QoS conventions and TF ownership. Verify
-image/cloud/IMU response under translation and rotation without duplicate TF.
+The vehicle publishes image, CameraInfo, cloud and IMU under /sim/racer/odin1 by default;
+the standalone bench retains /sim/odin1. Sensors attach to the lumped base_link body,
+with poses read from the Xacro fixed-joint chain. Bench and vehicle share odin_sensors.yaml;
+no vehicle mass or collisions are added. Optical/render camera axes are converted explicitly.
+
+Stationary, forward, both turn directions and acceleration/braking checks pass: known target
+projection, cloud surfaces/ground, IMU response, message rates/stamps and TF. Images are
+about 10 frames per simulated second, clouds about 10 Hz and IMU about 399.9 Hz. Local
+real-time factor is about 0.62, below real time. Acceptance uses default settings and known
+colored markers; real black-line recognition, full view/self-occlusion coverage and
+frame-loss recovery are not covered. See [onboard sensor guide](README.md#onboard-odin-sensors)
+for reproduction and thresholds.
+
+Next validate actual mounting visibility of black lines, connect perception/control,
+and measure end-to-end latency and real-time factor with algorithms running.
 
 ## 5. High priority: Odin installation, extrinsics and view unaccepted
 
@@ -120,9 +131,9 @@ response. Acceptance requires reproducing major hardware error trends.
 
 ## 8. Medium priority: track, closed loop and evaluation missing
 
-There are sensor and planar contact scenes, but no complete black-line track,
-crossings, lighting or occlusion suite. Perception-control closure, frame-loss
-recovery, end-to-end latency and real-time performance are unverified. Build straight,
+There are bench, onboard sensor and known-target scenes, but no complete black-line track,
+crossings, lighting or occlusion suite. Onboard sensor real-time factor is recorded;
+perception-control closure, frame-loss recovery and end-to-end algorithm latency remain unverified. Build straight,
 curve and crossing cases; record repeatable tracking error, success rate, stop
 distance and real-time factor, then disturbances/faults. Results should distinguish
 geometry, perception and control failures.
@@ -140,11 +151,11 @@ screws are not a prerequisite.
 
 1. Existing 877 g aggregation and drop checks complete; unknown masses deferred.
 2. ros2_control straight, turning and stopping checks complete.
-3. Integrate moving sensors, mounting/projection checks and algorithm closure (4-6).
+3. Onboard sensors and basic projection checks complete; verify actual mounting visibility and connect algorithms (4-6).
 4. Calibrate against hardware and establish track evaluation (7-8).
 5. Refine appearance as needed (9).
 
-Basic motion simulation is usable. Hardware equivalence requires subsequent comparison.
+Basic motion and onboard sensors are usable; algorithm closure in step 3 remains pending. Hardware equivalence requires subsequent comparison.
 
 ## Code and records
 

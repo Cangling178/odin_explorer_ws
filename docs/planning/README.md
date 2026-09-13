@@ -7,7 +7,11 @@ Maintain milestones, tasks, risks and decisions here. Build evidence is in [vali
 ## Milestones
 
 Use evidence gates instead of fixed dates before the hardware and rules are known.
-Only M0 is delivered by this foundation; later milestones are not started.
+Only M0 has passed its acceptance gate; M1-M8 remain incomplete. Mechanical modeling,
+the local vendor-driver build and initial point cloud check, and basic motion simulation
+have documented progress. These partial results do not establish hardware bench or
+autonomous line-following acceptance. SIM-001 remains in progress: onboard sensors are integrated; black-line scenes,
+algorithm closure and replay are the current focus.
 
 | Milestone | Deliverable | Exit evidence | Depends on |
 | --- | --- | --- | --- |
@@ -39,7 +43,7 @@ needs evidence before Done, not just a directory or a successful empty build.
 | HW-002 | P0 | Define power and motor-stop wiring | Todo | Diagram, ratings and bench check |
 | BASE-001 | P0 | Implement measured wheel feedback and transport | Blocked | HW-001; parser and round-trip tests |
 | BASE-002 | P0 | Validate command timeout and restart behavior | Blocked | BASE-001; disconnected-host evidence |
-| SENS-001 | P0 | Validate ODIN1 driver/firmware on target | Todo | Build revision and raw capture |
+| SENS-001 | P0 | Validate ODIN1 driver/firmware on target | Todo | Local build and initial point cloud display recorded in [vendor notes](../../vendor_ws/README.md); Jetson/device firmware pair and raw capture acceptance remain pending |
 | SENS-002 | P0 | Test RGB ground visibility and projection | Blocked | SENS-001; straight/crossing/bend dataset |
 | CAL-001 | P0 | Calibrate wheels, extrinsics and timestamps | Blocked | HW-001, SENS-001; residual report |
 | LOC-001 | P1 | Implement continuous local state and TF authority | Blocked | CAL-001; drift and reset tests |
@@ -51,7 +55,7 @@ needs evidence before Done, not just a directory or a successful empty build.
 | EVAL-002 | P1 | Export associated errors and report real trials | Blocked | EVAL-001; no invalid-data masking |
 | SPEED-001 | P1 | Add curvature and braking speed limits | Blocked | Accurate full-route baseline |
 | RACE-001 | P1 | Implement mode/state manager and race launch | Blocked | Healthy-device and route gates enforced |
-| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Gazebo Classic 11 / ros2_control basic motion validated; unknown masses deferred, moving sensors/replay pending; see simulation/README.md |
+| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Gazebo Classic 11 / ros2_control basic motion validated; onboard image/cloud/IMU and basic motion response validated; unknown masses deferred, black-line closure/replay pending; see simulation/README.md |
 | NAV-001 | P2 | Evaluate optional Nav2 mode | Todo | Separate scope; shared command gate |
 
 For each started item add: owner, branch, requirement IDs, design note, validation

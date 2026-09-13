@@ -51,3 +51,23 @@ the [simulation guide](../../simulation/README.md#ros2_control-vehicle-motion-si
 communication and moving sensor generation remain unimplemented. Commit preparation corrected full
 repository checker binary/vendor scanning and temporary-document language pairing;
 full repository checks pass.
+
+## Onboard Odin sensor validation — 2026-09-13
+
+The vehicle includes image, CameraInfo, cloud and IMU by default, sharing bench settings
+and deriving extrinsics from the Xacro fixed-joint chain. All ten local packages build
+and 18 unit tests pass. New tests cover rotated mounts and camera axes, bench/vehicle
+consistency, unchanged physics when sensors are disabled, and invalid settings/moving-mount rejection.
+
+`tools/validate_sim_sensors.py` passed stationary, forward, both turn directions, acceleration/braking,
+projection/cloud/IMU/TF/stamp/rate checks in a fresh known-target world; the local report is
+`data/generated/sim_sensors_validation.json`. A subsequent `tools/validate_sim_drive.py` run passed
+all six motion stages and stopping/limit regression checks, saved as
+`data/generated/sim_drive_with_sensors_validation.json`. The standalone bench entry point was
+rechecked: all four message types arrived, with 1600x1296 images, a nonempty cloud and stationary
+IMU Z=9.81 m/s^2; local record: `data/generated/odin_bench_regression.json`. Generated reports are
+not tracked in Git. Key parameters, metrics and reproduction commands are in the
+[onboard sensor guide](../../simulation/README.md#onboard-odin-sensors).
+
+Real-time factor was about 0.62 and still needs optimization. Complete black-line visibility,
+a self-occlusion test matrix, algorithm closure and hardware equivalence remain unaccepted.

@@ -21,5 +21,8 @@
   <test_depend>gazebo_msgs</test_depend>
   <test_depend>std_srvs</test_depend>
   <test_depend>rclpy</test_depend>
+  <test_depend>sensor_msgs</test_depend>
+  <test_depend>geometry_msgs</test_depend>
+  <test_depend>tf2_ros</test_depend>
   <export><build_type>ament_cmake</build_type></export>
 </package>

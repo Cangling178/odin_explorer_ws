@@ -68,3 +68,5 @@ link 均有碰撞体；两个轮胎和两个球的最低点均为 base_link 下 
 参数、隔离环境启动命令和已通过的落地测试见[仿真说明](../../../simulation/README_cn.md#整车地面接触测试)。
 
 运动场景由 `racer_bringup simulation.launch.py` 启动，通过可选 sim_control Xacro 参数声明控制接口；使用已有接触生成器并加入 Gazebo 控制插件。详见[运动仿真](../../../simulation/README_cn.md#ros2_control-整车运动仿真)。
+
+随车图像、点云和 IMU 已集成，台架与整车共用 config/odin_sensors.yaml，安装位姿来自 Xacro。见[随车传感器](../../../simulation/README_cn.md#随车-odin-传感器)。

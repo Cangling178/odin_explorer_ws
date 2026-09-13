@@ -33,3 +33,18 @@
 参数、有效轮距 1.10 的仿真标定依据与可复现命令见[仿真说明](../../simulation/README_cn.md#ros2_control-整车运动仿真)。
 `tools/validate_sim_drive.py` 输出完整指标。比赛模式仲裁、实车通信、随车感知仍未实现。
 提交整理时已修正二进制/厂商目录扫描并补齐临时文档语言配对，全量仓库检查通过。
+
+## 随车 Odin 传感器验证 — 2026-09-13
+
+整车默认集成图像、CameraInfo、点云和 IMU，参数与独立台架共用，外参由 Xacro 固定关节链生成。
+本机十个包构建成功，18 项单元测试通过；新增测试覆盖旋转安装与相机轴转换、台架/整车一致性、
+关闭传感器时的物理模型保持，以及非法参数和活动关节挂载拒绝。
+
+`tools/validate_sim_sensors.py` 在新启动的已知目标场景通过静止、前进、左右转向、加减速及
+投影/点云/IMU/TF/时间戳/频率检查；结果位于本地 `data/generated/sim_sensors_validation.json`。
+随后 `tools/validate_sim_drive.py` 六项运动及停车/限幅回归通过，结果为
+`data/generated/sim_drive_with_sensors_validation.json`。独立台架入口复测收到全部四类消息，
+1600×1296 图像、非空点云与静止 IMU Z=9.81 m/s²；本地记录为 `data/generated/odin_bench_regression.json`。
+这些生成文件不纳入 Git，关键参数、指标和复现命令见[随车传感器说明](../../simulation/README_cn.md#随车-odin-传感器)。
+
+实时因子约 0.62，仍需性能优化；完整黑线视野、自遮挡测试矩阵、算法闭环及实车一致性未验收。

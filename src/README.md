@@ -6,7 +6,7 @@ Main functions belong in packages under `src/odin_racer/`. There is no single `m
 
 | Package | Responsibility | State |
 | --- | --- | --- |
-| [racer_description](odin_racer/racer_description/README.md) | Robot geometry and frame definitions | Preview, physics model and simulation generation |
+| [racer_description](odin_racer/racer_description/README.md) | Robot geometry and frame definitions | Preview, physics model, onboard sensors and simulation generation |
 | [racer_hardware](odin_racer/racer_hardware/README.md) | Motor transport, wheel feedback and drive integration | Planned subsystem |
 | [racer_odin](odin_racer/racer_odin/README.md) | ODIN1 vendor adaptation and timestamp/frame contracts | Planned subsystem |
 | [racer_localization](odin_racer/racer_localization/README.md) | Continuous body state and global alignment | Planned subsystem |
@@ -30,7 +30,7 @@ a project contact; it is not used as the Git commit identity.
 | [simulation.launch.py](odin_racer/racer_bringup/launch/simulation.launch.py) | ros2_control vehicle motion simulation |
 | [preview.launch.py](odin_racer/racer_bringup/launch/preview.launch.py) | User launch entry; composes model preview |
 | [Model preview implementation](odin_racer/racer_description/launch/preview.launch.py) | Publishes model and stationary joint states |
-| [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | Illustrative geometry |
+| [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | CAD and simplified assemblies, approximate inertias, collisions and optional simulation control interfaces |
 | [evaluate_run.py](../tools/evaluate_run.py) | Offline evaluation of associated error samples |
 | [check_workspace.py](../tools/check_workspace.py) | Syntax, documentation links and package checks |
 

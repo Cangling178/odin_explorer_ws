@@ -6,7 +6,7 @@
 
 | 包 | 职责 | 状态 |
 | --- | --- | --- |
-| [racer_description](odin_racer/racer_description/README_cn.md) | 机器人几何与坐标系定义 | 预览、物理模型与仿真生成 |
+| [racer_description](odin_racer/racer_description/README_cn.md) | 机器人几何与坐标系定义 | 预览、物理模型、随车传感器与仿真生成 |
 | [racer_hardware](odin_racer/racer_hardware/README_cn.md) | 电机通信、车轮反馈与驱动集成 | 规划中的子系统 |
 | [racer_odin](odin_racer/racer_odin/README_cn.md) | ODIN1 厂商适配与时间戳/坐标约定 | 规划中的子系统 |
 | [racer_localization](odin_racer/racer_localization/README_cn.md) | 连续车体状态与全局对齐 | 规划中的子系统 |
@@ -28,7 +28,7 @@
 | [simulation.launch.py](odin_racer/racer_bringup/launch/simulation.launch.py) | ros2_control 整车运动仿真 |
 | [preview.launch.py](odin_racer/racer_bringup/launch/preview.launch.py) | 用户启动入口，组合模型预览 |
 | [模型预览实现](odin_racer/racer_description/launch/preview.launch.py) | 发布模型与静止关节状态 |
-| [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | 示意几何模型 |
+| [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | CAD 与简化装配、估算惯性、碰撞及可选仿真控制接口 |
 | [evaluate_run.py](../tools/evaluate_run.py) | 已关联误差样本的离线评测 |
 | [check_workspace.py](../tools/check_workspace.py) | 语法、文档链接和包结构检查 |
 

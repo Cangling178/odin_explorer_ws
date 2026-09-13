@@ -4,6 +4,12 @@ English | [Chinese](02_architecture_cn.md)
 
 ## Data and command flow
 
+The diagram shows the target architecture. Available components are model preview,
+the standalone Odin sensor bench, chassis contact and ros2_control motion simulation,
+and offline error evaluation. Onboard sensors are integrated; perception and route tracking nodes,
+race state management and F4 communication remain unimplemented.
+See [source navigation](../src/README.md) for package status.
+
 ```mermaid
 flowchart TD
   O[ODIN1 vendor driver] --> A[racer_odin adapter]
@@ -59,9 +65,10 @@ map                         course/world reference when alignment is available
         odin_camera_optical_frame
 ```
 
-`base_link` is proposed at the midpoint of the rear drive axle, with the judged
-point represented by a measured fixed offset if needed. The front casters are
-passive and receive no drive command.
+The current model places `base_link` at the midpoint of the rear drive axle.
+Verify this reference on hardware, with the judged point represented by a measured
+fixed offset if needed. The front ball transfers are passive supports and receive
+no drive command.
 
 `robot_state_publisher` owns body/joint transforms. The local estimator owns
 `odom -> base_link`. A separately validated global alignment owns `map -> odom`.
@@ -76,6 +83,14 @@ Begin with a measured wheel-based local estimate and a separately characterized
 ODIN1 pose reference. Choose fusion inputs after inspecting covariances and drift.
 Loop-closure jumps must not appear as instantaneous physical velocity.
 
+In the current motion simulation, `diff_drive_controller` publishes `odom -> base_link`
+from wheel position feedback, and `robot_state_publisher` publishes internal transforms
+on `/sim/racer/tf` and `/sim/racer/tf_static`. Simulated sensor frames use `odin_sim_*`
+names; the vehicle publishes images, clouds and IMU under `/sim/racer/odin1` by default. Gazebo world truth
+is used independently for validation, not as wheel-odometry input. Neither
+`world -> odom` nor `map -> odom` is published. Assign TF ownership explicitly when
+adding a localization node.
+
 ## Operating states, proposed
 
 `DISARMED -> READY -> RUNNING -> FINISHED`; faults enter `STOPPED` and require
@@ -84,5 +99,10 @@ valid geometry, fresh observations appropriate to the selected mode, controller
 health and a valid route. Localization-only fallback needs its own bounded trial;
 it is not enabled automatically after line loss.
 
-The foundation only provides model preview. Future race launch must reject
-incomplete calibration and must never arm motors as a side effect of startup.
+The race state machine above is not implemented. Simulation startup only activates
+the joint state broadcaster and differential drive controller, then waits for external
+stamped velocity commands without sending nonzero velocity automatically. Its command
+timeout uses simulation time and does not replace the independent F4 watchdog.
+Future race launch must reject incomplete calibration and must never arm motors as
+a side effect of startup. See [simulation documentation](../simulation/README.md)
+for available entry points and validation scope.

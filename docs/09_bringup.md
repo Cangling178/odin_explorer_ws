@@ -4,9 +4,13 @@ English | [Chinese](09_bringup_cn.md)
 
 ## Stage 0: foundation, available now
 
-Build packages, run offline checks and launch the model preview. Inspect links,
-wheel placement and units. Replace illustrative dimensions before using this
-model for planning or footprint checks.
+Build packages, run offline checks and launch the model preview. The current model
+contains CAD plate and Odin1 meshes, wheels with recorded dimensions, simplified
+assemblies, approximate inertias and collision shapes. Verify measured geometry
+before hardware planning or footprint acceptance. Standalone Odin sensors, chassis
+contact and ros2_control motion scenes have launch entry points and validation records;
+see [simulation documentation](../simulation/README.md). The vehicle motion scene
+produces onboard sensor data; autonomous line following remains unimplemented.
 
 ## Stage 1: electrical and motor bench, not implemented
 
@@ -15,7 +19,12 @@ off the surface, check each channel's direction, measured feedback and velocity
 limit. Unplug communications and restart the host; the lower-level controller
 must time out and require a deliberate re-arm. Record measured stopping behavior.
 
-## Stage 2: ODIN1 and estimator bench, not implemented
+## Stage 2: ODIN1 and estimator bench, partial integration started
+
+The vendor driver has been built on the development laptop, and the user confirmed
+RViz point cloud display; see [vendor notes](../vendor_ws/README.md). The target
+Jetson/device firmware pair, image and IMU quality, body adapter and estimator still
+need validation or implementation.
 
 Capture vendor data first. Audit frame directions, acquisition times and reset
 behavior. Inspect static scenes, known translation and both rotations. Confirm

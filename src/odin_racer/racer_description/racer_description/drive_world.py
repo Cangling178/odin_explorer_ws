@@ -8,9 +8,11 @@ import xacro
 import yaml
 
 from .contact_world import build_world, element
+from .sensor_world import add_odin_sensors, add_sensor_targets, load_sensor_config
 
 
-def build_drive_resources(share, controller_config, output_directory, contact_config=None):
+def build_drive_resources(share, controller_config, output_directory, contact_config=None,
+                          sensors=True, sensor_targets=False, sensor_config=None):
     share, output = Path(share), Path(output_directory)
     robot_xml = xacro.process_file(str(share/"urdf/robot.urdf.xacro"), mappings={"sim_control": "true"}).toxml()
     robot = ET.fromstring(robot_xml)
@@ -40,6 +42,12 @@ def build_drive_resources(share, controller_config, output_directory, contact_co
     config_file.write_text(yaml.safe_dump(params))
     sdf = ET.fromstring(build_world(share, contact_config, robot_xml))
     model = sdf.find("world/model[@name='odin_racer']")
+    if sensors:
+        add_odin_sensors(model.find("link[@name='base_link']"), robot, "base_link",
+                         load_sensor_config(sensor_config or share/"config/odin_sensors.yaml"),
+                         "/sim/racer/odin1")
+    if sensor_targets:
+        add_sensor_targets(sdf.find("world"))
     plugin = element(model, "plugin", name="gazebo_ros2_control", filename="libgazebo_ros2_control.so")
     element(plugin, "robot_param", "robot_description")
     element(plugin, "robot_param_node", "/sim/racer/robot_state_publisher")

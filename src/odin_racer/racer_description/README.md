@@ -82,3 +82,5 @@ publishes no vehicle TF or Odin sensor data. Settings, isolated launch commands
 and passed drop checks are in the [simulation guide](../../../simulation/README.md#chassis-ground-contact-test).
 
 The motion scene starts through `racer_bringup simulation.launch.py`. The optional sim_control Xacro argument declares control interfaces; the existing contact generator gains the Gazebo control plugin. See [motion simulation](../../../simulation/README.md#ros2_control-vehicle-motion-simulation).
+
+Onboard images, clouds and IMU are integrated. Bench and vehicle share config/odin_sensors.yaml and derive poses from Xacro. See [onboard sensors](../../../simulation/README.md#onboard-odin-sensors).

@@ -1,15 +1,25 @@
-# Simulation plan
+# Simulation usage and validation
 
 English | [Chinese](README_cn.md)
 
-A Gazebo Classic 11 standalone Odin sensor bench and a dynamic chassis contact test using the existing masses are available; ros2_control vehicle drive is integrated.
-Select the simulator after the ROS/JetPack and drive-model decisions.
-Run compute-heavy simulation on the workstation where practical.
+See [component simulation scope and hardware differences](COMPONENT_SIMULATION.md)
+for modeled behavior and approximations by component, and the [model gap list](MODEL_GAPS_TEMP.md)
+for follow-up priorities.
 
-Begin with deterministic planar tests: straight, constant-radius arc, S-curve,
-crossing with repeated coordinates, sharp corner and controlled data dropout.
-Then model measured wheel geometry, actuator delay, saturation, slip and camera
-field of view. Test that the chassis can traverse the surveyed corridor.
+The current backend is Gazebo Classic 11 / ROS 2 Humble. Standalone Odin sensor
+outputs, chassis contact using the existing masses, and basic ros2_control motion
+have been validated. Long-term simulator selection awaits the target ROS/JetPack
+and hardware drive decisions. Run compute-heavy simulation on the workstation
+where practical.
+
+Straight motion, in-place turns, arcs, command limits and stops after command loss
+have been tested. Onboard images, clouds and IMU are integrated and checked against
+known target projections and motion. Next validate the actual mounting view of black
+lines and establish closed-loop straight/arc tracking tests. Then extend to S-curves,
+crossings with repeated coordinates, sharp corners and controlled observation loss.
+Current contact, actuator and projection models use documented approximations;
+calibrate them with measured geometry, actuator delay, slip and sensor data to test
+whether the chassis can traverse the surveyed corridor.
 
 Acceptance: correct ordered progress, bounded command output, explicit invalid
 state on missing observations, no corner shortcuts, and reproducible error/time
@@ -130,8 +140,9 @@ build and 11 unit tests passed. Released with base_link at 53.25 mm, observed fo
 speed was about 0.0000323 m/s, angular speed 0.0000541 rad/s and orientation angle
 0.00460 degrees. A separate approximately one-second Gazebo contacts capture
 contained 987 records for each of the four supports, with no other parts touching
-the floor. Driven traction, turning, braking, real ground/ball behavior and hardware
-equivalence with omitted masses remain unvalidated.
+the floor. This drop check does not cover driven traction, turning or braking;
+subsequent basic motion validation is documented below. Real ground/ball behavior
+and the effect of omitted masses on hardware equivalence remain unvalidated.
 
 Commit preparation corrected CAD binary scanning and vendor directory boundaries,
 and added the English gap-list counterpart. Full repository checks, builds and
@@ -214,8 +225,7 @@ hardware geometry. Revalidate after changing tires, contact settings or ground.
 
 odom is a local planar reference initialized at startup; Gazebo world is the
 physical world. No artificial world-to-odom transform is published. Odometry z=0
-is not Gazebo ground height. Odin has moving geometry/TF only, without integrated
-on-vehicle sensor generation.
+is not Gazebo ground height. Odin produces onboard images, clouds and IMU by default; interfaces and validation follow below.
 
 ```bash
 # Same isolated ROS domain as the simulation; this actively moves the robot.
@@ -243,3 +253,78 @@ Displacement comparison uses world/odom axes separately, so accumulated heading
 drift also contributes. Speed, acceleration, effort, stale-command, height and
 TF checks passed; 14 unit tests passed. This demonstrates basic planar motion,
 not competition line following or real motor performance. The script produces full metrics.
+
+## Onboard Odin sensors
+
+The vehicle motion launch defaults to `sensors:=true`. Sensors attach directly to the
+surviving `base_link` physics body after fixed-link aggregation. Poses are composed
+along the expanded Xacro fixed-joint chain, including the Odin mount and sensor extrinsics.
+The camera generator converts ROS optical axes to Gazebo rendering axes while messages
+retain the optical frame. No bodies or mass are added: three bodies, 0.877 kg and 25 vehicle collisions remain.
+
+[odin_sensors.yaml](../src/odin_racer/racer_description/config/odin_sensors.yaml) supplies shared bench/vehicle
+resolution, rates, FOV and ranges; Xacro remains the source of extrinsics.
+[sensor_world.py](../src/odin_racer/racer_description/racer_description/sensor_world.py) generates both sets of sensors.
+`worlds/odin_sensors.world` is now a bench template populated by the existing launch;
+it is not directly launchable as a complete sensor world. Original device `calib_device.yaml`
+is unchanged. Pinhole, ray and ideal IMU approximations still apply; FishPoly and vendor SLAM are absent.
+
+| Topic | Type / frame | Suggested subscription |
+| --- | --- | --- |
+| `/sim/racer/odin1/image` | Image / `odin_sim_camera_optical` | Reliable, Volatile, depth=5 |
+| `/sim/racer/odin1/camera_info` | CameraInfo / `odin_sim_camera_optical` | Reliable, Volatile, depth=5 |
+| `/sim/racer/odin1/cloud_raw` | PointCloud2 / `odin_sim_lidar` | sensor_data QoS |
+| `/sim/racer/odin1/imu` | Imu / `odin_sim_imu` | sensor_data QoS |
+
+Consumers set `use_sim_time=true` and remap `/tf`, `/tf_static` to `/sim/racer/tf`, `/sim/racer/tf_static`.
+Only robot_state_publisher owns internal vehicle TF; the differential drive controller owns
+odom to base_link. No bench TF node is launched with the vehicle. Best-effort large-image
+subscriptions dropped frames locally; Reliable subscriptions restored about 10 frames per
+simulated second. Measure transport and latency again across machines or DDS implementations.
+
+| Launch argument | Default / purpose |
+| --- | --- |
+| `sensors` | true; false runs only the base, suitable for motion tests without rendering |
+| `sensor_config` | Shared odin_sensors.yaml; override vehicle settings and restart |
+| `sensor_targets` | false; true adds a red forward box and blue ground marker for validation |
+| `gui` | true; false closes the window only, camera still requires a working DISPLAY/rendering environment |
+
+Use a fresh dedicated world with no other command publishers. Validation actively moves
+the car and does not reset the world; restart before repeating sensor validation.
+The following assumes default model and sensor settings:
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 launch racer_bringup simulation.launch.py gui:=false sensor_targets:=true
+```
+
+In another terminal with the same ROS environment and domain:
+
+```bash
+python3 tools/validate_sim_sensors.py --output data/generated/sim_sensors_validation.json
+python3 tools/validate_sim_drive.py --output data/generated/sim_drive_with_sensors_validation.json
+```
+
+Sensor validation covers stationary output, 0.1 m/s forward motion, both 0.25 rad/s
+turn directions and acceleration/braking. Settled images/clouds are compared to known
+fixtures: a red box centered at (2,0,0.2) m with size (0.1,0.3,0.4) m; a visual-only blue
+marker centered at (0.8,0,0.001) m with size (0.3,0.12,0.001) m, leaving ground contact unchanged.
+CameraInfo projection is compared to visible image bounds, including marker clipping at
+image edges, with an 8 px threshold. Cloud target-surface P95 error must be below 20 mm
+and ground-plane error below 10 mm. IMU checks cover turn signs/rates, acceleration/braking
+signs, constant-speed and stationary response. TF, publishers, stamps, freshness and
+received rates are also checked. Gazebo link_states has no acquisition timestamp:
+geometry is compared only after stopping, and moving IMU uses the latest truth sample.
+This is basic response validation, not precise latency measurement or hardware calibration.
+
+Local acceptance on 2026-09-13 passed: image/CameraInfo about 10 Hz, cloud about 10 Hz,
+IMU about 399.9 Hz, all measured in simulation time. Across four settled poses, maximum
+red-target bound error was about 3.13 px and ground-marker error about 3.63 px. Steady
+turn-rate mean absolute error between IMU and truth was below 0.0002 rad/s in both directions.
+Measured real-time factor was about 0.62, below real time, for this computer/rendering/subscription
+load. Marker visibility does not establish the complete near-ground view or real black-line
+visibility. Black-line scenes, occlusion/frame-loss tests and algorithm closure remain pending.

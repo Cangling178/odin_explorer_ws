@@ -22,11 +22,13 @@ ros2 launch racer_bringup preview.launch.py --show-args
 ros2 launch racer_bringup preview.launch.py
 ```
 
-Preview needs `robot_state_publisher`, `joint_state_publisher` and `xacro` from
-the selected ROS installation. To inspect it visually, run `rviz2` in another
-sourced terminal, set Fixed Frame to `base_link`, and add RobotModel and TF.
+Preview needs `robot_state_publisher`, `joint_state_publisher`, `xacro` and `rviz2`
+from the selected ROS installation. The launch opens RViz with model and TF
+configuration by default; append `rviz:=false` to disable the window.
 The package launch also supports `use_sim_time:=true` when a clock is supplied.
-Stationary preview joints are illustrative; this is not physics simulation.
+Wheel joint states in preview are stationary illustrations. See
+[simulation documentation](../simulation/README.md) for standalone sensor, contact
+and vehicle-motion launch and validation commands.
 
 After ROS and rosdep are installed and initialized, the standard optional
 dependency step is:

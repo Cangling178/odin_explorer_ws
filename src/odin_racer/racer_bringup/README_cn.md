@@ -6,7 +6,7 @@
 
 ## 状态
 
-已提供：模型预览封装及 ros2_control 整车运动仿真 simulation.launch.py。待完成：经过验证的传感器、底盘和比赛启动组合，以及明确的就绪检查和使能。
+已提供：模型预览封装及 ros2_control 整车运动仿真 simulation.launch.py。已集成随车模拟传感器。待完成：实车传感器、底盘和比赛启动组合，以及明确的就绪检查和使能。
 
 ## 职责与验收
 
@@ -23,3 +23,6 @@
 使用 /sim/racer 命名空间。可追加 gui:=false。控制器激活失败时终止启动，
 成功后等待带仿真时间戳的速度指令；不启动任何真实电机接口。
 完整命令、参数和验证见[仿真说明](../../../simulation/README_cn.md#ros2_control-整车运动仿真)。
+
+默认启用随车 Odin 数据；追加 sensors:=false 可仅测试底盘。sensor_targets:=true 添加已知测试目标。
+相机需要渲染环境，即使 gui:=false；接口和验证见[随车传感器](../../../simulation/README_cn.md#随车-odin-传感器)。

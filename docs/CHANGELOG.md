@@ -11,3 +11,7 @@ English | [Chinese](CHANGELOG_cn.md)
 - Add local milestones, backlog, risks, decisions and optional GitHub templates.
 - Keep hardware drivers and autonomous runtime explicitly unimplemented.
 - Add `_cn.md` translations for all Markdown documents with bidirectional language links, language-aware checks and ROS package documentation installation.
+- Add plate/Odin1 CAD models, approximate inertias and collisions, a standalone sensor scene, and contact and basic ros2_control motion validation.
+- Record the local vendor-driver build and initial point cloud check; target-platform acceptance, F4 communication and autonomous line following remain pending.
+- Synchronize English and Chinese architecture, development, bringup, planning and simulation documentation, distinguishing current capabilities, target design and historical validation scope.
+- Integrate onboard Odin images, clouds and IMU with shared settings and Xacro extrinsics; add known fixtures and automated motion-response validation.
