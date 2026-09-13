@@ -51,16 +51,28 @@
         <geometry><box size="${gearbox_length} ${assumed_gearbox_depth} ${gearbox_height}"/></geometry>
         <material name="motor_metal"/>
       </visual>
+      <collision name="${side}_gearbox_envelope_collision">
+        <origin xyz="${motor_axis_offset/2} ${-sign*assumed_gearbox_depth/2} 0"/>
+        <geometry><box size="${gearbox_length} ${assumed_gearbox_depth} ${gearbox_height}"/></geometry>
+      </collision>
       <visual name="motor_can">
         <origin xyz="${motor_axis_offset} ${-sign*(assumed_gearbox_depth+can_depth/2)} 0" rpy="${pi/2} 0 0"/>
         <geometry><cylinder radius="${motor_diameter/2}" length="${can_depth}"/></geometry>
         <material name="motor_metal"/>
       </visual>
+      <collision name="${side}_motor_can_collision">
+        <origin xyz="${motor_axis_offset} ${-sign*(assumed_gearbox_depth+can_depth/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${motor_diameter/2}" length="${can_depth}"/></geometry>
+      </collision>
       <visual name="gmr_cover">
         <origin xyz="${motor_axis_offset} ${-sign*(motor_total_depth-assumed_encoder_depth/2)} 0" rpy="${pi/2} 0 0"/>
         <geometry><cylinder radius="${encoder_diameter/2}" length="${assumed_encoder_depth}"/></geometry>
         <material name="motor_black"/>
       </visual>
+      <collision name="${side}_gmr_cover_collision">
+        <origin xyz="${motor_axis_offset} ${-sign*(motor_total_depth-assumed_encoder_depth/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${encoder_diameter/2}" length="${assumed_encoder_depth}"/></geometry>
+      </collision>
     </link>
     <joint name="${side}_motor_mount" type="fixed">
       <parent link="base_link"/><child link="${side}_motor_link"/>
@@ -78,11 +90,19 @@
         <geometry><box size="${assumed_bracket_length} ${assumed_bracket_thickness} ${bracket_height}"/></geometry>
         <material name="motor_black"/>
       </visual>
+      <collision name="${side}_vertical_web_collision">
+        <origin xyz="${motor_axis_offset/2} ${sign*assumed_bracket_thickness/2} ${(plate_bottom_z-gearbox_height/2)/2}"/>
+        <geometry><box size="${assumed_bracket_length} ${assumed_bracket_thickness} ${bracket_height}"/></geometry>
+      </collision>
       <visual name="top_flange">
         <origin xyz="${motor_axis_offset/2} ${sign*(assumed_bracket_thickness-assumed_bracket_reach/2)} ${plate_bottom_z-assumed_bracket_thickness/2}"/>
         <geometry><box size="${assumed_bracket_length} ${assumed_bracket_reach} ${assumed_bracket_thickness}"/></geometry>
         <material name="motor_black"/>
       </visual>
+      <collision name="${side}_top_flange_collision">
+        <origin xyz="${motor_axis_offset/2} ${sign*(assumed_bracket_thickness-assumed_bracket_reach/2)} ${plate_bottom_z-assumed_bracket_thickness/2}"/>
+        <geometry><box size="${assumed_bracket_length} ${assumed_bracket_reach} ${assumed_bracket_thickness}"/></geometry>
+      </collision>
     </link>
     <joint name="${side}_motor_bracket_mount" type="fixed">
       <parent link="${side}_motor_link"/><child link="${side}_motor_bracket_link"/>
@@ -95,6 +115,10 @@
         <geometry><cylinder radius="${shaft_diameter/2}" length="${shaft_length}"/></geometry>
         <material name="motor_metal"/>
       </visual>
+      <collision name="${side}_output_shaft_collision">
+        <origin xyz="0 ${sign*(outer_y+shaft_length/2-wheel_track/2)} 0" rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${shaft_diameter/2}" length="${shaft_length}"/></geometry>
+      </collision>
     </link>
     <joint name="${side}_output_shaft_mount" type="fixed">
       <parent link="${side}_wheel_link"/><child link="${side}_output_shaft_link"/>

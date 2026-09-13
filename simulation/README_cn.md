@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-已添加 Gazebo Classic 11 独立 Odin1 传感器测试场景；整车接触与驱动尚未接入。确定 ROS/JetPack 和驱动模型后再选择仿真器；条件允许时，在工作站运行计算量大的仿真。
+已添加 Gazebo Classic 11 独立 Odin1 传感器测试场景，以及采用现有质量的整车落地接触测试；整车驱动尚未接入。确定 ROS/JetPack 和驱动模型后再选择仿真器；条件允许时，在工作站运行计算量大的仿真。
 
 先进行确定性的平面测试：直线、等半径圆弧、S 曲线、坐标重复的交叉点、尖角以及受控数据丢失。之后加入实测车轮几何、执行延迟、饱和、打滑和相机视野，验证底盘能否通过实测走廊。
 
@@ -51,3 +51,70 @@ ROS 话题：`/sim/odin1/image`、`/sim/odin1/camera_info`、
 [官方数据输出与外参](https://manifoldtechltd.github.io/wiki/odin_series/odin1/5.%20Data%20output_.html)。
 
 验证记录：本机实际收到 1600×1296 图像和 CameraInfo、XYZ/intensity 点云、IMU；静止加速度 Z=9.81 m/s²。尚未验证运动响应与实物误差。
+
+## 整车地面接触测试
+
+使用当前 Xacro 生成独立动态场景，不添加未知部件质量。生成器按固定关节合并
+质量、质心和惯性（包含坐标旋转与平行轴项），同时搬移所有外观和碰撞体。
+物理模型含 3 个刚体：0.785 kg 车体及两个各 0.046 kg 的车轮，总质量仍为
+0.877 kg；25 个碰撞体与两个自由轮关节保留。前球作为车体上的低摩擦滑动支撑，
+不模拟球体旋转。源 URDF 的 TF 树和零件级惯性不变，生成的 SDF 不重复计重。
+
+参数集中在 [ground_contact.yaml](../src/odin_racer/racer_description/config/ground_contact.yaml)，
+由场景生成器读取，不是 ROS 节点参数文件。以下全部为初始工程值，未实测标定：
+
+| 参数 | 初始值 | 用途 |
+| --- | --- | --- |
+| 后轮 mu / mu2 | 0.8 / 0.8 | 轮胎接地摩擦 |
+| 前球 mu / mu2 | 0.02 / 0.02 | 低摩擦支撑近似；不代表实测滚动阻力 |
+| 其他部件 / 地面摩擦 | 0.5 / 1.0 | 地面不限制较小的物体摩擦系数 |
+| 接触 kp / kd | 100000 N/m / 100 N·s/m | 接触刚度与阻尼 |
+| min_depth | 0.0001 m | 接触修正容差，不是穿透量的硬上限 |
+| max_vel | 0.1 m/s | 穿透修正速度上限，不是车速上限 |
+| 恢复系数 | 0 | 不额外施加恢复弹性 |
+| 最大接触点数 | 10 / 碰撞体 | 轮胎接触求解 |
+| ODE 步长 / 迭代数 / SOR | 1 ms / 80 / 1.3 | quick 求解器，pyramid 摩擦模型 |
+| 轮关节阻尼 | 0.0001 N·m·s/rad | 小阻尼，自由轮；不是电机刹车 |
+| 初始离地间隙 | 20 mm | 从几何最低点推导释放高度 |
+
+kp、kd 同时写入地面和物体表面；最终接触响应由 ODE 双方表面参数共同决定。
+参数含义参考 [Gazebo 物理参数](https://classic.gazebosim.org/tutorials?tut=physics_params)
+和 [SDFormat 接触规范](https://sdformat.org/spec/1.7/collision/)，具体取值是本工程初值。
+
+在工作空间根目录启动：
+
+```bash
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --packages-select racer_description
+source install/local_setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+ros2 launch racer_description ground_contact.launch.py
+```
+
+无窗口测试追加 `gui:=false`。可用 `contact_config:=/absolute/path/config.yaml` 替换参数。
+专用 ROS domain 和 Gazebo master 将测试与已有预览/设备会话隔离；另一测试终端需使用相同
+环境变量。该入口提供 Gazebo 可视化、/clock、/contact_test/model_states、
+/contact_test/link_states 和 /contact_test/get_entity_state，不发布车辆 TF、轮速指令或
+模拟 Odin 数据；状态服务是仿真真值，不能当作定位算法输出。
+
+复现本次落地检查（仅对上述专用测试世界使用 --reset，它会重置整个仿真世界）：
+
+```bash
+source /opt/ros/humble/setup.bash
+export ROS_DOMAIN_ID=73
+export GAZEBO_MASTER_URI=http://127.0.0.1:11355
+python3 tools/validate_ground_contact.py --reset \
+  --output data/generated/ground_contact_validation.json
+python3 -m unittest discover -s tests -v
+```
+
+检查程序观察 10 秒仿真时间，取后 5 秒检查高度误差 <1 mm、垂直波动 <0.5 mm、
+水平漂移 <1 mm、线速度 <0.005 m/s、角速度 <0.02 rad/s、姿态偏转 <0.5°。
+这些是本场景的工程检查阈值，不是实车性能指标；修改几何或释放高度后需同步审查检查条件。
+
+2026-09-13 本机 Gazebo 11.10.2 / ROS 2 Humble 验证：SDF 校验、包构建、11 项单元测试通过；
+从 base_link 高 53.25 mm 释放，观察 10.036 s，稳定高度约 33.1267 mm（名义值 33.25 mm），
+静置阶段最大线速度约 0.0000323 m/s、角速度约 0.0000541 rad/s、姿态偏转约 0.00460°。
+独立采集约 1 秒 Gazebo contacts，四个支撑各出现 987 条接触记录，没有其他部件触地。
+未验证带驱动的牵引、转向和制动，也未验证真实地面、真实球滚动或缺省质量的实车一致性。

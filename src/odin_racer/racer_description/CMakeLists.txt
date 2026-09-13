@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.8)
 project(racer_description)
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
+ament_python_install_package(${PROJECT_NAME})
 install(FILES README.md README_cn.md DESTINATION share/${PROJECT_NAME})
 foreach(asset_dir config launch urdf meshes worlds)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${asset_dir}")

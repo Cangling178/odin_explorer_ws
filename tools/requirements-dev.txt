@@ -1,2 +1,4 @@
-# Structural YAML checks only; evaluator uses the Python standard library.
+# Structural YAML checks and contact-model tests; evaluator uses the standard library.
+# Contact tests also need xacro from the sourced ROS 2 environment.
 PyYAML>=6.0,<7
+numpy>=1.21,<3

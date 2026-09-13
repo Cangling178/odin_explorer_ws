@@ -11,6 +11,11 @@
         <geometry><mesh filename="package://racer_description/meshes/odin1.stl"/></geometry>
         <material name="odin_shell"><color rgba="0.16 0.18 0.20 1"/></material>
       </visual>
+      <!-- Full CAD bounds, including connectors; conservative solid envelope. -->
+      <collision name="odin_body_collision">
+        <origin xyz="-0.0036 0 0.031"/>
+        <geometry><box size="0.0464 0.100 0.062"/></geometry>
+      </collision>
       <!-- Estimated uniform body box COM/inertia; manufacturer's mass only.
            Body CAD depth -3..40 mm; hole-group midpoint depth 20.4 mm. -->
       <inertial>

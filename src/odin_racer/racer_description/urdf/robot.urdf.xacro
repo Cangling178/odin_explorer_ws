@@ -1,11 +1,23 @@
 <?xml version="1.0"?>
-<!-- CAD-based geometry and approximate inertias for preview; no contact or drive simulation. -->
+<!-- CAD plate and user-specified wheel/ball geometry.
+     Preview with approximate inertias and primitive collisions. The dedicated
+     contact-world generator adds physics; no drive or measured calibration. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="odin_racer_preview">
   <!-- SI units. Dimensions reported by the user; level plate height is a
        modeling choice (62 mm replaces the earlier 57 mm ball assembly height).
        Plate edge offsets use the longitudinal CAD bounding-box extremes. -->
   <xacro:property name="plate_length" value="0.24741600036621094"/>
   <xacro:property name="plate_height" value="0.062"/>
+  <!-- Collision envelopes measured from the STL in its local frame.
+       The slab fills cutouts; the upper box conservatively fills space between
+       raised CAD features. Neither is machining or self-collision geometry. -->
+  <xacro:property name="plate_width" value="0.220"/>
+  <xacro:property name="plate_thickness" value="0.0035"/>
+  <xacro:property name="plate_upper_min_x" value="-0.11904653906822205"/>
+  <xacro:property name="plate_upper_max_x" value="0.07495316863059998"/>
+  <xacro:property name="plate_upper_min_y" value="-0.07358216494321823"/>
+  <xacro:property name="plate_upper_max_y" value="0.10356252640485764"/>
+  <xacro:property name="plate_upper_top" value="0.0335"/>
   <xacro:property name="wheel_radius" value="0.03325"/>
   <!-- User-adopted tire + hub mass, kg. Fasteners ignored by instruction. -->
   <xacro:property name="wheel_mass" value="0.046"/>
@@ -44,6 +56,14 @@
       <geometry><mesh filename="package://racer_description/meshes/chassis_plate.stl"/></geometry>
       <material name="body"/>
     </visual>
+    <collision name="plate_slab_collision">
+      <origin xyz="${plate_center_x} 0 ${plate_bottom_z+plate_thickness/2}"/>
+      <geometry><box size="${plate_length} ${plate_width} ${plate_thickness}"/></geometry>
+    </collision>
+    <collision name="plate_raised_envelope_collision">
+      <origin xyz="${plate_center_x+(plate_upper_min_x+plate_upper_max_x)/2} ${(plate_upper_min_y+plate_upper_max_y)/2} ${plate_bottom_z+(plate_thickness+plate_upper_top)/2}"/>
+      <geometry><box size="${plate_upper_max_x-plate_upper_min_x} ${plate_upper_max_y-plate_upper_min_y} ${plate_upper_top-plate_thickness}"/></geometry>
+    </collision>
   </link>
   <xacro:macro name="drive_wheel" params="side y">
     <link name="${side}_wheel_link">
@@ -61,6 +81,10 @@
         <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
         <material name="rubber"/>
       </visual>
+      <collision name="${side}_wheel_collision">
+        <origin rpy="${pi/2} 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
     </link>
     <joint name="${side}_wheel_joint" type="continuous">
       <parent link="base_link"/><child link="${side}_wheel_link"/>
@@ -80,6 +104,11 @@
           scale="${pillar_width} ${pillar_width} ${pillar_length}"/></geometry>
         <material name="brass"/>
       </visual>
+      <!-- Circumscribed cylinder around the hex; top remains at mount Z=0. -->
+      <collision name="${side}_${end}_pillar_collision">
+        <origin xyz="0 0 ${-pillar_length/2}"/>
+        <geometry><cylinder radius="${pillar_width/sqrt(3)}" length="${pillar_length}"/></geometry>
+      </collision>
     </link>
     <joint name="${side}_${end}_pillar_mount_joint" type="fixed">
       <parent link="base_link"/><child link="${side}_${end}_pillar_mount_link"/>
@@ -92,8 +121,8 @@
   </xacro:macro>
   <xacro:pillar_pair side="left" y="${ball_track/2}"/>
   <xacro:pillar_pair side="right" y="${-ball_track/2}"/>
-  <!-- Ball transfers, not swivel casters. Fixed visual spheres;
-       no rolling or friction model yet.
+  <!-- Ball transfers, not swivel casters. Fixed spheres with collision geometry;
+       contact-world generation adds low-friction sliding, not ball rotation.
        Housing is an envelope; flange
        width/thickness and hole diameters are absent from the product drawing.
        Do not interpret the simplified shell as machining geometry. -->
@@ -112,11 +141,18 @@
           ixy="0" ixz="0" iyz="0"/>
       </inertial>
       <visual><geometry><sphere radius="${ball_radius}"/></geometry><material name="steel"/></visual>
+      <collision name="${side}_ball_collision">
+        <geometry><sphere radius="${ball_radius}"/></geometry>
+      </collision>
       <visual>
         <origin xyz="0 0 ${caster_height-ball_radius-housing_height/2}"/>
         <geometry><cylinder radius="${housing_radius}" length="${housing_height}"/></geometry>
         <material name="steel"/>
       </visual>
+      <collision name="${side}_ball_housing_collision">
+        <origin xyz="0 0 ${caster_height-ball_radius-housing_height/2}"/>
+        <geometry><cylinder radius="${housing_radius}" length="${housing_height}"/></geometry>
+      </collision>
     </link>
     <joint name="front_${side}_caster_mount" type="fixed">
       <parent link="base_link"/><child link="front_${side}_caster_link"/>
