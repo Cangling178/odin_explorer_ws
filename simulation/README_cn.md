@@ -42,9 +42,9 @@ ROS 话题：`/sim/odin1/image`、`/sim/odin1/camera_info`、
 
 ### 参数与边界
 
-- RGB：1600×1296、10 Hz、水平 FOV 129°；**针孔近似**，垂直 FOV
-  由宽高比推导，不能同时匹配官方 104°；没有实现 FishPoly 或真实全局快门误差。
-  CameraInfo 为仿真针孔内参，绝不直接填设备鱼眼标定。
+- RGB：采用设备 O1-P040100136 标定的 **FishPoly** 几何投影，1600×1296、10 Hz。
+  标定推算水平/垂直视场约 128.85°/103.30°；CameraInfo 使用项目自定义 `fishpoly` 约定。
+  广角 cubemap 渲染后按标定逆映射采样；无曝光响应、运动模糊或图像噪声。详见 [FishPoly 实现](FISHPOLY_CAMERA_cn.md)。
 - 深度/点云：240×180 角度采样、120°×90°、10 Hz、0.2–30 m。
   30 m 是选择的量程上限；未模拟官方反射率/光照条件下的 70 m 能力。
   Gazebo 射线不是实际 DTOF 成像，点云会过滤无效点，数量不固定；
@@ -237,7 +237,7 @@ python3 tools/validate_sim_drive.py --output data/generated/sim_drive_validation
 传感器参数，包含分辨率、频率、FOV 和量程；外参仍以 Xacro 为来源。
 [sensor_world.py](../src/odin_racer/racer_description/racer_description/sensor_world.py) 负责生成两种场景的传感器。
 `worlds/odin_sensors.world` 现在是独立台架模板，通过原有 launch 生成可运行世界，不能直接作为完整传感器世界启动。
-设备原始 `calib_device.yaml` 未修改；当前针孔、射线和理想 IMU 近似仍适用，不模拟 FishPoly 或厂商 SLAM。
+设备原始 `calib_device.yaml` 未修改；相机已采用 FishPoly 几何投影；点云仍为射线、IMU 仍为理想模型，不模拟厂商 SLAM。
 
 | 话题 | 类型 / 坐标系 | 订阅建议 |
 | --- | --- | --- |
@@ -282,13 +282,13 @@ python3 tools/validate_sim_drive.py --output data/generated/sim_drive_with_senso
 传感器验证覆盖静止、0.1 m/s 前进、左右 0.25 rad/s 转向及加减速。
 停车后的图像与点云对照已知目标：红色方块中心 (2,0,0.2) m、尺寸 (0.1,0.3,0.4) m；
 蓝色标记中心 (0.8,0,0.001) m、尺寸 (0.3,0.12,0.001) m，仅有外观，不影响地面接触。
-图像按 CameraInfo 投影比较可见边界（包括标记移出画面的裁剪），阈值 8 px；
+图像按 FishPoly CameraInfo 投影比较采样后的曲线边界（包括标记移出画面的裁剪），阈值 8 px；
 点云目标表面 P95 误差阈值 20 mm、地平面 10 mm。IMU 检查左右角速度、加速/制动符号、
 匀速与静止响应；同时检查 TF、发布者、时间戳、消息新鲜度和实收频率。
 Gazebo link_states 没有采集时间戳：几何比较仅在停车后进行，运动 IMU 对照使用最近真值，
 属于基础响应验证，不能作为精密时延或实车标定报告。
 
-2026-09-13 本机验收通过：图像/CameraInfo 约 10 Hz、点云约 10 Hz、IMU 约 399.9 Hz，
+历史记录（2026-09-13，旧针孔版本；FishPoly 验收见上述专页）：图像/CameraInfo 约 10 Hz、点云约 10 Hz、IMU 约 399.9 Hz，
 均按仿真时间计。四个停车位姿的红色目标边界最大误差约 3.13 px，地面标记约 3.63 px；
 左右转向 IMU 与真值的稳态角速度平均绝对误差均低于 0.0002 rad/s。
 测得实时因子约 0.62，未达到实时运行；这是当前电脑、渲染和订阅负载下的结果。

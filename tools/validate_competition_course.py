@@ -26,6 +26,7 @@ from tf2_ros import Buffer, TransformException, TransformListener
 import yaml
 
 from validate_sim_sensors import cloud_xyz, matrix, stamp
+from racer_description.fishpoly import pixel_rays
 
 
 def pixels(msg):
@@ -37,8 +38,8 @@ def pixels(msg):
 def compare_ground(image, info, world_from_camera, texture, config, base, overview):
     """Ray/plane projection; compare only board pixels with a useful view angle."""
     rows, cols = np.mgrid[0:image.height:2, 0:image.width:2]
-    uv = np.stack([cols, rows, np.ones_like(cols)], axis=-1)
-    rays = uv @ np.linalg.inv(np.array(info.k).reshape(3, 3)).T @ world_from_camera[:3, :3].T
+    uv = np.stack([cols, rows], axis=-1)
+    rays = pixel_rays(info, uv) @ world_from_camera[:3, :3].T
     origin = world_from_camera[:3, 3]
     distance = (config['visual_z_m']-origin[2])/np.where(np.abs(rays[:, :, 2]) > 1e-8, rays[:, :, 2], 1e-8)
     ground = origin+rays*distance[:, :, None]

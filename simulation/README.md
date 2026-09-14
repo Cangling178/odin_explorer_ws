@@ -47,9 +47,10 @@ preview first to avoid duplicate simulated sensor TF. Topics: /sim/odin1/image,
 Consumers use use_sim_time=true. Stationary sensor at 0.5 m, target at 2 m;
 not the chassis mounting height or a drivable robot.
 
-RGB: 1600x1296, 10 Hz, horizontal FOV 129 degrees, PINHOLE approximation.
-Vertical FOV follows aspect ratio, not official 104 degrees. No FishPoly model;
-CameraInfo describes the simulated pinhole, not device fisheye calibration.
+RGB: calibrated **FishPoly** projection from device O1-P040100136, 1600x1296 at 10 Hz.
+Calibration-derived horizontal/vertical FOV is about 128.85/103.30 degrees. CameraInfo
+uses the custom `fishpoly` contract. Cubemap rendering is resampled by the calibrated
+inverse projection; no exposure response, motion blur or image noise. See [FishPoly implementation](FISHPOLY_CAMERA.md).
 Ray cloud: 240x180, 120x90 degrees, 10 Hz, 0.2-30 m. Not actual DTOF imaging;
 invalid returns may be filtered, no confidence/offset_time fields or calibrated
 noise, reflectivity or 70 m bright-target behavior.
@@ -271,7 +272,7 @@ resolution, rates, FOV and ranges; Xacro remains the source of extrinsics.
 [sensor_world.py](../src/odin_racer/racer_description/racer_description/sensor_world.py) generates both sets of sensors.
 `worlds/odin_sensors.world` is now a bench template populated by the existing launch;
 it is not directly launchable as a complete sensor world. Original device `calib_device.yaml`
-is unchanged. Pinhole, ray and ideal IMU approximations still apply; FishPoly and vendor SLAM are absent.
+is unchanged. The camera uses FishPoly geometry; ray cloud and ideal IMU approximations remain, and vendor SLAM is absent.
 
 | Topic | Type / frame | Suggested subscription |
 | --- | --- | --- |
@@ -319,7 +320,7 @@ Sensor validation covers stationary output, 0.1 m/s forward motion, both 0.25 ra
 turn directions and acceleration/braking. Settled images/clouds are compared to known
 fixtures: a red box centered at (2,0,0.2) m with size (0.1,0.3,0.4) m; a visual-only blue
 marker centered at (0.8,0,0.001) m with size (0.3,0.12,0.001) m, leaving ground contact unchanged.
-CameraInfo projection is compared to visible image bounds, including marker clipping at
+FishPoly projection of sampled curved edges is compared to visible image bounds, including marker clipping at
 image edges, with an 8 px threshold. Cloud target-surface P95 error must be below 20 mm
 and ground-plane error below 10 mm. IMU checks cover turn signs/rates, acceleration/braking
 signs, constant-speed and stationary response. TF, publishers, stamps, freshness and
@@ -327,7 +328,7 @@ received rates are also checked. Gazebo link_states has no acquisition timestamp
 geometry is compared only after stopping, and moving IMU uses the latest truth sample.
 This is basic response validation, not precise latency measurement or hardware calibration.
 
-Local acceptance on 2026-09-13 passed: image/CameraInfo about 10 Hz, cloud about 10 Hz,
+Historical acceptance (2026-09-13, former pinhole version; see FishPoly page for new results): image/CameraInfo about 10 Hz, cloud about 10 Hz,
 IMU about 399.9 Hz, all measured in simulation time. Across four settled poses, maximum
 red-target bound error was about 3.13 px and ground-marker error about 3.63 px. Steady
 turn-rate mean absolute error between IMU and truth was below 0.0002 rad/s in both directions.

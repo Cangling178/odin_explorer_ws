@@ -114,10 +114,10 @@ and cloud direction; simulation TF is not hardware calibration.
 
 ## 6. High priority: camera and localization differ from hardware
 
-The 1600 x 1296, 129-degree horizontal-FOV camera is pinhole, not FishPoly. Aspect
-ratio determines vertical FOV, so official 104 degrees is not simultaneously matched.
-There is no vendor SLAM, cloud_slam, relocalization or map service. Choose a rectified
-pinhole algorithm input or implement a closer projection. Add SLAM if required, or
+The camera now uses device-calibrated FishPoly geometry at 1600x1296, 10 Hz, with
+FOV derived from calibration. Exposure/noise still lack hardware calibration.
+There is no vendor SLAM, cloud_slam, relocalization or map service. Compare rendered
+images to hardware and add rectified input if needed. Add SLAM if required, or
 explicitly labeled truth; never present truth as vendor estimation. Projection and
 CameraInfo must agree, and localization source/error/time semantics must be explicit.
 

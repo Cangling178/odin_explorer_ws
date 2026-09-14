@@ -67,7 +67,7 @@
 
 | 传感器或功能 | 当前模拟 | 与真实设备的主要差异 |
 | --- | --- | --- |
-| RGB 相机 | 1600×1296、10 Hz、水平 FOV 129°；随车渲染图像并发布 CameraInfo | 使用针孔模型，设备标定为 FishPoly；垂直 FOV 由宽高比推导；没有真实镜头投影、曝光响应、运动模糊或图像噪声 |
+| RGB 相机 | 设备标定 FishPoly 几何投影，1600×1296、10 Hz；自定义 fishpoly CameraInfo；水平/垂直视场约 128.85°/103.30° | 有限 cubemap 与重采样精度；无曝光响应、运动模糊或图像噪声；普通针孔消费者需适配 |
 | 深度/点云 | 240×180 射线、120°×90°、0.2–30 m、10 Hz；检测碰撞体并输出 PointCloud2 | 射线求交近似 DTOF；没有反射率/光照影响、测距噪声、多径、confidence 或 offset_time，也未模拟条件相关的远距离探测能力 |
 | IMU | 约 400 Hz，随车输出角速度和加速度，包含静止重力响应 | 理想无噪声、无偏置漂移或温漂；400 Hz 是仿真设置，尚未核对设备实际采样/发送频率 |
 | 传感器外参 | 沿 Xacro 固定关节链计算；相机相对外参采用设备标定副本转换后的值 | 机壳到雷达为 CAD 镜头中心估计，车体安装尚未完成实测标定 |
@@ -77,8 +77,8 @@
 [odin_sensors.yaml](../src/odin_racer/racer_description/config/odin_sensors.yaml)，
 由 [sensor_world.py](../src/odin_racer/racer_description/racer_description/sensor_world.py) 生成传感器。
 
-保存 [calib_device.yaml](../hardware/mechanical/odin1/calib_device.yaml) 不代表 Gazebo 已按 FishPoly
-生成图像；当前只沿用转换后的相对外参，图像与 CameraInfo 仍属于仿真针孔模型。
+[calib_device.yaml](../hardware/mechanical/odin1/calib_device.yaml) 现已用于图像的 FishPoly 投影与 CameraInfo；
+相对外参仍使用原有转换值。实现与验收见 [FishPoly 相机](FISHPOLY_CAMERA_cn.md)。
 点云配置的 `resolution_m: 0.001` 是射线量程分辨率设置，不代表真实设备有 1 mm 测距精度。
 
 相机观察视觉几何，射线检测碰撞几何。测试红色方块有外观和碰撞，可被两者观察；蓝色地面标记

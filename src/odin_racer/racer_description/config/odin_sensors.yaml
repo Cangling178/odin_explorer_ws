@@ -1,10 +1,12 @@
 # Shared sensor settings for the bench and moving vehicle; simulation only.
 # Extrinsics come from the expanded URDF, not from this file.
 camera:
-  width: 1600
-  height: 1296
+  # Installed from hardware/mechanical/odin1/calib_device.yaml, unchanged.
+  calibration_file: calib_device.yaml
+  # Internal square equidistant image; output size comes from calibration.
+  render_size: 2048
+  env_texture_size: 1024
   rate_hz: 10.0
-  horizontal_fov_rad: 2.2514747351
   near_m: 0.02
   far_m: 70.0
 lidar:

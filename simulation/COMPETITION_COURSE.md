@@ -103,7 +103,7 @@ received sensor rates and short forward motion. Overhead comparison excludes the
 onboard comparison covers useful forward ground within 1 m, not complete-course visibility.
 The JSON report and two pairs of PNGs are written to `data/generated/competition_course_validation*`.
 
-Local validation passed on 2026-09-13: forward displacement about 0.116 m; overhead black IoU
+Historical validation (2026-09-13, former pinhole version; see [FishPoly results](FISHPOLY_CAMERA.md)): forward displacement about 0.116 m; overhead black IoU
 about 0.853/0.851 and onboard IoU about 0.926/0.933, with thresholds 0.85/0.70 respectively.
 Raster sampling and rendered boundaries affect these values. Received image, CameraInfo and cloud
 rates were about 10 Hz, overview 2 Hz and IMU 333 Hz, measured in simulation time. The configured

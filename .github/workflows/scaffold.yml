@@ -14,14 +14,14 @@ jobs:
       - name: Install check and asset build dependencies
         run: |
           apt-get update
-          apt-get install -y python3-yaml python3-numpy python3-colcon-common-extensions ros-humble-xacro ros-humble-robot-state-publisher ros-humble-joint-state-publisher
+          apt-get install -y python3-yaml python3-numpy python3-colcon-common-extensions ros-humble-xacro ros-humble-robot-state-publisher ros-humble-joint-state-publisher ros-humble-gazebo-dev ros-humble-gazebo-ros ros-humble-sensor-msgs libopencv-dev
       - name: Check repository and offline behavior
         shell: bash
         run: |
           source /opt/ros/humble/setup.bash
           python3 tools/check_workspace.py
           python3 -m unittest discover -s tests -v
-      - name: Build package assets
+      - name: Build package assets and simulation plugin
         shell: bash
         run: |
           source /opt/ros/humble/setup.bash

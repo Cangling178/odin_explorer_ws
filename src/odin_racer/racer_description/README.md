@@ -18,7 +18,7 @@ Course dimensions follow the drawing annotations and are not surveyed.
 ## Responsibility and acceptance
 
 Backlog: HW-001, CAL-001. See the root architecture and interface documents.
-This package currently installs assets/documentation through ament_cmake.
+This package installs assets/documentation through ament_cmake and builds the FishPoly Gazebo camera plugin.
 A successful build is not evidence that a planned subsystem runs.
 
 ## Configuration

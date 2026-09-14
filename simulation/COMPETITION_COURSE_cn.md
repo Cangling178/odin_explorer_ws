@@ -96,7 +96,7 @@ python3 tools/validate_competition_course.py
 俯视比较排除车体与阴影区域；随车比较只覆盖前方 1 m 内有用视野，不是全赛道可见性验收。
 JSON 报告及前后两组 PNG 保存至 `data/generated/competition_course_validation*`。
 
-2026-09-13 本机验证通过：实际前进约 0.116 m；两次俯视黑线 IoU 约 0.853/0.851，
+历史记录（2026-09-13，旧针孔版本；新结果见 [FishPoly 验收](FISHPOLY_CAMERA_cn.md)）：实际前进约 0.116 m；两次俯视黑线 IoU 约 0.853/0.851，
 随车投影 IoU 约 0.926/0.933（阈值分别为 0.85/0.70，受纹理采样和渲染边界影响）。
 图像、CameraInfo 和点云实收约 10 Hz，俯视图约 2 Hz，IMU 约 333 Hz，均按仿真时间计。
 IMU 配置目标为 400 Hz，本场景未实收到该频率；频率检查允许目标值 ±20%。

@@ -15,6 +15,7 @@ import time
 
 import numpy as np
 import rclpy
+from ament_index_python.packages import get_package_share_directory
 from rclpy.parameter import Parameter
 from rclpy.qos import qos_profile_sensor_data
 from rclpy.time import Time
@@ -22,6 +23,7 @@ from gazebo_msgs.msg import LinkStates
 from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import Image, CameraInfo, PointCloud2, Imu
 from tf2_ros import Buffer, TransformListener, TransformException
+from racer_description.fishpoly import FishPoly
 
 
 def matrix(position, q):
@@ -67,6 +69,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=Path("data/generated/sim_sensors_validation.json"))
     args = parser.parse_args()
+    expected = FishPoly.from_file(Path(get_package_share_directory('racer_description'))/'config/calib_device.yaml')
     rclpy.init()
     node = rclpy.create_node("validate_sim_sensors", parameter_overrides=[Parameter("use_sim_time", value=True)],
                              cli_args=["--ros-args", "-r", "/tf:=/sim/racer/tf", "-r", "/tf_static:=/sim/racer/tf_static"])
@@ -140,18 +143,27 @@ def main():
             raise ValueError("Stale sensor snapshot")
         camera_from_world = np.linalg.inv(world_from_sensor(image))
         k = np.array(info.k).reshape(3, 3)
+        model = FishPoly.from_info(info)
         def projected_box(xs, ys, zs, clip_marker=False):
-            corners = np.array([[x, y, z, 1.] for x in xs for y in ys for z in zs])
+            # FishPoly curves straight edges: sample every box edge, including
+            # the ordered perimeter for polygon clipping of the planar marker.
+            import itertools
+            vertices = np.array(list(itertools.product(xs, ys, zs)), dtype=float)
+            if clip_marker:
+                vertices = vertices[[0, 2, 3, 1]]
+                edges = list(zip(vertices, np.roll(vertices, -1, axis=0)))
+            else:
+                edges = [(a, b) for i, a in enumerate(vertices) for b in vertices[i+1:]
+                         if np.count_nonzero(a != b) == 1]
+            points = np.concatenate([a+(b-a)*np.linspace(0, 1, 101)[:, None] for a, b in edges])
+            corners = np.column_stack([points, np.ones(len(points))])
             optical = (camera_from_world @ corners.T).T[:, :3]
             if np.any(optical[:, 2] <= 0):
                 raise ValueError("Fixture behind the camera")
-            uv = (k @ optical.T).T
-            uv = uv[:, :2]/uv[:, 2:]
+            uv = model.project(optical)
             if clip_marker:
                 # Clip the planar marker polygon at image edges. A turn can make
                 # part of the marker leave the FOV without invalidating projection.
-                center = uv.mean(axis=0)
-                uv = uv[np.argsort(np.arctan2(uv[:, 1]-center[1], uv[:, 0]-center[0]))]
                 for axis, boundary, sign in ((0, 0., 1), (0, image.width-1., -1),
                                               (1, 0., 1), (1, image.height-1., -1)):
                     clipped = []
@@ -187,8 +199,9 @@ def main():
             "cloud_target_geometry": float(np.percentile(face_error, 95)) < .02,
             "cloud_ground_plane": ground_error < .01,
             "image_info_agree": image.width == info.width == 1600 and image.height == info.height == 1296
-            and abs(stamp(image)-stamp(info)) < .11 and info.distortion_model == "plumb_bob"
-            and np.allclose(info.d, 0.) and abs(k[0, 0]-381.58275109) < .01,
+            and abs(stamp(image)-stamp(info)) < .11 and info.distortion_model == "fishpoly"
+            and np.allclose(info.d, expected.d, atol=1e-12, rtol=0)
+            and np.allclose(k, expected.k, atol=1e-12, rtol=0) and np.allclose(info.p, 0.),
         }
         result = {"name": name, "base_xyz_m": [p.position.x, p.position.y, p.position.z],
                   "red_box_px": red.tolist(), "blue_box_px": blue.tolist(),
