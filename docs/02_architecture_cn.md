@@ -8,6 +8,10 @@
 ros2_control 运动仿真，以及离线误差评测。随车传感器已接入运动仿真；感知与路线跟踪节点、
 比赛状态管理和 F4 通信尚未实现；各包状态见[源码导航](../src/README_cn.md)。
 
+运动仿真可选择[比赛参考图赛道](../simulation/COMPETITION_COURSE_cn.md)，提供黑线图像、
+CameraInfo、IMU、点云、TF、里程计和速度指令接口，具备开发局部视觉循线闭环的基础。
+该赛道未经实测标定，Gazebo 真值和俯视相机用于独立检查，不作为循线算法输入。
+
 ```mermaid
 flowchart TD
   O[ODIN1 厂商驱动] --> A[racer_odin 适配层]

@@ -11,6 +11,10 @@ RViz preview, approximate inertias for the existing 0.877 kg mass subtotal, and
 primitive collision geometry. The level plate height is a user-selected 62 mm.
 Chassis contact and ros2_control motion tests pass; measured calibration remains pending.
 
+Onboard Odin sensors and the [competition drawing scene](../../../simulation/COMPETITION_COURSE.md)
+are available, with scale/provenance records, texture/mesh assets and a world generator.
+Course dimensions follow the drawing annotations and are not surveyed.
+
 ## Responsibility and acceptance
 
 Backlog: HW-001, CAL-001. See the root architecture and interface documents.

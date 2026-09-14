@@ -5,7 +5,7 @@ English | [Chinese](MODEL_GAPS_TEMP_cn.md)
 This is a code-state snapshot, not hardware acceptance. Work proceeds from stable
 ground contact and motion to perception integration and then hardware fidelity.
 For modeled behavior and hardware differences by component, see the [component comparison](COMPONENT_SIMULATION.md).
-Update, 2026-09-13: contact, ros2_control motion and onboard sensor checks pass; black-line visibility and algorithm closure are next.
+Update, 2026-09-13: contact, ros2_control motion and onboard sensor checks pass; the competition drawing scene is built. Complete-course visibility and algorithm closure are next.
 
 ## Completed
 
@@ -16,6 +16,7 @@ Update, 2026-09-13: contact, ros2_control motion and onboard sensor checks pass;
 - 25 primitive collisions on 16 visual links, all retained in the dynamic model.
 - RViz preview of the assembly and sensor frames.
 - Standalone Odin image, CameraInfo, cloud and stationary IMU checks.
+- Complete 2.00 x 1.50 m competition drawing reconstruction; initial-straight projection and short motion pass, without surveyed route claims.
 - Drop/settling, forward/reverse, turns, arc, limits and stops checked; onboard image, CameraInfo, cloud and IMU generation and basic motion response are checked.
 
 ## 1. Existing inertias defined; unknown masses deferred
@@ -131,8 +132,10 @@ response. Acceptance requires reproducing major hardware error trends.
 
 ## 8. Medium priority: track, closed loop and evaluation missing
 
-There are bench, onboard sensor and known-target scenes, but no complete black-line track,
-crossings, lighting or occlusion suite. Onboard sensor real-time factor is recorded;
+Bench, onboard sensor and known-target scenes are joined by the [competition drawing scene](COMPETITION_COURSE.md),
+including the complete line, crossing, loops and S-bends. Initial-straight projection and short motion pass.
+This is an unsurveyed image reconstruction without official route order, lighting variations or an occlusion suite.
+Onboard sensor real-time factor is recorded;
 perception-control closure, frame-loss recovery and end-to-end algorithm latency remain unverified. Build straight,
 curve and crossing cases; record repeatable tracking error, success rate, stop
 distance and real-time factor, then disturbances/faults. Results should distinguish

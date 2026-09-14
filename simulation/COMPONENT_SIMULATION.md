@@ -101,6 +101,7 @@ Simplified collision envelopes therefore affect simulated cloud shapes.
 | Part | Current simulation | Missing hardware effects |
 | --- | --- | --- |
 | Ground contact | Gravity, contact stiffness/damping, friction, settling and sliding | Default flat ground; no measured unevenness, material variation or calibrated tire-contact model |
+| Competition course | 2.00 x 1.50 m black/white board reconstructed from the drawing, including bends and crossing; camera-visible line | Image-estimated width about 21 mm, not surveyed; visual-only line with flat cloud returns; no official start/finish, route order or penalties |
 | Turning and slip | Contact-based motion with a 1.10 effective-separation correction | Correction applies only to this model, not hardware geometry; real slip trends have not been compared |
 | F4 | The simulated wheel PI loop approximates some execution functions | No F4 firmware, timers, protocol parsing, hardware faults or independent watchdog simulation |
 | Jetson | ROS nodes run on the development computer | No Jetson compute, scheduling, power or thermal-throttling model; perception and autonomous tracking nodes remain unimplemented |
@@ -125,6 +126,11 @@ is a command timeout, not the complete physical stopping time.
 Settling, basic straight/turn/arc motion, limits and stopping, and basic onboard
 image/cloud/IMU geometry and motion response have passed validation. Full commands,
 thresholds, historical metrics and local report locations are in the [simulation guide](README.md).
+
+The [competition drawing scene](COMPETITION_COURSE.md) passes initial-straight overhead/onboard
+projection and short forward-motion checks. Line recognition and autonomous full-course tracking
+remain absent. With the overview camera enabled, this run received about 333 Hz IMU and 10 Hz
+image/cloud output; 400 Hz in configuration is a target, so use the actual run report.
 
 Current checks support model placement, basic motion interfaces, sensor transforms
 and known-target observations as a foundation for algorithm integration. They do

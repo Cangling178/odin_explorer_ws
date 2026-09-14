@@ -54,8 +54,8 @@ git diff --check
 
 The structural checker requires PyYAML; the evaluator and its tests use the
 Python standard library. See `tools/requirements-dev.txt`. The optional GitHub
-workflow runs structural checks, offline tests and an asset build; it is only
-active if the owner later hosts this repository on GitHub.
+workflow runs structural checks, offline tests and an asset build on push/pull_request.
+It does not run Gazebo dynamic validation, which needs a rendering environment.
 
 ## Vendor underlay
 
@@ -73,9 +73,11 @@ Use concise messages such as `feat(hardware): add wheel feedback parser` or
 `docs(course): record crossing order`. Run relevant checks before merging.
 Tag actual milestones after recording evidence; do not tag untested autonomy.
 
-No remote is configured. Choosing an open-source license and publishing are
-separate future decisions. The local templates work without GitHub: copy a
-task entry into [project plan](planning/README.md) and record evidence beside it.
+Remote `origin` points to the [GitHub repository](https://github.com/Cangling178/odin_racer_ws);
+licensing is in the root LICENSE. Synchronize English/Chinese documentation, validation evidence
+and the [project plan](planning/README.md) before committing, and push after checks pass.
+Keep build outputs, vendor sources, bags and `data/generated/` reports local; document
+reproduction commands and key results.
 
 Contact-model tests additionally require NumPy, PyYAML and xacro from a sourced
 ROS environment; see `tools/requirements-dev.txt`. The evaluator tests themselves

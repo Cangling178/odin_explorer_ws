@@ -5,6 +5,9 @@
 逐部件的模拟内容、参数近似与实车差异见[各部件仿真范围与实车差异](COMPONENT_SIMULATION_cn.md)；
 后续工作优先级见[模型不足清单](MODEL_GAPS_TEMP_cn.md)。
 
+比赛参考图赛道已搭建：追加 `course:=competition` 启动完整黑线场景，
+详见[赛道启动、比例与验证](COMPETITION_COURSE_cn.md)。这是图片复刻版，尚无自主循线算法。
+
 当前使用 Gazebo Classic 11 / ROS 2 Humble，已验证独立 Odin1 传感器输出、采用已有质量的整车落地接触，
 以及 ros2_control 基础运动。长期仿真器选型仍待目标 ROS/JetPack 与实车驱动方案明确；
 条件允许时，在工作站运行计算量大的仿真。
@@ -253,6 +256,8 @@ python3 tools/validate_sim_drive.py --output data/generated/sim_drive_validation
 | `sensors` | true；false 时只运行底盘，适用于没有渲染环境的运动测试 |
 | `sensor_config` | 共用 odin_sensors.yaml；可替换整车传感器配置，需重新启动 |
 | `sensor_targets` | false；true 添加前方红色方块和蓝色地面标记，用于验证 |
+| `course` | empty；competition 为比赛参考图赛道，不能同时添加 sensor_targets |
+| `course_overview` | false；true 启用比赛场景的固定俯视检查相机 |
 | `gui` | true；false 只关闭窗口，相机仍需要可用的 DISPLAY/渲染环境 |
 
 使用新启动的专用世界，不与其他命令发布者共用。测试会主动移动车辆，不重置世界；
@@ -287,4 +292,5 @@ Gazebo link_states 没有采集时间戳：几何比较仅在停车后进行，�
 均按仿真时间计。四个停车位姿的红色目标边界最大误差约 3.13 px，地面标记约 3.63 px；
 左右转向 IMU 与真值的稳态角速度平均绝对误差均低于 0.0002 rad/s。
 测得实时因子约 0.62，未达到实时运行；这是当前电脑、渲染和订阅负载下的结果。
-该标记可见性不代表全部近地视野或真实黑线可见性验收。后续仍需黑线场景、遮挡/丢帧测试和算法闭环。
+该标记可见性不代表全部近地视野或真实黑线可见性验收。已另建[比赛参考图场景](COMPETITION_COURSE_cn.md)
+并检查初始直段黑线投影；全赛道视野、遮挡/丢帧测试和算法闭环仍待完成。

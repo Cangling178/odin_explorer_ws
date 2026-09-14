@@ -10,8 +10,8 @@ Use evidence gates instead of fixed dates before the hardware and rules are know
 Only M0 has passed its acceptance gate; M1-M8 remain incomplete. Mechanical modeling,
 the local vendor-driver build and initial point cloud check, and basic motion simulation
 have documented progress. These partial results do not establish hardware bench or
-autonomous line-following acceptance. SIM-001 remains in progress: onboard sensors are integrated; black-line scenes,
-algorithm closure and replay are the current focus.
+autonomous line-following acceptance. SIM-001 remains in progress: onboard sensors and the competition
+drawing scene are integrated; algorithm closure and replay are next. Survey and route order remain unconfirmed.
 
 | Milestone | Deliverable | Exit evidence | Depends on |
 | --- | --- | --- | --- |
@@ -55,12 +55,19 @@ needs evidence before Done, not just a directory or a successful empty build.
 | EVAL-002 | P1 | Export associated errors and report real trials | Blocked | EVAL-001; no invalid-data masking |
 | SPEED-001 | P1 | Add curvature and braking speed limits | Blocked | Accurate full-route baseline |
 | RACE-001 | P1 | Implement mode/state manager and race launch | Blocked | Healthy-device and route gates enforced |
-| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Gazebo Classic 11 / ros2_control basic motion validated; onboard image/cloud/IMU and basic motion response validated; unknown masses deferred, black-line closure/replay pending; see simulation/README.md |
+| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Basic motion and onboard image/cloud/IMU validated; [competition drawing scene](../../simulation/COMPETITION_COURSE.md) passes initial-straight projection and short motion; unknown masses deferred, black-line closure/replay pending |
 | NAV-001 | P2 | Evaluate optional Nav2 mode | Todo | Separate scope; shared command gate |
 
 For each started item add: owner, branch, requirement IDs, design note, validation
 command/procedure, evidence path and known limitations. Move completed evidence
 into a dated milestone report when the table becomes difficult to scan.
+
+Simulation prototypes for VIS-001/CTRL-001 can now start: detect the line in onboard images,
+project ground points using CameraInfo/TF, then close straight/simple-curve tracking at about
+0.05 m/s with stops on low confidence or image timeout. These algorithms are not implemented;
+hardware acceptance dependencies in the table remain. IMU attitude compensation can follow,
+and clouds are not required for the planar-line prototype. Truth is only for independent evaluation.
+Full laps still depend on TRACK-001/ROUTE-001 for ordered routes, branch confirmation and tight-turn feasibility.
 
 ## Risks
 

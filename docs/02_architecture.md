@@ -10,6 +10,11 @@ and offline error evaluation. Onboard sensors are integrated; perception and rou
 race state management and F4 communication remain unimplemented.
 See [source navigation](../src/README.md) for package status.
 
+Motion simulation can select the [competition drawing scene](../simulation/COMPETITION_COURSE.md),
+providing line images, CameraInfo, IMU, clouds, TF, odometry and velocity commands as a foundation
+for local visual tracking development. The course is not surveyed; Gazebo truth and the overhead
+camera are independent validation inputs, not tracking-algorithm inputs.
+
 ```mermaid
 flowchart TD
   O[ODIN1 vendor driver] --> A[racer_odin adapter]

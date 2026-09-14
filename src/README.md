@@ -28,6 +28,8 @@ a project contact; it is not used as the Git commit identity.
 | File | Function |
 | --- | --- |
 | [simulation.launch.py](odin_racer/racer_bringup/launch/simulation.launch.py) | ros2_control vehicle motion simulation |
+| [course_world.py](odin_racer/racer_description/racer_description/course_world.py) | Competition drawing scene and optional overhead camera, selected with course:=competition |
+| [validate_competition_course.py](../tools/validate_competition_course.py) | Course image projection, sensors and short-motion validation |
 | [preview.launch.py](odin_racer/racer_bringup/launch/preview.launch.py) | User launch entry; composes model preview |
 | [Model preview implementation](odin_racer/racer_description/launch/preview.launch.py) | Publishes model and stationary joint states |
 | [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | CAD and simplified assemblies, approximate inertias, collisions and optional simulation control interfaces |

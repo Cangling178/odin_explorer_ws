@@ -15,3 +15,5 @@ English | [Chinese](CHANGELOG_cn.md)
 - Record the local vendor-driver build and initial point cloud check; target-platform acceptance, F4 communication and autonomous line following remain pending.
 - Synchronize English and Chinese architecture, development, bringup, planning and simulation documentation, distinguishing current capabilities, target design and historical validation scope.
 - Integrate onboard Odin images, clouds and IMU with shared settings and Xacro extrinsics; add known fixtures and automated motion-response validation.
+- Reconstruct the 2.00 x 1.50 m competition drawing with `course:=competition`, an optional overhead camera, reproducible asset generation and projection/motion validation.
+- Synchronize English/Chinese course usage, dimension provenance, validation records and source navigation; simulated line-following development can begin, while detection/tracking algorithms and the surveyed route remain pending.

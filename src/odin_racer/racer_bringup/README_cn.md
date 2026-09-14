@@ -26,3 +26,6 @@
 
 默认启用随车 Odin 数据；追加 sensors:=false 可仅测试底盘。sensor_targets:=true 添加已知测试目标。
 相机需要渲染环境，即使 gui:=false；接口和验证见[随车传感器](../../../simulation/README_cn.md#随车-odin-传感器)。
+
+追加 `course:=competition` 使用[比赛参考图赛道](../../../simulation/COMPETITION_COURSE_cn.md)，
+默认 `course:=empty` 保留空场。`course_overview:=true` 添加俯视检查相机；比赛场景不能使用 sensor_targets。

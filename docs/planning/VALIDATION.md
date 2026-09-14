@@ -71,3 +71,26 @@ not tracked in Git. Key parameters, metrics and reproduction commands are in the
 
 Real-time factor was about 0.62 and still needs optimization. Complete black-line visibility,
 a self-occlusion test matrix, algorithm closure and hardware equivalence remain unaccepted.
+
+## Competition drawing scene — 2026-09-13, prepared for commit on 2026-09-14
+
+The 2.00 x 1.50 m image reconstruction is integrated into the vehicle scene, preserving vehicle
+mass, collisions and contact settings. Four new structural tests cover physics isolation, asset scale
+and provenance hashes, disabled onboard sensors/optional overview combinations, and incompatible
+scene settings. All 22 unit tests pass.
+
+`tools/validate_competition_course.py` passed a live run: approximately 0.116 m forward motion
+followed by a stop, overhead black IoU about 0.853/0.851 and onboard IoU about 0.926/0.933.
+Cloud ground, stationary IMU, stamp and rate checks passed. Image/cloud reception was about 10 Hz,
+overview 2 Hz and IMU 333 Hz against a configured 400 Hz target, with real-time factor about 0.84.
+Rates use simulation time and apply only to this computer and run load.
+
+Local reports and images are `data/generated/competition_course_validation*`, excluded from Git.
+Key metrics, thresholds, limitations and reproduction commands are in the
+[competition course guide](../../simulation/COMPETITION_COURSE.md). The source image is unchanged;
+survey templates remain empty and official start/direction/branch sequence are unconfirmed.
+This change does not implement line detection or autonomous tracking.
+
+Pre-commit checks on 2026-09-14 passed: repository structure/language pairs/local links,
+22 unit tests and all ten first-party packages with `colcon build --base-paths src`.
+README, architecture, development workflow, plan and changelog are synchronized.

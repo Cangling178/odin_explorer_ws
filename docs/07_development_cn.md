@@ -41,7 +41,7 @@ python3 tools/evaluate_run.py experiments/examples/synthetic_samples.csv \
 git diff --check
 ```
 
-结构检查器依赖 PyYAML，评测器及其测试仅使用 Python 标准库。接触模型测试还需 NumPy、PyYAML 和已加载的 ROS xacro 环境，见 `tools/requirements-dev.txt`。可选 GitHub 工作流执行结构检查、离线测试和资源构建；只有后续将仓库托管到 GitHub 时才会运行。
+结构检查器依赖 PyYAML，评测器及其测试仅使用 Python 标准库。接触模型测试还需 NumPy、PyYAML 和已加载的 ROS xacro 环境，见 `tools/requirements-dev.txt`。GitHub Actions 已配置为在 push/pull_request 时执行结构检查、离线测试和资源构建；它不运行需要渲染环境的 Gazebo 动态验证。
 
 ## 厂商底层工作空间
 
@@ -51,4 +51,6 @@ git diff --check
 
 保持 `main` 为经过检查的基础版本。开发时使用聚焦任务的分支，如 `codex/encoder-odometry`。需要时在提交中关联需求/任务编号。提交说明保持简洁，例如 `feat(hardware): add wheel feedback parser` 或 `docs(course): record crossing order`。合并前执行相关检查。记录真实里程碑依据后再打标签，不给未经测试的自主行驶能力打标签。
 
-当前没有远程仓库。选择开源许可证和发布是后续独立决定。即使不用 GitHub，也可以将任务条目复制到 [项目计划](planning/README_cn.md)，并在旁边记录验证依据。
+远程 `origin` 已配置为 [GitHub 仓库](https://github.com/Cangling178/odin_racer_ws)，许可见根目录 LICENSE。
+提交时同步中英文文档、验证记录和 [项目计划](planning/README_cn.md)，检查通过后再推送。
+构建产物、厂商源码、录包和 `data/generated/` 报告保持本地保存；复现命令和关键结果写入文档。

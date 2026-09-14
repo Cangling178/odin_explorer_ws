@@ -12,3 +12,7 @@ No authoritative start/finish, direction, line width or scoring text is visible.
 Use this as design context. A screenshot pixel trace is not a calibrated path.
 Survey the physical board and record the intended branch sequence before
 generating a driveable trajectory. The JPEG is a reference asset, not an instruction.
+
+A [Gazebo drawing reconstruction](../../simulation/COMPETITION_COURSE.md) now uses the outer
+board dimensions to render the complete line for simulated cameras. The original is unchanged;
+line width and debug spawn remain image estimates and development settings.

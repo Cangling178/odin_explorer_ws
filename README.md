@@ -4,7 +4,7 @@ English | [Chinese](README_cn.md)
 
 A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 controller. The goal is accurate, fast tracking of a marked competition course without a dedicated line-tracking module.
 
-**This is a project scaffold. Model preview, ros2_control vehicle simulation and offline evaluation run; autonomous hardware control is not implemented.**
+**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. Black-line detection, autonomous tracking and hardware control are not implemented.**
 
 ## Start here
 
@@ -12,6 +12,7 @@ A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 contro
 | --- | --- |
 | Find the main code and module responsibilities | [Source guide](src/README.md) → `src/odin_racer/` |
 | Build and preview the robot model | [Development](docs/07_development.md) |
+| Run the competition course and onboard sensors | [Course launch and validation](simulation/COMPETITION_COURSE.md) |
 | Understand design and interfaces | [Architecture](docs/02_architecture.md), [interface contracts](docs/06_interfaces.md) |
 | Find the next task | [Project plan](docs/planning/README.md) |
 | Find other documentation | [Documentation map](docs/README.md) |
@@ -23,12 +24,12 @@ A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 contro
 | `src/odin_racer/` | First-party ROS 2 packages; implement the main functions here |
 | `firmware/` | F4 firmware and protocol; documentation only for now |
 | `hardware/` | Inventory, measured geometry, wiring and calibration |
-| `tracks/` | Course reference image and unfilled route data |
-| `tools/`, `tests/` | Runnable offline evaluator, repository checker and evaluator tests |
+| `tracks/` | Course reference image, simulation extraction settings and unfilled surveyed route data |
+| `tools/`, `tests/` | Offline evaluation, course generation, simulation validation, repository checks and unit tests |
 | `experiments/` | Run records, result table and synthetic examples |
 | `data/` | Large local captures and generated results, excluded from Git |
 | `vendor_ws/` | Separate vendor driver workspace; v0.14.4 built locally; point cloud display confirmed |
-| `simulation/` | Usage and validation for sensor, ground-contact and vehicle-motion simulation |
+| `simulation/` | Usage and validation for the competition course, sensors, ground contact and vehicle motion |
 | `docs/` | Technical docs, contribution guide and changelog; plans in `planning/` |
 
 The root is also the colcon workspace root. `build/`, `install/` and `log/` are generated build outputs. `*.template.yaml` files are specification forms, not runtime ROS parameters.

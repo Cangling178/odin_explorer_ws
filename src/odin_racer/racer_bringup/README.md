@@ -31,3 +31,7 @@ See the [simulation guide](../../../simulation/README.md#ros2_control-vehicle-mo
 Onboard Odin output is enabled by default; append sensors:=false for base-only tests.
 sensor_targets:=true adds known fixtures. The camera requires rendering even with gui:=false;
 see [onboard sensors](../../../simulation/README.md#onboard-odin-sensors) for interfaces and validation.
+
+Append `course:=competition` for the [competition drawing scene](../../../simulation/COMPETITION_COURSE.md);
+the default `course:=empty` preserves the test floor. `course_overview:=true` adds an inspection camera.
+Competition mode rejects sensor_targets.

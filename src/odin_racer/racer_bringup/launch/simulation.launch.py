@@ -24,7 +24,9 @@ def start(context):
         LaunchConfiguration("contact_config").perform(context),
         sensors=IfCondition(LaunchConfiguration("sensors")).evaluate(context),
         sensor_targets=IfCondition(LaunchConfiguration("sensor_targets")).evaluate(context),
-        sensor_config=LaunchConfiguration("sensor_config").perform(context))
+        sensor_config=LaunchConfiguration("sensor_config").perform(context),
+        course=LaunchConfiguration("course").perform(context),
+        course_overview=IfCondition(LaunchConfiguration("course_overview")).evaluate(context))
 
     def cleanup(context):
         directory.cleanup()
@@ -62,6 +64,10 @@ def generate_launch_description():
         DeclareLaunchArgument("sensors", default_value="true", description="Enable onboard Odin sensor output"),
         DeclareLaunchArgument("sensor_targets", default_value="false", description="Add known sensor test fixtures"),
         DeclareLaunchArgument("sensor_config", default_value=str(share/"config/odin_sensors.yaml")),
+        DeclareLaunchArgument("course", default_value="empty", choices=["empty", "competition"],
+                              description="Flat test world or competition drawing reconstruction"),
+        DeclareLaunchArgument("course_overview", default_value="false",
+                              description="Enable a fixed overhead inspection camera in the competition world"),
         DeclareLaunchArgument("controllers", default_value=str(control/"config/simulation_controllers.yaml")),
         DeclareLaunchArgument("contact_config", default_value=str(share/"config/ground_contact.yaml")),
         OpaqueFunction(function=start),

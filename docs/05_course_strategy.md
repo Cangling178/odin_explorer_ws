@@ -10,6 +10,10 @@ crossing, several tight turns and a lower sequence of S-bends. The image has
 cropping and unknown print/capture scaling. No driveable coordinates have been
 generated from it. Confirm line width, route direction and start/finish physically.
 
+The [Gazebo drawing reconstruction](../simulation/COMPETITION_COURSE.md) now renders the line
+for perception development. It provides no ordered driveable trajectory, surveyed calibration
+or confirmed crossing branch sequence.
+
 ## Selected sensing mode
 
 The owner instructed us to treat prior mapping, preloaded routes and camera

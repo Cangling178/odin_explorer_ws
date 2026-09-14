@@ -9,10 +9,18 @@ import yaml
 
 from .contact_world import build_world, element
 from .sensor_world import add_odin_sensors, add_sensor_targets, load_sensor_config
+from .course_world import add_competition_course
 
 
 def build_drive_resources(share, controller_config, output_directory, contact_config=None,
-                          sensors=True, sensor_targets=False, sensor_config=None):
+                          sensors=True, sensor_targets=False, sensor_config=None,
+                          course="empty", course_overview=False):
+    if course not in ("empty", "competition"):
+        raise ValueError("course must be empty or competition")
+    if course == "competition" and sensor_targets:
+        raise ValueError("sensor_targets are for the empty world; disable them for the competition course")
+    if course_overview and course != "competition":
+        raise ValueError("course_overview requires course=competition")
     share, output = Path(share), Path(output_directory)
     robot_xml = xacro.process_file(str(share/"urdf/robot.urdf.xacro"), mappings={"sim_control": "true"}).toxml()
     robot = ET.fromstring(robot_xml)
@@ -48,6 +56,8 @@ def build_drive_resources(share, controller_config, output_directory, contact_co
                          "/sim/racer/odin1")
     if sensor_targets:
         add_sensor_targets(sdf.find("world"))
+    if course == "competition":
+        add_competition_course(sdf.find("world"), share, overview=course_overview)
     plugin = element(model, "plugin", name="gazebo_ros2_control", filename="libgazebo_ros2_control.so")
     element(plugin, "robot_param", "robot_description")
     element(plugin, "robot_param_node", "/sim/racer/robot_state_publisher")

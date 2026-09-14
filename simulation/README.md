@@ -6,6 +6,10 @@ See [component simulation scope and hardware differences](COMPONENT_SIMULATION.m
 for modeled behavior and approximations by component, and the [model gap list](MODEL_GAPS_TEMP.md)
 for follow-up priorities.
 
+The complete competition drawing is available as `course:=competition`; see
+[course launch, scale and validation](COMPETITION_COURSE.md). This is an image reconstruction;
+autonomous line tracking is not implemented.
+
 The current backend is Gazebo Classic 11 / ROS 2 Humble. Standalone Odin sensor
 outputs, chassis contact using the existing masses, and basic ros2_control motion
 have been validated. Long-term simulator selection awaits the target ROS/JetPack
@@ -287,6 +291,8 @@ simulated second. Measure transport and latency again across machines or DDS imp
 | `sensors` | true; false runs only the base, suitable for motion tests without rendering |
 | `sensor_config` | Shared odin_sensors.yaml; override vehicle settings and restart |
 | `sensor_targets` | false; true adds a red forward box and blue ground marker for validation |
+| `course` | empty; competition selects the reference track and rejects sensor_targets |
+| `course_overview` | false; true enables a fixed inspection camera in the competition world |
 | `gui` | true; false closes the window only, camera still requires a working DISPLAY/rendering environment |
 
 Use a fresh dedicated world with no other command publishers. Validation actively moves
@@ -327,4 +333,5 @@ red-target bound error was about 3.13 px and ground-marker error about 3.63 px. 
 turn-rate mean absolute error between IMU and truth was below 0.0002 rad/s in both directions.
 Measured real-time factor was about 0.62, below real time, for this computer/rendering/subscription
 load. Marker visibility does not establish the complete near-ground view or real black-line
-visibility. Black-line scenes, occlusion/frame-loss tests and algorithm closure remain pending.
+visibility. The [competition drawing scene](COMPETITION_COURSE.md) now has an initial-straight
+projection check; complete-course visibility, occlusion/frame-loss tests and algorithm closure remain pending.

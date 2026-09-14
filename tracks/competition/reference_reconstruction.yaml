@@ -1,0 +1,16 @@
+schema_version: 1
+status: image_reconstruction_not_surveyed
+source: tracks/reference/course_reference.jpg
+# Pixel rectangle [left, top, right_exclusive, bottom_exclusive].
+# Board corners are read from the gray rectangle, excluding dimension arrows.
+board_crop_px: [9, 90, 859, 728]
+board_size_m: [2.0, 1.5]
+black_max_channel: 110
+black_max_chroma: 65
+# Repair tiny holes where red dimension dashes overprint the black stroke.
+max_annotation_hole_area_px: 80
+closing_kernel_px: 3
+# Debug location on the top straight, looking right in the reference image.
+# This is NOT an official start or traversal direction.
+spawn_pixel: [180.0, 153.0]
+spawn_yaw_rad: 0.0

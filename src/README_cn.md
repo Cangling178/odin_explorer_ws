@@ -26,6 +26,8 @@
 | 文件 | 功能 |
 | --- | --- |
 | [simulation.launch.py](odin_racer/racer_bringup/launch/simulation.launch.py) | ros2_control 整车运动仿真 |
+| [course_world.py](odin_racer/racer_description/racer_description/course_world.py) | 比赛参考图赛道与可选俯视相机，通过 course:=competition 加载 |
+| [validate_competition_course.py](../tools/validate_competition_course.py) | 赛道图像投影、传感器与短距离运动验证 |
 | [preview.launch.py](odin_racer/racer_bringup/launch/preview.launch.py) | 用户启动入口，组合模型预览 |
 | [模型预览实现](odin_racer/racer_description/launch/preview.launch.py) | 发布模型与静止关节状态 |
 | [robot.urdf.xacro](odin_racer/racer_description/urdf/robot.urdf.xacro) | CAD 与简化装配、估算惯性、碰撞及可选仿真控制接口 |
