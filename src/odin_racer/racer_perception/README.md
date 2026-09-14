@@ -2,20 +2,10 @@
 
 English | [Chinese](README_cn.md)
 
-Local visual line observations and branch candidates.
+Local visual black-line detection and metric ground centerlines.
 
-## Status
+C++17 node `line_perception` is implemented with algorithm logic separate from ROS plumbing.
+Runtime parameters are in `config/line_perception.yaml`; `*.template.yaml` remain design specifications.
 
-Planned: ground projection, line candidates, confidence and invalid-data semantics. No trained model or detector is included.
-
-## Responsibility and acceptance
-
-Backlog: VIS-001. See the root architecture and interface documents.
-This package currently installs assets/documentation through ament_cmake.
-A successful build is not evidence that a planned subsystem runs.
-
-## Configuration
-
-Any `*.template.yaml` is a specification form, not a live ROS parameter file.
-Add runtime dependencies, executables and tested parameters when implementing
-the component. Keep vendor code and large recordings outside this package.
+Implementation, topics, parameters, launch and tests: [visual line following](../../../simulation/LINE_FOLLOWING.md).
+Full-course routing, crossing selection, hardware calibration and F4 integration remain pending.

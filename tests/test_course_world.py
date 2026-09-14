@@ -9,6 +9,7 @@ import unittest
 import xml.etree.ElementTree as ET
 
 import numpy as np
+import cv2
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,9 +17,29 @@ SHARE = ROOT/'src/odin_racer/racer_description'
 CONTROL = ROOT/'src/odin_racer/racer_control/config/simulation_controllers.yaml'
 sys.path.insert(0, str(SHARE))
 from racer_description.drive_world import build_drive_resources
+from racer_description.course_world import LINE_SCENES
+from racer_description.course_texture import fixed_width_mesh
 
 
 class CourseWorldTests(unittest.TestCase):
+    def test_scaled_map_keeps_physical_stroke_width_and_connectivity(self):
+        asset = SHARE/'meshes/competition_course'
+        source = cv2.imread(str(asset/'course.png'), cv2.IMREAD_GRAYSCALE)
+        source_components = cv2.connectedComponents((source < 128).astype(np.uint8))[0]
+        for scale in (2.0, 2.5, 4.0):
+            with self.subTest(scale=scale), tempfile.TemporaryDirectory() as directory:
+                mesh = fixed_width_mesh(asset, directory, [2*scale, 1.5*scale], .02115987460815047)
+                image = cv2.imread(str(Path(directory)/'course_fixed_width.png'), cv2.IMREAD_GRAYSCALE)
+                self.assertTrue(mesh.exists())
+                self.assertEqual(cv2.connectedComponents((image < 128).astype(np.uint8))[0], source_components)
+                # Measure independent horizontal/vertical straight cross sections.
+                pitch_y = 1.5*scale/image.shape[0]
+                pitch_x = 2*scale/image.shape[1]
+                horizontal = np.count_nonzero(image[:400, 800] < 128)*pitch_y
+                vertical = np.count_nonzero(image[400, :600] < 128)*pitch_x
+                self.assertAlmostEqual(horizontal, .02115987460815047, delta=2*pitch_y)
+                self.assertAlmostEqual(vertical, .02115987460815047, delta=2*pitch_x)
+
     def build(self, **options):
         with tempfile.TemporaryDirectory() as directory:
             _, path = build_drive_resources(SHARE, CONTROL, directory, **options)
@@ -68,7 +89,22 @@ class CourseWorldTests(unittest.TestCase):
         self.assertEqual(len(world.findall('.//sensor')), 1)
         config = yaml.safe_load((SHARE/'config/competition_course.yaml').read_text())
         xyzrpy = np.fromstring(world.findtext("model[@name='odin_racer']/pose"), sep=' ')
-        np.testing.assert_allclose(xyzrpy[[0, 1, 5]], [config[k] for k in ('spawn_x_m', 'spawn_y_m', 'spawn_yaw_rad')])
+        np.testing.assert_allclose(xyzrpy[[0, 1, 5]],
+                                   [2*config['spawn_x_m'], 2*config['spawn_y_m'], config['spawn_yaw_rad']])
+        mesh = world.find("model[@name='competition_course']/link/visual/geometry/mesh")
+        np.testing.assert_allclose(np.fromstring(mesh.findtext('scale'), sep=' '), [2, 2, 1])
+
+    def test_analytic_line_fixtures_preserve_physics(self):
+        empty = self.build(sensors=False)
+        for kind in LINE_SCENES:
+            world = self.build(course=kind, sensors=False)
+            self.assertEqual(ET.tostring(empty.find('physics')), ET.tostring(world.find('physics')))
+            self.assertEqual(len(empty.findall('.//collision')), len(world.findall('.//collision')))
+            board = world.find("model[@name='line_test_course']")
+            self.assertEqual(board.findall('.//collision'), [])
+            pose = np.fromstring(world.findtext("model[@name='odin_racer']/pose"), sep=' ')
+            np.testing.assert_allclose(pose[[0, 1, 5]], [0, -.035, -.08])
+            self.assertIsNone(world.find("model[@name='competition_course']"))
 
     def test_reject_mixed_scenes(self):
         for options in ({'course': 'unknown'}, {'course': 'competition', 'sensor_targets': True}, {'course_overview': True}):

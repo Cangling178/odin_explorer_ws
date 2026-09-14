@@ -2,7 +2,12 @@
 
 English | [Chinese](README_cn.md)
 
+2026-09-14 update: [C++ single-branch visual tracking](../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
 Maintain milestones, tasks, risks and decisions here. Build evidence is in [validation](VALIDATION.md). Technical details remain in the [documentation](../README.md).
+
+Isolated simulation acceptance passed 42/42 tracking and 12/12 fault trials; see [delivered results](../../experiments/isolated_line/RESULTS.md).
+The competition map defaults to scale 2 (4 by 3 m) with about 21.2 mm stroke width; full-course routing, crossing selection and hardware dependencies remain pending.
 
 ## Milestones
 
@@ -11,7 +16,7 @@ Only M0 has passed its acceptance gate; M1-M8 remain incomplete. Mechanical mode
 the local vendor-driver build and initial point cloud check, and basic motion simulation
 have documented progress. These partial results do not establish hardware bench or
 autonomous line-following acceptance. SIM-001 remains in progress: onboard sensors and the competition
-drawing scene are integrated; algorithm closure and replay are next. Survey and route order remain unconfirmed.
+drawing scene are integrated; full-course closure and replay are next. Survey and route order remain unconfirmed.
 
 | Milestone | Deliverable | Exit evidence | Depends on |
 | --- | --- | --- | --- |
@@ -48,14 +53,14 @@ needs evidence before Done, not just a directory or a successful empty build.
 | CAL-001 | P0 | Calibrate wheels, extrinsics and timestamps | Blocked | HW-001, SENS-001; residual report |
 | LOC-001 | P1 | Implement continuous local state and TF authority | Blocked | CAL-001; drift and reset tests |
 | TRACK-001 | P0 | Survey course and confirm traversal order | Blocked | RULE-001; ordered metric route |
-| VIS-001 | P1 | Extract line candidates with confidence | Blocked | SENS-002; recorded lighting cases |
+| VIS-001 | P1 | Extract line candidates with confidence | In progress (simulation; hardware blocked) | SENS-002; recorded lighting cases |
 | ROUTE-001 | P1 | Add progress-constrained crossing selection | Blocked | TRACK-001, VIS-001; both crossing visits |
-| CTRL-001 | P1 | Establish low-speed tracking baseline | Blocked | BASE-002, CAL-001; independent line error |
+| CTRL-001 | P1 | Establish low-speed tracking baseline | In progress (simulation; hardware blocked) | BASE-002, CAL-001; independent line error |
 | EVAL-001 | P1 | Implement synchronized independent measurement | Todo | Ground-truth calibration and timing uncertainty |
 | EVAL-002 | P1 | Export associated errors and report real trials | Blocked | EVAL-001; no invalid-data masking |
 | SPEED-001 | P1 | Add curvature and braking speed limits | Blocked | Accurate full-route baseline |
 | RACE-001 | P1 | Implement mode/state manager and race launch | Blocked | Healthy-device and route gates enforced |
-| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Basic motion and onboard image/cloud/IMU validated; [competition drawing scene](../../simulation/COMPETITION_COURSE.md) passes initial-straight projection and short motion; unknown masses deferred, black-line closure/replay pending |
+| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Basic motion and onboard image/cloud/IMU validated; [competition drawing scene](../../simulation/COMPETITION_COURSE.md) passes initial-straight projection and short motion; unknown masses deferred, single-branch C++ closure implemented; full-route closure/replay pending |
 | NAV-001 | P2 | Evaluate optional Nav2 mode | Todo | Separate scope; shared command gate |
 
 For each started item add: owner, branch, requirement IDs, design note, validation
@@ -64,7 +69,7 @@ into a dated milestone report when the table becomes difficult to scan.
 
 Simulation prototypes for VIS-001/CTRL-001 can now start: detect the line in onboard images,
 project ground points using CameraInfo/TF, then close straight/simple-curve tracking at about
-0.05 m/s with stops on low confidence or image timeout. These algorithms are not implemented;
+0.05 m/s with stops on low confidence or image timeout. The C++ single-branch algorithms are implemented;
 hardware acceptance dependencies in the table remain. IMU attitude compensation can follow,
 and clouds are not required for the planar-line prototype. Truth is only for independent evaluation.
 Full laps still depend on TRACK-001/ROUTE-001 for ordered routes, branch confirmation and tight-turn feasibility.
@@ -107,3 +112,9 @@ risk only with a test or resolved rule, not with a proposed mitigation alone.
 
 Motor/encoder details, exact F4 board, driver/transport, start/direction and
 precise judging limits remain unresolved. Do not infer approval from elapsed time.
+
+## C++ tracking development — 2026-09-14
+
+Owner: this Codex implementation; implementation in the current workspace. The user selected C++ runtime nodes.
+VIS-001/CTRL-001 now have a flat-ground single-branch prototype; [tests and limits](../../simulation/LINE_FOLLOWING.md).
+This does not close hardware M2/M3 dependencies or TRACK-001/ROUTE-001. Crossing, disturbance and replay matrices follow.

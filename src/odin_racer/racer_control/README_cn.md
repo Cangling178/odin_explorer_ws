@@ -2,24 +2,12 @@
 
 [English](README.md) | 简体中文
 
-路径跟踪、运行状态与指令控制。
+低速路径跟踪、显式使能与指令失效停车。
 
-## 状态
+已实现 C++17 节点 `line_controller`，算法和 ROS 接口分离。运行参数为 `config/line_controller.yaml`；
+`*.template.yaml` 仍是设计规格表，不能作为运行参数。
 
-计划：低速基线、误差反馈、有界指令和模式仲裁。没有自主速度发布者。
+实现、话题、参数、启动与测试命令见[低速视觉循线](../../../simulation/LINE_FOLLOWING_cn.md)。
+完整比赛路线、交叉点选择、实车标定及 F4 接入仍待完成。
 
-## 职责与验收
-
-任务编号：CTRL-001, RACE-001。参见根目录的架构与接口文档。
-本包目前通过 ament_cmake 安装资源/文档。构建成功不代表规划中的子系统已经可以运行。
-
-## 配置
-
-所有 `*.template.yaml` 都是规格表，不是运行中的 ROS 参数文件。实现组件时再添加运行依赖、可执行程序和经过测试的参数。厂商代码和大型录制数据不放在本包中。
-
-## 仿真差速控制
-
-已提供 config/simulation_controllers.yaml：100 Hz ros2_control 管理器、轮状态广播器、
-差速控制器和 0.25 s 指令超时。轮径/轮距在启动时从机器人模型填入；有效轮距修正仅用于仿真。
-这是可用的仿真底盘速度控制配置，路径跟踪、比赛状态和实车通信仍未实现。
-启动及验证见[仿真说明](../../../simulation/README_cn.md#ros2_control-整车运动仿真)。
+已有 `config/simulation_controllers.yaml` 保留 ros2_control 差速底盘、轮状态广播器与底层指令超时。

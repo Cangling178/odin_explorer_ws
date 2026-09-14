@@ -2,6 +2,8 @@
 
 from pathlib import Path
 import tempfile
+import yaml
+from racer_description.course_world import LINE_SCENES
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -26,6 +28,7 @@ def start(context):
         sensor_targets=IfCondition(LaunchConfiguration("sensor_targets")).evaluate(context),
         sensor_config=LaunchConfiguration("sensor_config").perform(context),
         course=LaunchConfiguration("course").perform(context),
+        course_parameters=yaml.safe_load(LaunchConfiguration("course_parameters").perform(context)),
         course_overview=IfCondition(LaunchConfiguration("course_overview")).evaluate(context))
 
     def cleanup(context):
@@ -50,7 +53,8 @@ def start(context):
              parameters=[{"robot_description": description, "use_sim_time": True}],
              remappings=[("/tf", "/sim/racer/tf"), ("/tf_static", "/sim/racer/tf_static")], output="screen"),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(gazebo/"launch/gazebo.launch.py")),
-                                 launch_arguments={"world": str(world), "gui": LaunchConfiguration("gui")}.items()),
+                                 launch_arguments={"world": str(world), "gui": LaunchConfiguration("gui"),
+                                                   "params_file": LaunchConfiguration("gazebo_params")}.items()),
         RegisterEventHandler(OnProcessExit(target_action=spawner, on_exit=check_spawner)),
         spawner,
     ]
@@ -61,11 +65,13 @@ def generate_launch_description():
     control = Path(get_package_share_directory("racer_control"))
     return LaunchDescription([
         DeclareLaunchArgument("gui", default_value="true"),
+        DeclareLaunchArgument("gazebo_params", default_value=""),
         DeclareLaunchArgument("sensors", default_value="true", description="Enable onboard Odin sensor output"),
         DeclareLaunchArgument("sensor_targets", default_value="false", description="Add known sensor test fixtures"),
         DeclareLaunchArgument("sensor_config", default_value=str(share/"config/odin_sensors.yaml")),
-        DeclareLaunchArgument("course", default_value="empty", choices=["empty", "competition"],
+        DeclareLaunchArgument("course", default_value="empty", choices=["empty", "competition", *LINE_SCENES],
                               description="Flat test world or competition drawing reconstruction"),
+        DeclareLaunchArgument("course_parameters", default_value="{}"),
         DeclareLaunchArgument("course_overview", default_value="false",
                               description="Enable a fixed overhead inspection camera in the competition world"),
         DeclareLaunchArgument("controllers", default_value=str(control/"config/simulation_controllers.yaml")),

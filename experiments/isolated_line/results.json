@@ -1,0 +1,191 @@
+{
+  "complete": true,
+  "passed": true,
+  "tracking": {
+    "passed": 42,
+    "total": 42
+  },
+  "faults": {
+    "passed": 12,
+    "total": 12
+  },
+  "one_binary_version": true,
+  "source_snapshot_matches_workspace": true,
+  "missing": [],
+  "scenes": {
+    "line_straight": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 17.531983178084825,
+      "worst_full_p95_mm": 34.807181878917255,
+      "worst_full_max_mm": 35.00015216665204,
+      "worst_tail_rms_mm": 3.7258341844958114,
+      "worst_swept_bound_mm": 185.7342938437318
+    },
+    "line_arc": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 13.534064895395115,
+      "worst_full_p95_mm": 34.17856213802214,
+      "worst_full_max_mm": 35.00308992123955,
+      "worst_tail_rms_mm": 5.411529053924168,
+      "worst_swept_bound_mm": 212.073578270853
+    },
+    "line_left": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 17.054171571327355,
+      "worst_full_p95_mm": 34.92621373687538,
+      "worst_full_max_mm": 35.00308538374486,
+      "worst_tail_rms_mm": 7.540401525798185,
+      "worst_swept_bound_mm": 212.08452384671057
+    },
+    "line_right": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 16.849712877478503,
+      "worst_full_p95_mm": 34.72932922585116,
+      "worst_full_max_mm": 35.00293251149207,
+      "worst_tail_rms_mm": 6.201676543384408,
+      "worst_swept_bound_mm": 212.20338766502385
+    },
+    "line_s": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 17.449936314419077,
+      "worst_full_p95_mm": 34.69775392424795,
+      "worst_full_max_mm": 35.10524206802281,
+      "worst_tail_rms_mm": 13.858457619265971,
+      "worst_swept_bound_mm": 213.5047393553614
+    },
+    "line_corner_left": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 29.586472961994026,
+      "worst_full_p95_mm": 65.00208845995981,
+      "worst_full_max_mm": 75.46482933233567,
+      "worst_tail_rms_mm": 43.40062599422621,
+      "worst_swept_bound_mm": 220.31420262312713
+    },
+    "line_corner_right": {
+      "passed": 6,
+      "total": 6,
+      "worst_full_rms_mm": 29.988934501480895,
+      "worst_full_p95_mm": 66.77290310295602,
+      "worst_full_max_mm": 78.48198765821823,
+      "worst_tail_rms_mm": 44.46798411556818,
+      "worst_swept_bound_mm": 222.2782446890453
+    }
+  },
+  "failed_trials": [],
+  "conditions": "engineering_simulation_not_official_competition_or_hardware",
+  "acceptance_sha256": "b4bc6d3508e515f5e6ecc3f5c7b8a63cbc82924e364bf7653674888e36e466f8",
+  "binary_sha256": {
+    "racer_perception": "3ce86e1ae77c89175ec44d86c404476601269443d4b26adde1363092a5d740b6",
+    "racer_control": "9c97305f35390d8bf2659590c5b0be4cdeec01f1c8b52227484d293767845d67"
+  },
+  "max_observation_age_s": 0.21,
+  "max_command_acceleration": {
+    "v": 0.15000000000001304,
+    "w": 0.8000000000000712
+  },
+  "fault_cases": [
+    {
+      "case": "RUNNING_drop",
+      "kind": "drop",
+      "phase": "RUNNING",
+      "request_delay_s": 0.29000000000000004,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "RUNNING_blank",
+      "kind": "blank",
+      "phase": "RUNNING",
+      "request_delay_s": 0.29000000000000004,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "RUNNING_tf",
+      "kind": "tf",
+      "phase": "RUNNING",
+      "request_delay_s": 0.3999999999999999,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "RUNNING_odom",
+      "kind": "odom",
+      "phase": "RUNNING",
+      "request_delay_s": 0.16999999999999993,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "APPROACH_drop",
+      "kind": "drop",
+      "phase": "APPROACH",
+      "request_delay_s": 0.29000000000000004,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "APPROACH_blank",
+      "kind": "blank",
+      "phase": "APPROACH",
+      "request_delay_s": 0.34999999999999964,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "APPROACH_tf",
+      "kind": "tf",
+      "phase": "APPROACH",
+      "request_delay_s": 0.34999999999999964,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "APPROACH_odom",
+      "kind": "odom",
+      "phase": "APPROACH",
+      "request_delay_s": 0.17000000000000082,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "TURN_drop",
+      "kind": "drop",
+      "phase": "TURN",
+      "request_delay_s": 0.2699999999999996,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "TURN_blank",
+      "kind": "blank",
+      "phase": "TURN",
+      "request_delay_s": 0.3200000000000003,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "TURN_tf",
+      "kind": "tf",
+      "phase": "TURN",
+      "request_delay_s": 0.370000000000001,
+      "physical_stop": true,
+      "latched": true
+    },
+    {
+      "case": "TURN_odom",
+      "kind": "odom",
+      "phase": "TURN",
+      "request_delay_s": 0.21999999999999886,
+      "physical_stop": true,
+      "latched": true
+    }
+  ],
+  "raw_root": "data/generated/isolated/validated"
+}

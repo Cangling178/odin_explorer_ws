@@ -2,6 +2,8 @@
 
 English | [Chinese](README_cn.md)
 
+2026-09-14 update: [C++ single-branch visual tracking](../../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
 Launch composition and robot operating profiles.
 
 ## Status

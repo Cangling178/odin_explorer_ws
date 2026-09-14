@@ -5,7 +5,7 @@ English | [Chinese](COMPETITION_COURSE_cn.md)
 The complete track has been reconstructed from the supplied [competition drawing](../tracks/reference/course_reference.jpg),
 including straights, the central crossing, loops, tight bends and lower S-bends. It uses the existing
 vehicle physics, ros2_control and onboard Odin image, CameraInfo, cloud and IMU. The scene supports
-black-line perception development; autonomous recognition, branch selection and tracking are not implemented.
+black-line perception development. Single-branch low-speed tracking is implemented; see [line following](LINE_FOLLOWING.md). Full-course routing and crossing selection remain pending.
 
 ## Launch
 
@@ -37,13 +37,13 @@ use RViz Image for display.
 
 | Item | Implementation |
 | --- | --- |
-| Board | 2.00 x 1.50 m white plane, centered at the world origin |
+| Board | Default scale 2: 4.00 x 3.00 m white plane, centered at the world origin; original assets are 2.00 x 1.50 m |
 | Axes | Drawing right = +X, drawing top = +Y, up = +Z |
 | Extraction | Source 905x738; crop `[9,90,859,728]` with exclusive right/bottom bounds; 850x638 texture |
-| Black line | Preserve drawing stroke width; remove dimension text, red annotations and gray border; repair small annotation holes |
-| Pixel scale | About 2.35 mm/px in X/Y; upper straight width about 21.2 mm, estimated from the drawing |
-| Black outer extent | About 1.635 x 1.218 m; not separately warped to force agreement with the red 1.61 x 1.20 m annotations |
-| Initial vehicle pose | `base_link` X about -0.5965 m, Y about 0.6007 m, yaw=0; release height from the contact model |
+| Black line | Source extraction removes text, annotations and borders; runtime redraws the connected skeleton at about 21.2 mm independently of map scale |
+| Pixel scale | Original texture: about 2.35 mm/px in X/Y; runtime uses four-times pixel resolution, about 1.18 mm/px at default map scale 2 |
+| Black outer extent | Original assets: about 1.635 x 1.218 m, not current runtime dimensions; not forced to match red annotations. Runtime scales the centerline independently of stroke width |
+| Initial vehicle pose | `base_link` X about -1.1929 m, Y about 1.2014 m, yaw=0; release height from the contact model |
 | Ground | Black and white areas share existing flat contact/friction; visual at Z=0.2 mm, no added collision |
 
 The white board and black line share one textured mesh, surrounded by gray ground. Physical support
@@ -67,11 +67,15 @@ centerline suitable as hardware ground truth has been generated.
 - [Generated configuration](../src/odin_racer/racer_description/config/competition_course.yaml): scale, estimated width, spawn and provenance status.
 - [World assembly](../src/odin_racer/racer_description/racer_description/course_world.py): inserts the course into the driven vehicle world.
 
-The texture and mesh are checked in; regeneration is unnecessary for normal use. After changing the
+Original texture and mesh are checked in; source extraction is unnecessary for normal use. Runtime uses OpenCV to generate temporary assets with a fixed physical stroke width.
+`course_parameters` accepts `scale` (default 2.0), `line_width` (default about 0.02116 m), and `spawn_x/y/yaw`.
+Default spawn scales with the map; explicit spawn coordinates are world metres and are not scaled again.
+See [line following](LINE_FOLLOWING.md#scaled-map-with-original-nominal-stroke-width) for the corresponding upper-right spawn.
+ After changing the
 specification, regenerate, rebuild and restart:
 
 ```bash
-# Only asset regeneration and image validation need these dependencies.
+# Runtime map repainting, asset generation and image validation need these dependencies.
 sudo apt-get install python3-opencv python3-numpy python3-yaml
 python3 tools/generate_competition_course.py
 ```
@@ -80,6 +84,8 @@ Image extraction is not survey acceptance evidence. Revise scale/width when vect
 
 ## Validation
 
+This historical projection validator reads original asset coordinates. Use `scale: 1.0` below; it does not validate the default scale-2 map.
+
 Start a fresh world in a dedicated ROS domain and Gazebo port without another velocity publisher:
 
 ```bash
@@ -87,7 +93,8 @@ source /opt/ros/humble/setup.bash
 source install/local_setup.bash
 export ROS_DOMAIN_ID=74
 export GAZEBO_MASTER_URI=http://127.0.0.1:11356
-ros2 launch racer_bringup simulation.launch.py course:=competition course_overview:=true gui:=false
+ros2 launch racer_bringup simulation.launch.py course:=competition course_overview:=true gui:=false \
+  course_parameters:='{scale: 1.0}'
 ```
 
 In another terminal with the same ROS/workspace environment and `ROS_DOMAIN_ID=74`:

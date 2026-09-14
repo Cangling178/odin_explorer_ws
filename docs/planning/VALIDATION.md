@@ -94,3 +94,25 @@ This change does not implement line detection or autonomous tracking.
 Pre-commit checks on 2026-09-14 passed: repository structure/language pairs/local links,
 22 unit tests and all ten first-party packages with `colcon build --base-paths src`.
 README, architecture, development workflow, plan and changelog are synchronized.
+
+## Early C++ low-speed visual tracking baseline — 2026-09-14
+
+All 10 packages build; 28 Python tests, 10 C++ tests and 16 ROS input/state checks pass.
+Continuous straight tracking (25 s), arc tracking (40 s), and fault stops pass, with final-window
+lateral RMS about 1.19 mm and 8.04 mm. The competition initial straight separately passes a 3 s
+short-motion check. Full metrics, development failures, parameters and reproduction are in
+[visual tracking validation](../../simulation/LINE_FOLLOWING.md). This is not hardware or full-route acceptance.
+
+## Isolated acceptance and pre-commit verification — 2026-09-14
+
+The frozen version passed 42/42 tracking and 12/12 fault simulation trials across seven isolated scenes;
+see [delivered results](../../experiments/isolated_line/RESULTS.md). This excludes full-course and hardware acceptance.
+Competition-map generation and associated documentation have changed since the freeze;
+perception, control and evaluation algorithms are unchanged apart from whitespace cleanup in a controller header and evaluator script. The competition map now defaults to scale 2
+(4 by 3 m), about 21.2 mm stroke width and a scaled default spawn; the upper-right example preserves its corresponding position and heading.
+
+Fresh pre-commit checks passed: structure/language pairs/local links, 36 Python tests, all 11 ROS packages,
+and 23 colcon test results (21 C++ cases plus two suite results).
+All 17 synthetic ROS checks in `validate_line_controller.py` and 20 arming trials in `validate_arming_clock.py` passed.
+Map tests cover stroke width and connectivity at scales 2, 2.5 and 4, default spawn, and preserved sensors and physics.
+The 54 Gazebo trials were not rerun for this commit; no new full-course tracking acceptance is claimed.

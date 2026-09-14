@@ -54,3 +54,16 @@ git diff --check
 远程 `origin` 已配置为 [GitHub 仓库](https://github.com/Cangling178/odin_racer_ws)，许可见根目录 LICENSE。
 提交时同步中英文文档、验证记录和 [项目计划](planning/README_cn.md)，检查通过后再推送。
 构建产物、厂商源码、录包和 `data/generated/` 报告保持本地保存；复现命令和关键结果写入文档。
+
+## C++ 循线检查
+
+新增运行节点与参数见[低速视觉循线](../simulation/LINE_FOLLOWING_cn.md)。构建后执行：
+
+```bash
+source install/local_setup.bash
+colcon test --base-paths src --packages-select racer_perception racer_control
+colcon test-result --verbose
+python3 tools/validate_line_controller.py
+```
+
+Gazebo 动态循线验证需渲染环境，不在 CI 中执行。纯 ROS 控制器故障验证使用隔离 domain 92，不连接硬件。

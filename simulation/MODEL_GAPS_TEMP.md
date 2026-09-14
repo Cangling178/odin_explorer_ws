@@ -2,6 +2,8 @@
 
 English | [Chinese](MODEL_GAPS_TEMP_cn.md)
 
+2026-09-14 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
 This is a code-state snapshot, not hardware acceptance. Work proceeds from stable
 ground contact and motion to perception integration and then hardware fidelity.
 For modeled behavior and hardware differences by component, see the [component comparison](COMPONENT_SIMULATION.md).
@@ -79,7 +81,7 @@ The timeout is not the complete stopping time. Maximum stage odometry displaceme
 increment error was about 11.3 mm and yaw increment error about 0.0079 rad.
 These are planar simulation results, not hardware positioning accuracy.
 
-F4 communication, race arbitration and line tracking remain
+F4 communication, full race arbitration and ordered-route tracking remain
 unimplemented. PI, effort, contact and effective separation are simulation estimates;
 simulation-time timeout does not replace an independent lower-controller watchdog.
 See [motion guide](README.md#ros2_control-vehicle-motion-simulation) and
@@ -100,7 +102,7 @@ colored markers; real black-line recognition, full view/self-occlusion coverage 
 frame-loss recovery are not covered. See [onboard sensor guide](README.md#onboard-odin-sensors)
 for reproduction and thresholds.
 
-Next validate actual mounting visibility of black lines, connect perception/control,
+Next validate actual mounting visibility of black lines, extend single-branch perception/control,
 and measure end-to-end latency and real-time factor with algorithms running.
 
 ## 5. High priority: Odin installation, extrinsics and view unaccepted
@@ -136,7 +138,7 @@ Bench, onboard sensor and known-target scenes are joined by the [competition dra
 including the complete line, crossing, loops and S-bends. Initial-straight projection and short motion pass.
 This is an unsurveyed image reconstruction without official route order, lighting variations or an occlusion suite.
 Onboard sensor real-time factor is recorded;
-perception-control closure, frame-loss recovery and end-to-end algorithm latency remain unverified. Build straight,
+single-branch closure and frame-loss stops now have tests; full-course behavior and end-to-end timing remain pending. Build straight,
 curve and crossing cases; record repeatable tracking error, success rate, stop
 distance and real-time factor, then disturbances/faults. Results should distinguish
 geometry, perception and control failures.
@@ -154,11 +156,11 @@ screws are not a prerequisite.
 
 1. Existing 877 g aggregation and drop checks complete; unknown masses deferred.
 2. ros2_control straight, turning and stopping checks complete.
-3. Onboard sensors and basic projection checks complete; verify actual mounting visibility and connect algorithms (4-6).
+3. Onboard sensors and basic projection checks complete; verify actual mounting visibility and extend the single-branch baseline (4-6).
 4. Calibrate against hardware and establish track evaluation (7-8).
 5. Refine appearance as needed (9).
 
-Basic motion and onboard sensors are usable; algorithm closure in step 3 remains pending. Hardware equivalence requires subsequent comparison.
+Basic motion, onboard sensors and C++ single-branch algorithm closure are available; full-course acceptance remains pending. Hardware equivalence requires subsequent comparison.
 
 ## Code and records
 

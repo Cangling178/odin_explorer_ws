@@ -4,7 +4,7 @@
 
 已根据仓库的[比赛参考图](../tracks/reference/course_reference.jpg)搭建完整 Gazebo 赛道，
 保留直线、中央交叉点、回环、紧弯和下方连续 S 弯。整车沿用现有动力学、ros2_control 和
-随车 Odin 图像、CameraInfo、点云、IMU。场景可用于开发黑线感知；自主识别、分支选择和循线控制尚未实现。
+随车 Odin 图像、CameraInfo、点云、IMU。已实现单分支低速视觉循线，见[循线说明](LINE_FOLLOWING_cn.md)；完整路线与交叉点选路尚未完成。
 
 ## 启动
 
@@ -35,13 +35,13 @@ ros2 launch racer_bringup simulation.launch.py course:=competition
 
 | 项目 | 当前实现 |
 | --- | --- |
-| 赛板 | 2.00 × 1.50 m 白色平面，中心为世界原点 |
+| 赛板 | 默认2倍比例：4.00 × 3.00 m 白色平面，中心为世界原点；原始资源为2.00 × 1.50 m |
 | 坐标 | 图右为 +X，图上为 +Y，向上为 +Z |
 | 提取 | 原图 905×738；赛板裁剪区域 `[9,90,859,728]`，右/下边界不包含，得到 850×638 纹理 |
-| 黑线 | 保留原图笔画宽度，去掉尺寸文字、红色标注及灰色边框；修补标注覆盖的小孔 |
-| 像素比例 | X/Y 均约 2.35 mm/px；上方直段黑线约 21.2 mm 宽，为图片估计 |
-| 黑线外包络 | 约 1.635 × 1.218 m；与红色 1.61 × 1.20 m 标注没有强制二次缩放对齐 |
-| 默认车体位置 | `base_link` 初始 X≈−0.5965 m、Y≈0.6007 m、yaw=0；释放高度沿用底盘接触模型 |
+| 黑线 | 原始提取去掉文字、标注和边框；默认运行时按连通骨架重绘约21.2 mm线宽，与地图比例独立 |
+| 像素比例 | 原始纹理X/Y均约2.35 mm/px；运行纹理采用4倍像素分辨率，默认2倍地图约1.18 mm/px |
+| 黑线外包络 | 原始资源约1.635 × 1.218 m，非当前运行尺寸；未强制对齐红色标注，运行时中心线随比例缩放、线宽独立 |
+| 默认车体位置 | `base_link` 初始 X≈−1.1929 m、Y≈1.2014 m、yaw=0；释放高度沿用底盘接触模型 |
 | 地面 | 黑白区域共用原有平面接触和摩擦；赛板纹理在 Z=0.2 mm，无额外碰撞体 |
 
 白色底板与黑线一起作为视觉网格加载，外围为灰色地面。物理地面仍为原有 20×20 m 场景平面；
@@ -62,10 +62,13 @@ ros2 launch racer_bringup simulation.launch.py course:=competition
 - [生成配置](../src/odin_racer/racer_description/config/competition_course.yaml)：比例、线宽估计、出生点和来源状态。
 - [场景组装](../src/odin_racer/racer_description/racer_description/course_world.py)：把赛道加入可驱动整车世界。
 
-纹理和网格已入库，运行无需重新提取。修改提取参数后执行以下命令并重新构建、启动：
+原始纹理和网格已入库，运行无需重新提取。默认运行时使用OpenCV生成固定米制线宽的临时纹理及网格引用。
+`course_parameters`支持`scale`（默认2.0）、`line_width`（默认约0.02116 m）和`spawn_x/y/yaw`。
+默认出生点随比例缩放；显式出生坐标为世界米制坐标，不再乘比例。右上角对应位置示例见[循线说明](LINE_FOLLOWING_cn.md#放大地图并保持原线宽)。
+修改提取参数后执行以下命令并重新构建、启动：
 
 ```bash
-# 仅重新生成资源及运行图像验证需要这些依赖。
+# 地图运行时重绘、资源生成及图像验证需要这些依赖。
 sudo apt-get install python3-opencv python3-numpy python3-yaml
 python3 tools/generate_competition_course.py
 ```
@@ -81,7 +84,8 @@ source /opt/ros/humble/setup.bash
 source install/local_setup.bash
 export ROS_DOMAIN_ID=74
 export GAZEBO_MASTER_URI=http://127.0.0.1:11356
-ros2 launch racer_bringup simulation.launch.py course:=competition course_overview:=true gui:=false
+ros2 launch racer_bringup simulation.launch.py course:=competition course_overview:=true gui:=false \
+  course_parameters:='{scale: 1.0}'
 ```
 
 另一终端加载同一 ROS 环境、工作空间和 `ROS_DOMAIN_ID=74` 后执行：
@@ -90,6 +94,7 @@ ros2 launch racer_bringup simulation.launch.py course:=competition course_overvi
 python3 tools/validate_competition_course.py
 ```
 
+此历史投影验证程序读取原始资源坐标，必须使用上面的`scale: 1.0`；它不验收默认2倍地图。
 验证程序在上方直线以 0.08 m/s 指令行驶 1.5 仿真秒后停车；重复验证前重启世界。
 它比较俯视图与地图纹理的黑线重合度，并用 CameraInfo、TF 和停车后的 Gazebo 位姿
 检查随车图像投影；同时检查点云地平面、静止 IMU、传感器频率及短距离前进。

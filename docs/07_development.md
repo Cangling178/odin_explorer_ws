@@ -82,3 +82,16 @@ reproduction commands and key results.
 Contact-model tests additionally require NumPy, PyYAML and xacro from a sourced
 ROS environment; see `tools/requirements-dev.txt`. The evaluator tests themselves
 still use only the Python standard library.
+
+## C++ tracking checks
+
+Runtime nodes and parameters are documented in [visual line following](../simulation/LINE_FOLLOWING.md). After building:
+
+```bash
+source install/local_setup.bash
+colcon test --base-paths src --packages-select racer_perception racer_control
+colcon test-result --verbose
+python3 tools/validate_line_controller.py
+```
+
+Gazebo tracking validation requires rendering and is not run in CI. The synthetic ROS controller fault test uses isolated domain 92 and no hardware.

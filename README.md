@@ -4,12 +4,15 @@ English | [Chinese](README_cn.md)
 
 A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 controller. The goal is accurate, fast tracking of a marked competition course without a dedicated line-tracking module.
 
-**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. Black-line detection, autonomous tracking and hardware control are not implemented.**
+**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. C++ single-branch low-speed visual tracking is now implemented; full-course and hardware control remain pending.**
+
+Isolated simulation acceptance: 42/42 tracking and 12/12 fault trials passed; see [results and scope](experiments/isolated_line/RESULTS.md). The competition map defaults to 4 by 3 m with about 21.2 mm stroke width.
 
 ## Start here
 
 | Task | Entry point |
 | --- | --- |
+| Run C++ visual tracking | [Line following](simulation/LINE_FOLLOWING.md) |
 | Find the main code and module responsibilities | [Source guide](src/README.md) → `src/odin_racer/` |
 | Build and preview the robot model | [Development](docs/07_development.md) |
 | Run the competition course and onboard sensors | [Course launch and validation](simulation/COMPETITION_COURSE.md) |

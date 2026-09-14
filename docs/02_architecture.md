@@ -2,12 +2,14 @@
 
 English | [Chinese](02_architecture_cn.md)
 
+2026-09-14 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
 ## Data and command flow
 
 The diagram shows the target architecture. Available components are model preview,
 the standalone Odin sensor bench, chassis contact and ros2_control motion simulation,
-and offline error evaluation. Onboard sensors are integrated; perception and route tracking nodes,
-race state management and F4 communication remain unimplemented.
+and offline error evaluation. Onboard sensors and C++ single-branch perception/tracking are integrated. Full race
+state management, ordered route selection and F4 communication remain unimplemented.
 See [source navigation](../src/README.md) for package status.
 
 Motion simulation can select the [competition drawing scene](../simulation/COMPETITION_COURSE.md),

@@ -2,3 +2,7 @@
 # Contact tests also need xacro from the sourced ROS 2 environment.
 PyYAML>=6.0,<7
 numpy>=1.21,<3
+
+# Independent image-run evaluation and exported validation plots.
+scipy>=1.8,<2
+matplotlib>=3.5,<4

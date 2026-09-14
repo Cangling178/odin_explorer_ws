@@ -2,6 +2,8 @@
 
 English | [Chinese](COMPONENT_SIMULATION_cn.md)
 
+2026-09-14 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
 Status date: 2026-09-13. Applies to the current Gazebo Classic 11 / ROS 2 Humble
 vehicle motion scene with onboard Odin sensors enabled by default. This document
 describes modeled behavior, approximations and missing hardware effects by component.
@@ -104,7 +106,7 @@ Simplified collision envelopes therefore affect simulated cloud shapes.
 | Competition course | 2.00 x 1.50 m black/white board reconstructed from the drawing, including bends and crossing; camera-visible line | Image-estimated width about 21 mm, not surveyed; visual-only line with flat cloud returns; no official start/finish, route order or penalties |
 | Turning and slip | Contact-based motion with a 1.10 effective-separation correction | Correction applies only to this model, not hardware geometry; real slip trends have not been compared |
 | F4 | The simulated wheel PI loop approximates some execution functions | No F4 firmware, timers, protocol parsing, hardware faults or independent watchdog simulation |
-| Jetson | ROS nodes run on the development computer | No Jetson compute, scheduling, power or thermal-throttling model; perception and autonomous tracking nodes remain unimplemented |
+| Jetson | ROS nodes run on the development computer | No Jetson compute, scheduling, power or thermal-throttling model; C++ single-branch perception/tracking now exist; Jetson timing remains unverified |
 | Communication and time | ROS topics, simulation time and a 0.25 s command timeout | No physical serial/CAN delays, packet loss or device clock offsets; timeout time also pauses with simulation |
 | Battery and driver board | No electrical model | No battery voltage change, voltage sag, driver efficiency, current limiting or undervoltage behavior |
 | Localization output | Differential drive controller computes odometry from wheel positions | No wheel/ODIN1 fused localization; Gazebo truth is only an independent validation input |
@@ -128,7 +130,7 @@ image/cloud/IMU geometry and motion response have passed validation. Full comman
 thresholds, historical metrics and local report locations are in the [simulation guide](README.md).
 
 The [competition drawing scene](COMPETITION_COURSE.md) passes initial-straight overhead/onboard
-projection and short forward-motion checks. Line recognition and autonomous full-course tracking
+projection and short forward-motion checks. Autonomous full-course tracking
 remain absent. With the overview camera enabled, this run received about 333 Hz IMU and 10 Hz
 image/cloud output; 400 Hz in configuration is a target, so use the actual run report.
 

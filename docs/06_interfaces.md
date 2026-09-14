@@ -2,8 +2,15 @@
 
 English | [Chinese](06_interfaces_cn.md)
 
-These are first-party design contracts. No adapter or control node is implemented
-yet, and these names are not claims about the vendor driver's current API.
+2026-09-14 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+
+The isolated-scene implementation uses `racer_interfaces/LineObservation` v0.1.0
+on `/sim/racer/line/observation`. It atomically associates path, image health,
+confidence, corner and exit evidence with the acquisition stamp in `path.header`.
+`local_path` remains a debug view. See [message contract](../src/odin_racer/racer_interfaces/README.md).
+
+These are first-party design contracts. Hardware adaptation remains pending; simulation tracking interfaces are documented above.
+These names are not claims about the vendor driver's current API.
 Prefer standard ROS messages. Add custom messages only when branch/progress
 semantics cannot be expressed unambiguously; document their version first.
 

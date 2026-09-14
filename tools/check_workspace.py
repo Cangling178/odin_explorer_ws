@@ -61,8 +61,8 @@ def main():
                         errors.append(f"{path.relative_to(ROOT)}: broken local link {target}")
         except (ValueError, SyntaxError, ET.ParseError, yaml.YAMLError) as exc:
             errors.append(f"{path.relative_to(ROOT)}: {exc}")
-    if len(manifests) != 10 or len(set(manifests)) != len(manifests):
-        errors.append("expected ten uniquely named first-party packages")
+    if len(manifests) != 11 or len(set(manifests)) != len(manifests):
+        errors.append("expected eleven uniquely named first-party packages")
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
