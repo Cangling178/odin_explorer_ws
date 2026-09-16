@@ -95,6 +95,10 @@ inline Detection detect(const cv::Mat &gray, const cv::Mat &visible, const Grid 
   // horizontal run width: a true right-angle exit is intentionally horizontal.
   cv::Mat distance; cv::distanceTransform(result.mask,distance,cv::DIST_L2,3);
   result.skeleton=thin(result.mask);
+  // Off-board dark floor and chassis shadows must not become a near-line seed.
+  // Remove their thick skeleton before component selection, not after choosing
+  // a seed. Real narrow forks retain their junction and remain ambiguous.
+  result.skeleton.setTo(0, distance > max_width/(2*grid.step));
   const int rows=gray.rows,cols=gray.cols,total=rows*cols;
   auto neighbors = [&](int id) {
     std::vector<int> out; int r=id/cols,c=id%cols;
@@ -129,7 +133,7 @@ inline Detection detect(const cv::Mat &gray, const cv::Mat &visible, const Grid 
   // Pick one near-vehicle connected component. Two plausible near seeds are
   // ambiguity, even when one happens to be closer to the center of the image.
   std::vector<int> candidates;
-  for(int r=0;r<std::min(rows,static_cast<int>(.10/grid.step)+1);++r) for(int c=2;c<cols-2;++c) {
+  for(int r=0;r<std::min(rows,static_cast<int>((.40-grid.near_x)/grid.step)+1);++r) for(int c=2;c<cols-2;++c) {
     if(!result.skeleton.at<uchar>(r,c))continue;
     auto p=grid.point(r,c);
     if(std::abs(p.y) > seed_limit || (hint.valid && cv::norm(p-hint.point)>.10))continue;
@@ -238,7 +242,7 @@ inline Detection detect(const cv::Mat &gray, const cv::Mat &visible, const Grid 
     }
   }
   double width_sum=0;for(auto p:result.points)width_sum+=2*distance.at<float>(std::lround((p.x-grid.near_x)/grid.step),std::lround((grid.half_width-p.y)/grid.step))*grid.step;
-  result.confidence=std::min(1.,length/.30)*std::min(1.,width_sum/result.points.size()/min_width);
+  result.confidence=std::min(1.,length/(2*min_length))*std::min(1.,width_sum/result.points.size()/min_width);
   result.reason="valid";if(result.exits==0)result.exits=1;
   return result;
 }

@@ -2,8 +2,10 @@
 
 English | [Chinese](README_cn.md)
 
+The full-map continuous entry is [competition_lap.launch.py](odin_racer/racer_bringup/launch/competition_lap.launch.py), with C++ `lap_controller` and onboard visual alignment. See [lap guide](../simulation/COMPETITION_LAP.md).
+
 C++ runtime entry: [line_following.launch.py](odin_racer/racer_bringup/launch/line_following.launch.py); [implementation and tests](../simulation/LINE_FOLLOWING.md).
-Main functions belong in packages under `src/odin_racer/`. There is no single `main.py` or race launch yet. Packages marked as planned contain documentation and configuration specifications, not algorithm nodes.
+Main functions belong in packages under `src/odin_racer/`. The complete-map simulation entry point is `competition_lap.launch.py`; there is no hardware race launch yet. Packages marked as planned contain documentation and configuration specifications, not algorithm nodes.
 
 | Package | Responsibility | State |
 | --- | --- | --- |
@@ -14,7 +16,7 @@ Main functions belong in packages under `src/odin_racer/`. There is no single `m
 | [racer_localization](odin_racer/racer_localization/README.md) | Continuous body state and global alignment | Planned subsystem |
 | [racer_perception](odin_racer/racer_perception/README.md) | Local visual line observations and branch candidates | C++ black-line detection, FishPoly ground projection and invalid observations |
 | [racer_trajectory](odin_racer/racer_trajectory/README.md) | Ordered route progress and feasible speed profiles | Planned subsystem |
-| [racer_control](odin_racer/racer_control/README.md) | Path tracking, operating state and command gating | C++ adaptive Pure Pursuit, bounded single-corner states and latched fault stops; full race state pending |
+| [racer_control](odin_racer/racer_control/README.md) | Path tracking, operating state and command gating | C++ adaptive Pure Pursuit, bounded single-corner states and latched fault stops; continuous lap states implemented; hardware race integration pending |
 | [racer_navigation](odin_racer/racer_navigation/README.md) | Optional Nav2 integration | Planned subsystem |
 | [racer_bringup](odin_racer/racer_bringup/README.md) | Launch composition and robot operating profiles | Preview and vehicle motion simulation |
 | [racer_evaluation](odin_racer/racer_evaluation/README.md) | Race recording and metric export integration | Planned subsystem |

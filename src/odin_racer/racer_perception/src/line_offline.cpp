@@ -4,12 +4,13 @@
 #include <fstream>
 #include <iostream>
 int main(int argc,char **argv) {
-  if(argc!=3) {std::cerr<<"Usage: line_offline ground_gray.png output_prefix\n";return 2;}
+  if(argc!=3 && argc!=5) {std::cerr<<"Usage: line_offline ground_gray.png output_prefix [near_x half_width]\n";return 2;}
   cv::Mat gray=cv::imread(argv[1],cv::IMREAD_GRAYSCALE);
   racer_perception::Grid grid;
+  if(argc==5) {grid.near_x=std::stod(argv[3]);grid.half_width=std::stod(argv[4]);grid.validate();}
   if(gray.empty()||gray.rows!=grid.rows()||gray.cols!=grid.cols())return 2;
   cv::Mat visible(gray.size(),CV_8UC1,cv::Scalar(255));
-  auto d=racer_perception::detect(gray,visible,grid,65,.008,.05,.18,.12);
+  auto d=racer_perception::detect(gray,visible,grid,65,.008,.05,.10,.45);
   std::string prefix=argv[2];cv::imwrite(prefix+"_mask.png",d.mask);cv::imwrite(prefix+"_skeleton.png",d.skeleton);
   cv::Mat debug;cv::cvtColor(gray,debug,cv::COLOR_GRAY2BGR);
   auto pixel=[&](cv::Point2d p){return cv::Point(std::lround((grid.half_width-p.y)/grid.step),std::lround((p.x-grid.near_x)/grid.step));};

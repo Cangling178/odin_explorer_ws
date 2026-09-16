@@ -51,7 +51,7 @@ class Evaluator:
         self.s = np.r_[0, np.cumsum(self.length)]
         self.tree = cKDTree(self.path)
         self.footprint = footprint_points
-        self.start_s = self.project([0,0])[1]
+        self.start_s = self.project(fixture.get('evaluation_start', [0,0]))[1]
         self.end_s = self.project(fixture['end']['center'])[1]
 
     def project(self, xy):

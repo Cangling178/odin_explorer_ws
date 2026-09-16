@@ -2,16 +2,21 @@
 
 [English](README.md) | 简体中文
 
+当前整圈基线：0.05 m/s 同配置独立启动 3/3 次通过；0.10 m/s 单次通过，圈时 197.43 s。默认仍为 0.05 m/s，0.20 m/s 尚未测试且超过当前控制器参数上限。见[完整结果](experiments/competition_lap/RESULTS_cn.md)。
+
 基于 ROS 2 的四轮循迹小车项目：Jetson Orin Nano + ODIN1 + F4 下位机。目标是不使用专用循迹模块，准确、快速地沿比赛标线行驶。
 
-**已具备仿真循线开发基础：模型预览、比赛参考图赛道、随车传感器、ros2_control 底盘控制和离线评测可运行。已新增 C++ 单分支低速视觉循线；完整路线与实车控制待实现。**
+**已具备仿真循线开发基础：模型预览、比赛参考图赛道、随车传感器、ros2_control 底盘控制和离线评测可运行。已实现 C++ 单分支低速视觉循线及预录路线辅助的完整地图连续整圈仿真；实车控制与正式比赛验收待完成。**
 
-独立仿真验收：42/42次跟踪、12/12次故障测试通过，见[结果与范围](experiments/isolated_line/RESULTS_cn.md)。比赛地图默认4×3 m、约21.2 mm线宽。
+完整地图连续整圈：185/185检查点，367.29 s，中途不停；见[整圈验收](experiments/competition_lap/RESULTS_cn.md)。
+
+历史冻结版本独立仿真验收：42/42次跟踪、12/12次故障测试通过，见[结果与范围](experiments/isolated_line/RESULTS_cn.md)。比赛地图默认4×3 m、约21.2 mm线宽。
 
 ## 从哪里开始
 
 | 要做什么 | 入口 |
 | --- | --- |
+| 运行完整地图连续整圈 | [整圈循迹](simulation/COMPETITION_LAP_cn.md) |
 | 运行 C++ 视觉循线 | [循线实现与验证](simulation/LINE_FOLLOWING_cn.md) |
 | 找主要代码、了解模块职责 | [源码导航](src/README_cn.md) → `src/odin_racer/` |
 | 构建工程、启动模型预览 | [开发流程](docs/07_development_cn.md) |

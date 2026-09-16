@@ -9,6 +9,7 @@
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <opencv2/imgproc.hpp>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <functional>
 #include <sstream>
@@ -23,6 +24,8 @@ public:
 
   void Load(gazebo::sensors::SensorPtr sensor, sdf::ElementPtr sdf) override
   {
+    // Avoid a large OpenCV worker pool competing with Gazebo sensor threads.
+    cv::setNumThreads(1);
     node_ = gazebo_ros::Node::Get(sdf);
     try {
       sensor_ = std::dynamic_pointer_cast<gazebo::sensors::CameraSensor>(sensor);
@@ -111,15 +114,22 @@ private:
                unsigned depth, const std::string &)
   {
     if (depth != 3 || !data) return;
+    const auto begin = std::chrono::steady_clock::now();
     cv::Mat source(height, width, CV_8UC3, const_cast<unsigned char *>(data));
     cv::Mat output(info_.height, info_.width, CV_8UC3, image_.data.data());
     cv::remap(source, output, map1_, map2_, cv::INTER_LINEAR, cv::BORDER_CONSTANT);
     const auto time = sensor_->LastMeasurementTime();
+    const double stamp = time.Double();
+    if (last_frame_stamp_ > 0 && stamp-last_frame_stamp_ > .15)
+      RCLCPP_WARN(node_->get_logger(), "FishPoly source frame gap %.3f simulated seconds", stamp-last_frame_stamp_);
+    last_frame_stamp_ = stamp;
     image_.header.stamp.sec = time.sec;
     image_.header.stamp.nanosec = time.nsec;
     info_.header.stamp = image_.header.stamp;
     image_pub_->publish(image_);
     info_pub_->publish(info_);
+    const double elapsed = std::chrono::duration<double>(std::chrono::steady_clock::now()-begin).count();
+    if (elapsed > .1) RCLCPP_WARN(node_->get_logger(), "FishPoly frame processing/publish took %.3f s", elapsed);
   }
 
   gazebo_ros::Node::SharedPtr node_;
@@ -127,6 +137,7 @@ private:
   sensor_msgs::msg::CameraInfo info_;
   sensor_msgs::msg::Image image_;
   cv::Mat map1_, map2_;
+  double last_frame_stamp_ = 0;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_pub_;
   rclcpp::Publisher<sensor_msgs::msg::CameraInfo>::SharedPtr info_pub_;
   gazebo::event::ConnectionPtr connection_;

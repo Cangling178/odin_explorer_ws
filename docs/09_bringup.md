@@ -10,7 +10,8 @@ assemblies, approximate inertias and collision shapes. Verify measured geometry
 before hardware planning or footprint acceptance. Standalone Odin sensors, chassis
 contact and ros2_control motion scenes have launch entry points and validation records;
 see [simulation documentation](../simulation/README.md). The vehicle motion scene
-produces onboard sensor data; autonomous line following remains unimplemented.
+produces onboard sensor data; local tracking and selected-route continuous laps are implemented.
+See [full-map simulation](../simulation/COMPETITION_LAP.md). Stages 1–5 below describe outstanding hardware work.
 
 ## Stage 1: electrical and motor bench, not implemented
 

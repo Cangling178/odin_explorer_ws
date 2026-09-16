@@ -1,0 +1,50 @@
+{
+  "criteria": {
+    "max_axle_error_m": 0.1,
+    "rms_axle_error_m": 0.05,
+    "gate_radius_m": 0.1,
+    "gate_spacing_m": 0.1,
+    "minimum_moving_speed_mps": 0.003,
+    "startup_exclusion_s": 1.0,
+    "max_observation_age_s": 0.35
+  },
+  "checks": {
+    "single_command_publisher": true,
+    "initially_disarmed": true,
+    "final_physical_stop": true,
+    "full_lap": true,
+    "no_mid_lap_stop": true,
+    "max_error": true,
+    "rms_error": true,
+    "truth_fresh": true,
+    "observation_fresh": true,
+    "command_bounds": true
+  },
+  "metrics": {
+    "duration_s": 197.43,
+    "rms_error_m": 0.0055975469100132975,
+    "max_error_m": 0.024139182998070496,
+    "gates_visited": 185,
+    "gates_total": 185,
+    "min_moving_speed_mps": 0.016710185166880987
+  },
+  "passed": true,
+  "binary_sha256": "7d96722658b63f01b2079987d7db30df195b95290a6c87efe021457188634374",
+  "source_sha256": {
+    "src/odin_racer/racer_control/src/lap_controller.cpp": "376fd342acbc9f68d82e472747020877c6f8d42f67e23ea73db81e7fa9b79219",
+    "src/odin_racer/racer_control/include/racer_control/lap_route.hpp": "ca6d9f3c3df5d134eeb2e4f107f5eed7887b429e8a36dec0af2201df0d83d3e9",
+    "src/odin_racer/racer_control/config/competition_lap.csv": "a4955276aa566785d61572c228cf7a8d5355f8de165edb84ca6248e3a78134e8"
+  },
+  "termination": "FINISHED",
+  "speed_setting_mps": 0.1,
+  "lookahead_m": 0.1,
+  "command_audit": {
+    "passed": true,
+    "count": 14405,
+    "nonpositive_or_invalid": 0
+  },
+  "baseline_mean_duration_s": 367.31,
+  "time_reduction_percent": 46.24976178160137,
+  "raw_report": "data/generated/competition_lap/speed_010_01/report.json",
+  "scope": "Single nominal-start Gazebo test; default launch speed remains 0.05 m/s."
+}

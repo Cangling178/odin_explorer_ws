@@ -53,6 +53,35 @@ inline bool ordered_path(const std::vector<Point> &path) {
   }
   return length>=.08 && length<5;
 }
+// Retain already observed near-ground points as they enter the camera blind
+// zone. Join only overlapping observations in odometry; never fill a line gap.
+inline std::vector<Point> merge_observed_path(const std::vector<Point> &old,
+                                             const std::vector<Point> &observed, bool *accepted=nullptr) {
+  if(accepted)*accepted=true;
+  if(old.empty() || observed.empty())return observed;
+  auto closest=[&](Point p) {
+    size_t index=0;
+    for(size_t i=1;i<old.size();++i)if(distance(old[i],p)<distance(old[index],p))index=i;
+    return index;
+  };
+  size_t first=closest(observed.front()),last=closest(observed.back());
+  if(distance(old[first],observed.front())>.035) {
+    if(accepted)*accepted=false;
+    return old;
+  }
+  std::vector<Point> merged(old.begin(),old.begin()+first);
+  for(auto p:observed)if(merged.empty()||distance(p,merged.back())>=.001)merged.push_back(p);
+  // Preserve an occluded suffix only at a close overlap, and never carry a
+  // disconnected old fragment into the new path.
+  if(last>=first && distance(old[last],observed.back())<.01) {
+    for(size_t i=last+1;i<old.size();++i) {
+      double gap=distance(old[i],merged.back());
+      if(gap>.02)break;
+      if(gap>=.001)merged.push_back(old[i]);
+    }
+  }
+  return merged;
+}
 inline Command adaptive_pursuit(const std::vector<Point> &path, double nominal, double min_lookahead,
     double max_lookahead, double speed, double previous_speed, double max_yaw, double acceleration,
     const Point *previous_target=nullptr) {
@@ -67,6 +96,7 @@ inline Command adaptive_pursuit(const std::vector<Point> &path, double nominal, 
     auto r=std::lower_bound(arc.begin(),arc.end(),arc[i]+.08);
     if(r==arc.end())break;
     auto a=path[l-arc.begin()],b=path[i],c=path[r-arc.begin()];
+    if(distance(a,b)<.04 || distance(b,c)<.04)continue;
     double turn=std::abs(wrap(std::atan2(c.y-b.y,c.x-b.x)-std::atan2(b.y-a.y,b.x-a.x)));
     curvature=std::max(curvature,turn/.08);
   }
@@ -76,8 +106,8 @@ inline Command adaptive_pursuit(const std::vector<Point> &path, double nominal, 
   if(lookahead>max_lookahead)return {};
   lookahead=std::min(lookahead,reach-.025);
   if(lookahead<min_lookahead)return {};
-  const double available=std::max(0.,arc.back()-.12);
-  const double limited=std::min({speed,max_yaw/std::max(curvature,1e-6),std::sqrt(2*acceleration*available)});
+  const double available=std::max(0.,arc.back()-.04);
+  const double limited=std::min({speed,max_yaw/std::max(curvature,1e-6),std::sqrt(2*acceleration*available),speed*std::min(1.,arc.back()/.20)});
   if(limited<.005)return {};
   auto command=pursuit(path,lookahead,limited,max_yaw);
   if(!command.valid)return {};

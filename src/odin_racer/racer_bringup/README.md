@@ -2,7 +2,7 @@
 
 English | [Chinese](README_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](../../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](../../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is now validated in simulation; hardware acceptance remains pending.
 
 Launch composition and robot operating profiles.
 
@@ -37,3 +37,9 @@ see [onboard sensors](../../../simulation/README.md#onboard-odin-sensors) for in
 Append `course:=competition` for the [competition drawing scene](../../../simulation/COMPETITION_COURSE.md);
 the default `course:=empty` preserves the test floor. `course_overview:=true` adds an inspection camera.
 Competition mode rejects sensor_targets.
+
+## Current implementation — 2026-09-16
+
+Use `competition_lap.launch.py` for full-map laps and `line_following.launch.py` for local tracking experiments. Both are simulation launches, not hardware bringup.
+
+Launch, parameters and acceptance: [competition lap](../../../simulation/COMPETITION_LAP.md).

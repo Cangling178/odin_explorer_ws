@@ -2,16 +2,21 @@
 
 English | [Chinese](README_cn.md)
 
+Current lap baseline: 3/3 independent nominal starts passed at 0.05 m/s; one 0.10 m/s trial passed in 197.43 s. The default remains 0.05 m/s. A 0.20 m/s trial has not been run and exceeds the current controller parameter limit. See [full results](experiments/competition_lap/RESULTS.md).
+
 A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 controller. The goal is accurate, fast tracking of a marked competition course without a dedicated line-tracking module.
 
-**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. C++ single-branch low-speed visual tracking is now implemented; full-course and hardware control remain pending.**
+**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. C++ single-branch tracking and a prerecorded-route assisted continuous full-map lap are implemented in simulation; hardware control and official competition acceptance remain pending.**
 
-Isolated simulation acceptance: 42/42 tracking and 12/12 fault trials passed; see [results and scope](experiments/isolated_line/RESULTS.md). The competition map defaults to 4 by 3 m with about 21.2 mm stroke width.
+Continuous full-map lap: 185/185 gates, 367.29 s, no mid-lap stop; see [lap acceptance](experiments/competition_lap/RESULTS.md).
+
+Historical frozen-version isolated simulation acceptance: 42/42 tracking and 12/12 fault trials passed; see [results and scope](experiments/isolated_line/RESULTS.md). The competition map defaults to 4 by 3 m with about 21.2 mm stroke width.
 
 ## Start here
 
 | Task | Entry point |
 | --- | --- |
+| Run a continuous full-map lap | [Competition lap](simulation/COMPETITION_LAP.md) |
 | Run C++ visual tracking | [Line following](simulation/LINE_FOLLOWING.md) |
 | Find the main code and module responsibilities | [Source guide](src/README.md) → `src/odin_racer/` |
 | Build and preview the robot model | [Development](docs/07_development.md) |

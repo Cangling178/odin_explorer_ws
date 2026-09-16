@@ -2,14 +2,14 @@
 
 English | [Chinese](02_architecture_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is validated in simulation; hardware acceptance remains pending.
 
 ## Data and command flow
 
 The diagram shows the target architecture. Available components are model preview,
 the standalone Odin sensor bench, chassis contact and ros2_control motion simulation,
-and offline error evaluation. Onboard sensors and C++ single-branch perception/tracking are integrated. Full race
-state management, ordered route selection and F4 communication remain unimplemented.
+and offline error evaluation. Onboard sensors and C++ single-branch perception/tracking are integrated. Ordered route selection and continuous-lap states now run inside `lap_controller`. Hardware race
+integration and F4 communication remain unimplemented.
 See [source navigation](../src/README.md) for package status.
 
 Motion simulation can select the [competition drawing scene](../simulation/COMPETITION_COURSE.md),
@@ -106,7 +106,7 @@ valid geometry, fresh observations appropriate to the selected mode, controller
 health and a valid route. Localization-only fallback needs its own bounded trial;
 it is not enabled automatically after line loss.
 
-The race state machine above is not implemented. Simulation startup only activates
+The lap controller implements explicit enable, readiness, running, finish and latched stops in simulation. Hardware mode arbitration remains pending. The base-only simulation launch activates
 the joint state broadcaster and differential drive controller, then waits for external
 stamped velocity commands without sending nonzero velocity automatically. Its command
 timeout uses simulation time and does not replace the independent F4 watchdog.

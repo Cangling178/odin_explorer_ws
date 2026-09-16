@@ -2,7 +2,11 @@
 
 English | [Chinese](LINE_FOLLOWING_cn.md)
 
-Scope: the existing simulated vehicle follows straight lines, left/right arcs,
+For the prerecorded-route assisted continuous full-map entry, see [competition lap](COMPETITION_LAP.md).
+
+Current competition right-straight/lower-wave development: [map wave tracking](COMPETITION_WAVES.md).
+
+Historical isolated acceptance scope: the existing simulated vehicle follows straight lines, left/right arcs,
 an S bend and one left/right right-angle corner from onboard FishPoly images.
 Intersection selection, complete competition laps, hardware and official corridor
 certification are excluded. Implementation is separate from acceptance: all
@@ -58,7 +62,7 @@ Competition now defaults to twice the original linear map dimensions: 4 by 3 m
 instead of 2 by 1.5 m. Stroke width now defaults to approximately 21.2 mm
 independently of map scale. The S-bend example above
 explicitly selects scale 2. Vehicle geometry, onboard
-camera intrinsics and tracking parameters are unchanged. Set `scale: 1.0` for the
+camera intrinsics are unchanged by map scaling; current tracking parameters are listed below. Set `scale: 1.0` for the
 original map size. Explicit spawn overrides are world metres after scaling and
 are not scaled again; the default map spawn scales automatically. GUI and optional
 overview camera positions also scale. Original map asset files remain unchanged. Motion still requires explicit enable.
@@ -68,7 +72,7 @@ matrix; successful placement does not establish successful tracking.
 ## Perception
 
 The original FishPoly forward projection, six distortion coefficients, skew and
-acquisition-time image/CameraInfo matching are retained. A metric ground grid is
+acquisition-time image/CameraInfo matching are retained. A three-image queue selects the newest complete pair so interleaved DDS delivery cannot overwrite every unpaired image. A metric ground grid is
 projected into the onboard image using camera TF. Visible dark pixels form a mask;
 Zhang–Suen thinning forms the centerline skeleton. An eight-neighbor graph removes
 redundant diagonal triangles and short terminal noise spurs attached to junctions.
@@ -88,8 +92,8 @@ refresh corner memory. Invalid path, absent line, ambiguous exits and unhealthy
 image/projection are explicit. A nearly uniform raw frame is unhealthy. Image
 health does not imply that a line is visible.
 
-The header algorithm is ROS independent. `line_offline` replays a saved default
-metric ground grayscale PNG and writes mask, skeleton, annotated corner/exit and
+The header algorithm is ROS independent. `line_offline` replays a saved
+metric ground grayscale PNG (append `0.10 0.50` after the output prefix for the current grid; omit for the historical grid) and writes mask, skeleton, annotated corner/exit and
 ordered-path JSON. The fixed threshold is validated only for the current simulated
 lighting, not real-world shadows. Confidence is an engineering quality score, not a calibrated probability.
 
@@ -106,11 +110,18 @@ cannot renew either watchdog.
 Path checks validate finite coordinates, segment gaps and total arc length,
 replacing the previous strict forward-coordinate ordering. Pure Pursuit selects
 the first forward lookahead-circle crossing. Lookahead depends on speed, measured
-curvature and visible distance with hard 0.28–0.45 m bounds, and must lie beyond
-the visible start. Insufficient evidence stops the vehicle. The previous target
+curvature and visible distance with hard 0.12–0.45 m bounds, and must lie beyond
+the retained observed-path start. Insufficient evidence stops the vehicle. The previous target
 is retained in odometry and constrains the next target in both current-path arc
 coordinates and physical distance. Angular capability and remaining visible
 stopping distance cap speed. Normal commands retain acceleration shaping.
+
+The controller retains observed near points in `odom`, joining only overlapping paths and replacing
+the overlap boundary to avoid accumulating clipped skeleton tips. `observed_path_memory` defaults to
+12 s; healthy image/TF acquisitions must still meet the 0.35 s deadline, and odometry freshness is unchanged.
+Short remaining paths reduce speed. A tight bend may enter `CURVE_ALIGN`: translation pauses while
+turning toward the last observed exit tangent, and resumes only with a new usable camera path.
+Failure to reacquire within 5 s stops the vehicle. This is separate from the right-angle sequence below.
 
 ## One-corner state machine
 
@@ -144,11 +155,11 @@ and contact model.
 
 | Setting | Default |
 | --- | --- |
-| Metric grid | x 0.25–0.75 m, y +/-0.30 m, 5 mm cells |
+| Metric grid | x 0.10–0.75 m, y +/-0.50 m, 5 mm cells |
 | Ground plane | 33.25 mm below base_link, flat-ground approximation |
 | Dark threshold / thickness | gray 65 / 8–50 mm |
-| Minimum path length / lateral seed gate | 0.18 m / +/-0.12 m |
-| Speed / lookahead | <=0.05 m/s / 0.28–0.45 m |
+| Minimum path length / lateral seed gate | 0.10 m / +/-0.45 m |
+| Speed / lookahead | <=0.05 m/s / 0.12–0.45 m |
 | Yaw / linear / angular acceleration | <=0.5 rad/s / 0.15 m/s² / 0.8 rad/s² |
 | Corner approach / yaw speed | <=0.04 m/s / <=0.30 rad/s |
 | Observation / odometry deadline | 0.35 s / 0.15 s; 0.02 s future tolerance |
@@ -164,7 +175,7 @@ Topics below use the `/sim/racer/line/` prefix:
 | --- | --- |
 | `observation` | Atomic `LineObservation` used for control |
 | `local_path` | Acquisition-stamped ordered metric `nav_msgs/Path`, for inspection |
-| `perception_status` | Detection reason, confidence and truncation reason |
+| `perception_status` | Detection reason, confidence, truncation reason and processing time in ms |
 | `ground_gray`, `black_mask`, `ground_debug` | Metric grayscale, mask, centerline/corner/exit overlay |
 | `tracking_status` | State and stopping reason; Transient Local |
 | `control_debug` | JSON ages, target, lookahead, odometry corner/exit, memory use and commands |
@@ -191,6 +202,8 @@ assets remain unchanged; generated texture and DAE live in the simulation resour
 directory. Original pixel errors and local spurs remain. This produces a uniform
 nominal engineering width rather than restoring each varying original stroke.
 The 2.5-times map straight measures approximately 22 mm with rasterization error.
-Vehicle geometry, perception/control source and parameters, and isolated fixtures
-are unchanged. Restart the old simulation to load the new texture. Verification
-covers texture width, connectivity and generated resources, not full-map tracking.
+The earlier map-only change preserved vehicle geometry and isolated fixtures, and verified
+texture width, connectivity and generated resources. Current tracking changes and segment
+evidence are documented in [competition waves](COMPETITION_WAVES.md). Restart the simulation to load new resources.
+
+Line-following defaults to `lockstep:=true` and a 64 MiB Fast DDS shared-memory profile. Images use SensorDataQoS; the image deadline remains 0.35 s and the wall watchdog 1 s. Configuration and transport details are in [competition waves](COMPETITION_WAVES.md).

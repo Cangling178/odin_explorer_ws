@@ -2,7 +2,7 @@
 
 [English](05_course_strategy.md) | 简体中文
 
-2026-09-14 更新：[C++ 单分支视觉循线](../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整比赛路线和实车验收仍待完成。
+2026-09-16 更新：[C++ 单分支视觉循线](../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整地图连续循线已通过仿真验证；实车验收仍待完成。
 
 ## 图片能确定的信息
 

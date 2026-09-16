@@ -19,20 +19,21 @@ class LineController : public rclcpp::Node {
   LineController() : Node("line_controller"), buffer_(get_clock()), listener_(buffer_) {
     speed_ = declare_parameter("speed", .05);
     lookahead_ = declare_parameter("lookahead", .40);
-    min_lookahead_ = declare_parameter("min_lookahead", .28);
+    min_lookahead_ = declare_parameter("min_lookahead", .12);
     max_lookahead_ = declare_parameter("max_lookahead", .45);
     max_yaw_ = declare_parameter("max_yaw_rate", .5);
     acceleration_ = declare_parameter("acceleration", .15);
     yaw_acceleration_ = declare_parameter("yaw_acceleration", .8);
     path_age_ = declare_parameter("max_path_age", .35);
+    curve_memory_ = declare_parameter("observed_path_memory", 12.);
     odom_age_ = declare_parameter("max_odom_age", .15);
     wall_age_ = declare_parameter("wall_watchdog", 1.);
     base_ = declare_parameter("base_frame", std::string("base_link"));
     odom_frame_ = declare_parameter("odom_frame", std::string("odom"));
-    for (double v : {speed_, lookahead_, max_yaw_, acceleration_, yaw_acceleration_, path_age_, odom_age_, wall_age_, min_lookahead_, max_lookahead_})
+    for (double v : {speed_, lookahead_, max_yaw_, acceleration_, yaw_acceleration_, path_age_, odom_age_, wall_age_, curve_memory_, min_lookahead_, max_lookahead_})
       if (!std::isfinite(v) || v <= 0) throw std::invalid_argument("Invalid positive controller parameter");
     if (speed_ > .2 || max_yaw_ > 1 || acceleration_ > .3 || yaw_acceleration_ > 1.5 ||
-        min_lookahead_ < .20 || min_lookahead_ > lookahead_ || lookahead_ > max_lookahead_ || max_lookahead_ > .7 || base_.empty() || odom_frame_.empty())
+        min_lookahead_ < .10 || min_lookahead_ > lookahead_ || lookahead_ > max_lookahead_ || max_lookahead_ > .7 || base_.empty() || odom_frame_.empty())
       throw std::invalid_argument("Controller parameters exceed baseline limits");
     corner_.config.memory_time=declare_parameter("corner_memory_time",18.);
     corner_.config.memory_distance=declare_parameter("corner_memory_distance",.45);
@@ -78,7 +79,7 @@ class LineController : public rclcpp::Node {
     enable_ = create_service<std_srvs::srv::SetBool>("~/enable",
       [this](const std_srvs::srv::SetBool::Request::SharedPtr request,
              std_srvs::srv::SetBool::Response::SharedPtr response) {
-        if (!request->data) { armed_ = false; corner_.reset(); target_valid_=false; state_ = "DISARMED"; publish_zero(); response->success = true; }
+        if (!request->data) { armed_ = false; corner_.reset(); target_valid_=false; curve_align_=false; state_ = "DISARMED"; publish_zero(); response->success = true; }
         else {
           std::string error;
           auto command = compute(error);
@@ -108,7 +109,7 @@ class LineController : public rclcpp::Node {
   }
   void publish_zero(bool tick_command=false) { last_v_ = last_w_ = 0; publish(0, 0, tick_command); }
   void stop(const std::string &reason) {
-    corner_.reset(); target_valid_=false;
+    corner_.reset(); target_valid_=false; curve_align_=false;
     if (armed_) { armed_ = false; state_ = "STOPPED: " + reason; publish_state(); }
     publish_zero();
   }
@@ -145,10 +146,14 @@ class LineController : public rclcpp::Node {
       }
       if(!observation.path_valid && !path.poses.empty()) {invalidate("inconsistent_observation");return;}
       image_valid_=true;health_stamp_=stamp.nanoseconds();path_wall_=std::chrono::steady_clock::now();
-      if(observation.path_valid) {points_=std::move(global);path_stamp_=stamp.nanoseconds();}
+      if(observation.path_valid) {
+        bool accepted=true;
+        points_=curve_align_?global:racer_control::merge_observed_path(points_,global,&accepted);
+        if(accepted)path_stamp_=stamp.nanoseconds();
+      }
       else {
-        points_.clear();
-        if(!corner_.active() || (observation.reason!="no_near_seed" && observation.reason!="insufficient_visible_length")) {
+        const bool clipped=observation.reason=="no_near_seed" || observation.reason=="insufficient_visible_length";
+        if(!clipped || (!corner_.active() && !racer_control::fresh(now().seconds(),path_stamp_*1e-9,curve_memory_))) {
           invalidate("line_lost: "+observation.reason);return;
         }
       }
@@ -193,9 +198,27 @@ class LineController : public rclcpp::Node {
     tf2::Transform transform(tf2::Quaternion(q.x,q.y,q.z,q.w),tf2::Vector3(p.x,p.y,p.z));
     auto inverse=transform.inverse();std::vector<racer_control::Point> local;
     for(auto point:points_) {auto shifted=inverse*tf2::Vector3(point.x,point.y,p.z);local.push_back({shifted.x(),shifted.y()});}
-    bool valid_path=!local.empty()&&racer_control::fresh(time,path_stamp_*1e-9,path_age_);
+    // Remove traversed points, but retain the measured near section that the
+    // camera can no longer see. Curved tracking can then use a shorter preview.
+    size_t trim=0;
+    while(trim<local.size() && local[trim].x<.06)++trim;
+    local.erase(local.begin(),local.begin()+trim);
+    points_.erase(points_.begin(),points_.begin()+trim);
+    bool valid_path=!local.empty()&&racer_control::fresh(time,path_stamp_*1e-9,armed_?curve_memory_:path_age_);
+    if(curve_align_) {
+      // Rotate toward the last actually observed exit tangent, then require a
+      // new camera path before translating again. This handles a tight smooth
+      // bend that leaves the forward camera view, without extrapolating ink.
+      auto candidate=racer_control::adaptive_pursuit(local,lookahead_,min_lookahead_,max_lookahead_,speed_,0.,max_yaw_,acceleration_);
+      if(path_stamp_*1e-9>curve_align_stamp_ && valid_path && candidate.valid) {
+        curve_align_=false;target_valid_=false;
+      } else {
+        if(time-curve_align_stamp_>5.) {error="curve_exit_not_reacquired";return {};}
+        return {0.,std::clamp(1.3*racer_control::wrap(curve_exit_yaw_-yaw),-.30,.30),true};
+      }
+    }
     if(armed_) {
-      bool exit_evidence=valid_path&&local.size()>8&&std::abs(local.front().y)<.10;
+      bool exit_evidence=valid_path&&racer_control::fresh(time,path_stamp_*1e-9,path_age_)&&local.size()>8&&std::abs(local.front().y)<.10;
       if(exit_evidence) {
         auto a=local.front(),b=local.back();
         exit_evidence=std::abs(std::atan2(b.y-a.y,b.x-a.x))<.25 && racer_control::distance(a,b)>.20;
@@ -214,8 +237,24 @@ class LineController : public rclcpp::Node {
     racer_control::Point previous;
     if(target_valid_) {auto a=inverse*tf2::Vector3(target_.x,target_.y,p.z);previous={a.x(),a.y()};}
     auto command=racer_control::adaptive_pursuit(local,lookahead_,min_lookahead_,max_lookahead_,speed_,last_v_,max_yaw_,acceleration_,target_valid_?&previous:nullptr);
-    if(!command.valid)error="no_safe_ordered_lookahead";
-    else if(armed_) {auto a=transform*tf2::Vector3(command.target.x,command.target.y,0);target_={a.x(),a.y()};target_valid_=true;}
+    const bool short_memory=path_stamp_*1e-9<time-path_age_ && local.size()>8 &&
+        racer_control::distance(local.front(),local.back())<.20;
+    if(!command.valid || short_memory) {
+      if(armed_ && !corner_.active() && local.size()>8) {
+        size_t before=local.size()-1;
+        while(before>0 && racer_control::distance(local[before],local.back())<.06)--before;
+        auto a=local[before],b=local.back();
+        double heading=std::atan2(b.y-a.y,b.x-a.x);
+        if(racer_control::distance(a,b)>.04 && std::abs(heading)>.25 && std::abs(heading)<1.8) {
+          curve_align_=true;curve_align_stamp_=time;curve_exit_yaw_=yaw+heading;target_valid_=false;
+          return {0.,std::clamp(1.3*heading,-.30,.30),true};
+        }
+      }
+      if(!command.valid) {
+        error="no_safe_ordered_lookahead";
+      }
+    }
+    if(command.valid && armed_) {auto a=transform*tf2::Vector3(command.target.x,command.target.y,0);target_={a.x(),a.y()};target_valid_=true;}
     return command;
   }
   void debug(const racer_control::Command &command) {
@@ -254,10 +293,12 @@ class LineController : public rclcpp::Node {
     if (dt > .2) { stop("control_time_gap"); return; }
     last_v_ = racer_control::slew(last_v_, desired.v, acceleration_, dt);
     last_w_ = racer_control::slew(last_w_, desired.w, yaw_acceleration_, dt);
-    state_=corner_.name(); publish_state();
+    state_=curve_align_?"CURVE_ALIGN":corner_.name(); publish_state();
     publish(last_v_, last_w_, true); debug(desired);
   }
   tf2_ros::Buffer buffer_; tf2_ros::TransformListener listener_;
+  double curve_memory_, curve_align_stamp_=0., curve_exit_yaw_=0.;
+  bool curve_align_=false;
   double speed_, lookahead_, max_yaw_, acceleration_, yaw_acceleration_, path_age_, odom_age_, wall_age_;
   double last_v_ = 0, last_w_ = 0, last_tick_ = 0;
   int64_t path_stamp_ = 0;

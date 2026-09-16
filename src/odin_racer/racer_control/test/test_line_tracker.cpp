@@ -110,3 +110,21 @@ TEST(Tracker, SharedSegmentEndpointSurvivesFloatingPointMotionCompensation) {
     EXPECT_NEAR(std::hypot(command.target.x,command.target.y),radius,1e-10);
   }
 }
+
+TEST(Tracker, ShortVisiblePathSlowsWhileKeepingObservedLookahead) {
+  std::vector<Point> path;
+  for(int i=0;i<=22;++i)path.push_back({.27+i*.005,-.03});
+  auto command=adaptive_pursuit(path,.4,.28,.45,.05,.05,.5,.15);
+  ASSERT_TRUE(command.valid);
+  EXPECT_GT(command.v,.005); EXPECT_LT(command.v,.035);
+  EXPECT_GT(command.target.x,path.front().x);
+  EXPECT_LT(command.target.x,path.back().x);
+}
+
+TEST(Tracker, ObservedHistoryRetainsBlindPrefixButDoesNotJoinSeparateLines) {
+  std::vector<Point> old{{.1,0},{.15,0},{.2,0},{.25,0},{.3,0}};
+  auto joined=merge_observed_path(old,{{.2,.002},{.25,.002},{.3,.002},{.35,.002}});
+  EXPECT_DOUBLE_EQ(joined.front().x,.1);EXPECT_DOUBLE_EQ(joined.back().x,.35);
+  auto separate=merge_observed_path(old,{{.2,.2},{.25,.2},{.3,.2}});
+  EXPECT_DOUBLE_EQ(separate.front().y,0.);EXPECT_EQ(separate.size(),old.size());
+}

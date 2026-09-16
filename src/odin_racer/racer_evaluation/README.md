@@ -19,3 +19,9 @@ A successful build is not evidence that a planned subsystem runs.
 Any `*.template.yaml` is a specification form, not a live ROS parameter file.
 Add runtime dependencies, executables and tested parameters when implementing
 the component. Keep vendor code and large recordings outside this package.
+
+## Current implementation — 2026-09-16
+
+The ROS package remains a skeleton; executable validation is provided by the Python tools `validate_competition_lap.py`, `validate_lap_controller.py` and `repeat_competition_lap.py`.
+
+Launch, parameters and acceptance: [competition lap](../../../simulation/COMPETITION_LAP.md).

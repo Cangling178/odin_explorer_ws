@@ -2,7 +2,7 @@
 
 English | [Chinese](05_course_strategy_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is validated in simulation; hardware acceptance remains pending.
 
 ## What the image establishes
 

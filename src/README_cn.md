@@ -2,8 +2,10 @@
 
 [English](README.md) | 简体中文
 
+完整地图连续运行新增 [competition_lap.launch.py](odin_racer/racer_bringup/launch/competition_lap.launch.py)，由 C++ `lap_controller` 跟踪有序路线并用车载图像校正；见[整圈说明](../simulation/COMPETITION_LAP_cn.md)。
+
 C++ 运行入口：[line_following.launch.py](odin_racer/racer_bringup/launch/line_following.launch.py)；[实现与验证](../simulation/LINE_FOLLOWING_cn.md)。
-主要功能在 `src/odin_racer/` 内按包实现，目前没有统一的 `main.py` 或比赛启动程序。下表中的“规划中的子系统”只有文档和配置规格，没有算法节点。
+主要功能在 `src/odin_racer/` 内按包实现，完整地图仿真入口为 `competition_lap.launch.py`；实车比赛启动程序尚未实现。下表中的“规划中的子系统”只有文档和配置规格，没有算法节点。
 
 | 包 | 职责 | 状态 |
 | --- | --- | --- |
@@ -14,7 +16,7 @@ C++ 运行入口：[line_following.launch.py](odin_racer/racer_bringup/launch/li
 | [racer_localization](odin_racer/racer_localization/README_cn.md) | 连续车体状态与全局对齐 | 规划中的子系统 |
 | [racer_perception](odin_racer/racer_perception/README_cn.md) | 局部视觉黑线观测与候选分支 | C++ 黑线检测、FishPoly 地面投影与无效观测输出 |
 | [racer_trajectory](odin_racer/racer_trajectory/README_cn.md) | 有序路线进度与可行速度曲线 | 规划中的子系统 |
-| [racer_control](odin_racer/racer_control/README_cn.md) | 路径跟踪、运行状态与指令控制 | C++ 自适应 Pure Pursuit、有界单角转向状态与锁存停车；完整比赛状态待实现 |
+| [racer_control](odin_racer/racer_control/README_cn.md) | 路径跟踪、运行状态与指令控制 | C++ 自适应 Pure Pursuit、有界单角转向状态与锁存停车；已实现连续整圈状态；实车比赛集成待完成 |
 | [racer_navigation](odin_racer/racer_navigation/README_cn.md) | 可选 Nav2 集成 | 规划中的子系统 |
 | [racer_bringup](odin_racer/racer_bringup/README_cn.md) | 启动组合与机器人运行配置 | 预览及整车运动仿真 |
 | [racer_evaluation](odin_racer/racer_evaluation/README_cn.md) | 比赛记录与指标导出集成 | 规划中的子系统 |

@@ -2,7 +2,7 @@
 
 English | [Chinese](MODEL_GAPS_TEMP_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is now validated in simulation; hardware acceptance remains pending.
 
 This is a code-state snapshot, not hardware acceptance. Work proceeds from stable
 ground contact and motion to perception integration and then hardware fidelity.
@@ -138,7 +138,7 @@ Bench, onboard sensor and known-target scenes are joined by the [competition dra
 including the complete line, crossing, loops and S-bends. Initial-straight projection and short motion pass.
 This is an unsurveyed image reconstruction without official route order, lighting variations or an occlusion suite.
 Onboard sensor real-time factor is recorded;
-single-branch closure and frame-loss stops now have tests; full-course behavior and end-to-end timing remain pending. Build straight,
+single-branch closure and frame-loss stops now have tests; selected-route full laps now pass; hardware end-to-end timing remains pending. Build straight,
 curve and crossing cases; record repeatable tracking error, success rate, stop
 distance and real-time factor, then disturbances/faults. Results should distinguish
 geometry, perception and control failures.
@@ -160,7 +160,7 @@ screws are not a prerequisite.
 4. Calibrate against hardware and establish track evaluation (7-8).
 5. Refine appearance as needed (9).
 
-Basic motion, onboard sensors and C++ single-branch algorithm closure are available; full-course acceptance remains pending. Hardware equivalence requires subsequent comparison.
+Basic motion, onboard sensors and C++ single-branch algorithm closure are available; selected-route continuous full-lap simulation acceptance also passes. Hardware equivalence requires subsequent comparison.
 
 ## Code and records
 

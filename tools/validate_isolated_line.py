@@ -14,6 +14,7 @@ import time
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import cv2
+import yaml
 import numpy as np
 import rclpy
 from rclpy.parameter import Parameter
@@ -34,41 +35,59 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--course',choices=LINE_SCENES,required=True)
+    parser.add_argument('--course',choices=(*LINE_SCENES, 'competition'),required=True)
     parser.add_argument('--output',type=Path,required=True)
     parser.add_argument('--duration',type=float,default=100.)
-    parser.add_argument('--spawn-x',type=float,default=0.)
-    parser.add_argument('--spawn-y',type=float,default=-.035)
-    parser.add_argument('--spawn-yaw',type=float,default=-.08)
+    parser.add_argument('--spawn-x',type=float,default=None)
+    parser.add_argument('--spawn-y',type=float,default=None)
+    parser.add_argument('--spawn-yaw',type=float,default=None)
     parser.add_argument('--domain',type=int,default=93)
     parser.add_argument('--port',type=int,default=11393)
     parser.add_argument('--fault',choices=['drop','blank','tf','odom'])
     parser.add_argument('--fault-phase',choices=['RUNNING','APPROACH','TURN'],default='RUNNING')
     parser.add_argument('--static',action='store_true',help='Save stationary observations without enabling')
     args=parser.parse_args()
+    cv2.setNumThreads(1)
+    if args.course == 'competition':
+        from competition_segment import competition_segment
+        fixture = competition_segment(get_package_share_directory('racer_description'))
+        defaults = fixture['spawn']
+    else:
+        defaults = [0., -.035, -.08]
+    args.spawn_x, args.spawn_y, args.spawn_yaw = [default if value is None else value
+        for value, default in zip((args.spawn_x, args.spawn_y, args.spawn_yaw), defaults)]
+    course_parameters = dict(spawn_x=args.spawn_x, spawn_y=args.spawn_y, spawn_yaw=args.spawn_yaw)
+    if args.course == 'competition':
+        course_parameters.update(fixture['parameters'])
+        fixture['spawn'] = [args.spawn_x, args.spawn_y, args.spawn_yaw]
+        fixture['evaluation_start'] = fixture['spawn'][:2]
+    else:
+        fixture = line_fixture(args.course, course_parameters)
     if not all(math.isfinite(v) for v in (args.duration,args.spawn_x,args.spawn_y,args.spawn_yaw)) or args.duration<=0:
         parser.error('Nonfinite/invalid test parameters')
     args.output.mkdir(parents=True,exist_ok=True)
     if (args.output/'report.json').exists():
         parser.error('Output exists; use a new directory to retain every attempt')
     criteria=json.loads((ROOT/'experiments/isolated_line/acceptance.json').read_text())
-    fixture=line_fixture(args.course,dict(spawn_x=args.spawn_x,spawn_y=args.spawn_y,spawn_yaw=args.spawn_yaw))
     body,envelope=footprint(Path(get_package_share_directory('racer_description')))
     evaluator=Evaluator(fixture,body)
     report=dict(course=args.course,fixture=fixture,criteria=criteria,footprint=envelope,
-                data_kind='gazebo_onboard_image',checks={},samples=[],commands=[],events=[],captures=[],fault=None)
+                data_kind='gazebo_onboard_image',simulation=dict(lockstep=True,real_time_factor=1.0),duration_limit_s=args.duration,checks={},samples=[],commands=[],events=[],captures=[],fault=None)
+    report['ground_grid']=yaml.safe_load((Path(get_package_share_directory('racer_perception'))/'config/line_perception.yaml').read_text())['/**']['ros__parameters']
     report['binary_sha256']={name:hashlib.sha256((ROOT/'install'/name/'lib'/name/exe).read_bytes()).hexdigest() for name,exe in [('racer_perception','line_perception'),('racer_control','line_controller')]}
     report['source_sha256']={str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
       for folder in ('racer_perception','racer_control') for p in (ROOT/'src/odin_racer'/folder).rglob('*')
       if p.is_file() and p.suffix in ('.cpp','.hpp','.yaml')}
+    os.environ.setdefault('FASTRTPS_DEFAULT_PROFILES_FILE', str(Path(get_package_share_directory('racer_bringup'))/'config/line_fastdds.xml'))
+    report['dds_profile_sha256']=hashlib.sha256(Path(os.environ['FASTRTPS_DEFAULT_PROFILES_FILE']).read_bytes()).hexdigest()
     os.environ['ROS_DOMAIN_ID']=str(args.domain);os.environ['GAZEBO_MASTER_URI']=f'http://127.0.0.1:{args.port}'
     with socket.socket() as probe:
         if probe.connect_ex(('127.0.0.1',args.port))==0:
             raise RuntimeError('Test Gazebo port occupied')
     log=(args.output/'launch.log').open('w')
     process=subprocess.Popen(['ros2','launch','racer_bringup','line_following.launch.py','gui:=false',
-        f'course:={args.course}','course_parameters:='+json.dumps(dict(spawn_x=args.spawn_x,spawn_y=args.spawn_y,spawn_yaw=args.spawn_yaw)),
-        'image_topic:=/validation/image',
+        f'course:={args.course}','lockstep:=true','course_parameters:='+json.dumps(course_parameters),
+        'image_topic:='+('/validation/image' if args.fault in ('drop','blank') else '/sim/racer/odin1/image'),
         'odom_topic:='+('/validation/odom' if args.fault=='odom' else '/sim/racer/diff_drive_controller/odom'),
         'tf_topic:='+('/validation/tf' if args.fault=='tf' else '/sim/racer/tf')],
         stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
@@ -83,14 +102,21 @@ def main():
     odom_relay=relay_node.create_publisher(Odometry,'/validation/odom',10)
     tf_relay=relay_node.create_publisher(TFMessage,'/validation/tf',100)
     def image(msg):
+        stamp=msg.header.stamp.sec+msg.header.stamp.nanosec*1e-9
+        previous=latest.get('image_stamp',stamp)
+        report['max_input_image_gap_s']=max(report.get('max_input_image_gap_s',0.),stamp-previous)
+        latest['image_stamp']=stamp
         latest['image']=msg
         if mode=='drop': return
         if mode=='blank':
             msg=copy.deepcopy(msg);msg.data=bytes([200])*len(msg.data)
-        latest['input']=msg;relay.publish(msg)
-    relay_node.create_subscription(Image,'/sim/racer/odin1/image',image,1)
-    relay_node.create_subscription(Odometry,'/sim/racer/diff_drive_controller/odom',lambda m: odom_relay.publish(m) if mode!='odom' else None,qos_profile_sensor_data)
-    relay_node.create_subscription(TFMessage,'/sim/racer/tf',lambda m:tf_relay.publish(m) if mode!='tf' else None,100)
+        latest['input']=msg
+        if args.fault in ('drop','blank'):relay.publish(msg)
+    relay_node.create_subscription(Image,'/sim/racer/odin1/image',image,qos_profile_sensor_data)
+    if args.fault == 'odom':
+        relay_node.create_subscription(Odometry,'/sim/racer/diff_drive_controller/odom',lambda m: odom_relay.publish(m) if mode!='odom' else None,qos_profile_sensor_data)
+    if args.fault == 'tf':
+        relay_node.create_subscription(TFMessage,'/sim/racer/tf',lambda m:tf_relay.publish(m) if mode!='tf' else None,100)
     relay_thread=threading.Thread(target=relay_executor.spin,daemon=True);relay_thread.start()
     for key,topic in [('ground','ground_debug'),('mask','black_mask'),('gray','ground_gray')]:
         node.create_subscription(Image,'/sim/racer/line/'+topic,lambda m,k=key:latest.update({k:m}),1)
@@ -149,7 +175,7 @@ def main():
         if args.static:
             run(2);capture('static');report['checks']['stationary']=abs(latest['truth'][1].linear.x)<.005
         else:
-            enable(True);start=now();deadline=time.monotonic()+args.duration*20+30;last=-1
+            enable(True);start=now();deadline=time.monotonic()+args.duration*20+30;last=-1; last_progress=-15.
             while now()-start<args.duration:
                 spin()
                 if time.monotonic()>deadline:raise RuntimeError('Simulation stalled')
@@ -162,6 +188,9 @@ def main():
                     yaw_rate=twist.angular.z,cmd_v=cmd.linear.x,cmd_w=cmd.angular.z,state=latest.get('state',''),
                     perception=latest.get('perception',''),telemetry=latest.get('telemetry',''))
                 sample.update(evaluator.sample(x,y,yaw));report['samples'].append(sample)
+                if sample['time']-last_progress >= 15:
+                    print(f"t={sample['time']:.1f}s xy=({x:.3f},{y:.3f}) state={sample['state']} error={sample['error']:.3f}m", flush=True)
+                    last_progress=sample['time']
                 if now()-last_capture>=1. or sample['state']!=last_state:
                     capture('run');last_capture=now();last_state=sample['state']
                 if args.fault and injected is None and sample['state']==args.fault_phase and now()-start>2 and (abs(sample['yaw_rate'])>.08 if args.fault_phase=='TURN' else sample['speed']>.015):
@@ -199,7 +228,7 @@ def main():
             pose,twist=latest['truth']
             report['parking_pose']=dict(x=pose.position.x,y=pose.position.y,speed=math.hypot(twist.linear.x,twist.linear.y),yaw_rate=twist.angular.z)
         report['last_state']=latest.get('state');report['last_perception']=latest.get('perception')
-        active=[s for s in report['samples'] if s['state'] in ('RUNNING','APPROACH','CORNER_STOP','TURN','REACQUIRE')]
+        active=[s for s in report['samples'] if s['state'] in ('RUNNING','CURVE_ALIGN','APPROACH','CORNER_STOP','TURN','REACQUIRE')]
         telemetry=[]
         for sample in active:
             try: telemetry.append(json.loads(sample['telemetry']))
@@ -218,7 +247,7 @@ def main():
         stop_times=report.get('explicit_stop_times',[])+[e['time'] for e in report['events'] if e['state'].startswith('STOPPED')]
         def intentional_zero(b):
             return b['v']==0 and b['w']==0 and any(-.06<=b['time']-t<=.20 for t in stop_times)
-        pairs=[(a,b) for a,b in zip(report['commands'],report['commands'][1:]) if b['time']>a['time'] and not intentional_zero(b) and a['state']==b['state'] and b['state'] in ('RUNNING','APPROACH','TURN','REACQUIRE')]
+        pairs=[(a,b) for a,b in zip(report['commands'],report['commands'][1:]) if b['time']>a['time'] and not intentional_zero(b) and a['state']==b['state'] and b['state'] in ('RUNNING','CURVE_ALIGN','APPROACH','TURN','REACQUIRE')]
         if pairs:
             report['command_acceleration']=dict(v=max(abs(b['v']-a['v'])/(b['time']-a['time']) for a,b in pairs),w=max(abs(b['w']-a['w'])/(b['time']-a['time']) for a,b in pairs))
             report['checks']['acceleration']=report['command_acceleration']['v']<=criteria['acceleration_max_mps2']+.005 and report['command_acceleration']['w']<=criteria['yaw_acceleration_max_radps2']+.02

@@ -4,7 +4,7 @@
 
 已根据仓库的[比赛参考图](../tracks/reference/course_reference.jpg)搭建完整 Gazebo 赛道，
 保留直线、中央交叉点、回环、紧弯和下方连续 S 弯。整车沿用现有动力学、ros2_control 和
-随车 Odin 图像、CameraInfo、点云、IMU。已实现单分支低速视觉循线，见[循线说明](LINE_FOLLOWING_cn.md)；完整路线与交叉点选路尚未完成。
+随车 Odin 图像、CameraInfo、点云、IMU。已实现单分支低速视觉循线，见[循线说明](LINE_FOLLOWING_cn.md)和[右侧直线/波浪段](COMPETITION_WAVES_cn.md)；选定仿真路线的完整跑圈与交叉点选路已验证，见[连续整圈](COMPETITION_LAP_cn.md)。
 
 ## 启动
 

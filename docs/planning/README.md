@@ -2,12 +2,12 @@
 
 English | [Chinese](README_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](../../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is now validated in simulation; hardware acceptance remains pending.
 
 Maintain milestones, tasks, risks and decisions here. Build evidence is in [validation](VALIDATION.md). Technical details remain in the [documentation](../README.md).
 
 Isolated simulation acceptance passed 42/42 tracking and 12/12 fault trials; see [delivered results](../../experiments/isolated_line/RESULTS.md).
-The competition map defaults to scale 2 (4 by 3 m) with about 21.2 mm stroke width; full-course routing, crossing selection and hardware dependencies remain pending.
+The competition map defaults to scale 2 (4 by 3 m) with about 21.2 mm stroke width; selected-route full laps and crossing selection pass in simulation; hardware dependencies remain pending.
 
 ## Milestones
 
@@ -16,7 +16,7 @@ Only M0 has passed its acceptance gate; M1-M8 remain incomplete. Mechanical mode
 the local vendor-driver build and initial point cloud check, and basic motion simulation
 have documented progress. These partial results do not establish hardware bench or
 autonomous line-following acceptance. SIM-001 remains in progress: onboard sensors and the competition
-drawing scene are integrated; full-course closure and replay are next. Survey and route order remain unconfirmed.
+drawing scene and full-course closure are validated; sensor replay and hardware integration remain. Physical survey and official route order remain unconfirmed.
 
 | Milestone | Deliverable | Exit evidence | Depends on |
 | --- | --- | --- | --- |
@@ -54,13 +54,13 @@ needs evidence before Done, not just a directory or a successful empty build.
 | LOC-001 | P1 | Implement continuous local state and TF authority | Blocked | CAL-001; drift and reset tests |
 | TRACK-001 | P0 | Survey course and confirm traversal order | Blocked | RULE-001; ordered metric route |
 | VIS-001 | P1 | Extract line candidates with confidence | In progress (simulation; hardware blocked) | SENS-002; recorded lighting cases |
-| ROUTE-001 | P1 | Add progress-constrained crossing selection | Blocked | TRACK-001, VIS-001; both crossing visits |
+| ROUTE-001 | P1 | Add progress-constrained crossing selection | In progress (simulation; hardware blocked) | TRACK-001, VIS-001; both crossing visits |
 | CTRL-001 | P1 | Establish low-speed tracking baseline | In progress (simulation; hardware blocked) | BASE-002, CAL-001; independent line error |
 | EVAL-001 | P1 | Implement synchronized independent measurement | Todo | Ground-truth calibration and timing uncertainty |
 | EVAL-002 | P1 | Export associated errors and report real trials | Blocked | EVAL-001; no invalid-data masking |
-| SPEED-001 | P1 | Add curvature and braking speed limits | Blocked | Accurate full-route baseline |
-| RACE-001 | P1 | Implement mode/state manager and race launch | Blocked | Healthy-device and route gates enforced |
-| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Basic motion and onboard image/cloud/IMU validated; [competition drawing scene](../../simulation/COMPETITION_COURSE.md) passes initial-straight projection and short motion; unknown masses deferred, single-branch C++ closure implemented; full-route closure/replay pending |
+| SPEED-001 | P1 | Add curvature and braking speed limits | In progress (simulation; hardware blocked) | Accurate full-route baseline |
+| RACE-001 | P1 | Implement mode/state manager and race launch | In progress (simulation; hardware blocked) | Healthy-device and route gates enforced |
+| SIM-001 | P2 | Add drive-model simulation and sensor replay | In progress | Basic motion and onboard image/cloud/IMU validated; [competition drawing scene](../../simulation/COMPETITION_COURSE.md) passes initial-straight projection and short motion; unknown masses deferred, single-branch C++ closure implemented; full-route closure passes; sensor replay pending |
 | NAV-001 | P2 | Evaluate optional Nav2 mode | Todo | Separate scope; shared command gate |
 
 For each started item add: owner, branch, requirement IDs, design note, validation
@@ -72,7 +72,7 @@ project ground points using CameraInfo/TF, then close straight/simple-curve trac
 0.05 m/s with stops on low confidence or image timeout. The C++ single-branch algorithms are implemented;
 hardware acceptance dependencies in the table remain. IMU attitude compensation can follow,
 and clouds are not required for the planar-line prototype. Truth is only for independent evaluation.
-Full laps still depend on TRACK-001/ROUTE-001 for ordered routes, branch confirmation and tight-turn feasibility.
+Physical-course laps still depend on TRACK-001/ROUTE-001. The user-approved simulation route now passes ordered crossing and continuous-lap checks.
 
 ## Risks
 
@@ -118,3 +118,13 @@ precise judging limits remain unresolved. Do not infer approval from elapsed tim
 Owner: this Codex implementation; implementation in the current workspace. The user selected C++ runtime nodes.
 VIS-001/CTRL-001 now have a flat-ground single-branch prototype; [tests and limits](../../simulation/LINE_FOLLOWING.md).
 This does not close hardware M2/M3 dependencies or TRACK-001/ROUTE-001. Crossing, disturbance and replay matrices follow.
+
+## Continuous-lap simulation progress — 2026-09-16
+
+The approved prerecorded-route, visual alignment and wheel-odometry approach completed one C++ continuous selected-map lap: 185/185 gates, 367.29 s, no mid-lap stop. See [results](../../experiments/competition_lap/RESULTS.md). This advances SIM-001 and the simulation portions of VIS-001/CTRL-001; hardware milestones and official route, calibration and rule dependencies remain open.
+
+## Current lap validation summary — 2026-09-16
+
+Three independent nominal starts passed at 0.05 m/s in 367.26–367.36 s. One 0.10 m/s trial passed in 197.43 s with 5.60/24.14 mm RMS/maximum error. Every run passed 185/185 ordered gates without a mid-lap stop. Repeatability at 0.10 m/s is untested; the default remains 0.05 m/s. Hardware milestone dependencies M2–M8 remain open.
+
+[Results](../../experiments/competition_lap/RESULTS.md).

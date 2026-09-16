@@ -5,7 +5,7 @@ English | [Chinese](COMPETITION_COURSE_cn.md)
 The complete track has been reconstructed from the supplied [competition drawing](../tracks/reference/course_reference.jpg),
 including straights, the central crossing, loops, tight bends and lower S-bends. It uses the existing
 vehicle physics, ros2_control and onboard Odin image, CameraInfo, cloud and IMU. The scene supports
-black-line perception development. Single-branch low-speed tracking is implemented; see [line following](LINE_FOLLOWING.md). Full-course routing and crossing selection remain pending.
+black-line perception development. Single-branch low-speed tracking is implemented; see [line following](LINE_FOLLOWING.md) and [right-straight/lower-wave tracking](COMPETITION_WAVES.md). Full-course routing and crossing selection are validated with the selected simulation route; see [continuous lap](COMPETITION_LAP.md).
 
 ## Launch
 

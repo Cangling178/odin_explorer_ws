@@ -1,0 +1,17 @@
+{
+  "source_sha256": "2ff579ebcbfe7830e265870aff2aca6e91f67916633ee876954440eb4e66d43d",
+  "raw_skeleton_length_m": 18.69438788540324,
+  "length_m": 18.439805601188063,
+  "spawn": [
+    1.611764705882353,
+    0.7452978056426331,
+    -1.5707963267948966
+  ],
+  "map_size_m": [
+    4,
+    3
+  ],
+  "route": "right_down_waves_left_lobe_rectangle_center_loop_upper_right",
+  "source": "image reconstruction, not surveyed",
+  "gap_policy": "Retain original texture; use mapped continuity through its small damaged stroke."
+}

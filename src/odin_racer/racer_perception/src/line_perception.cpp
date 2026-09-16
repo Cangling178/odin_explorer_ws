@@ -9,22 +9,25 @@
 #include <tf2/LinearMath/Transform.h>
 #include <cv_bridge/cv_bridge.h>
 #include <deque>
+#include <chrono>
 #include <racer_interfaces/msg/line_observation.hpp>
 
 class LinePerception : public rclcpp::Node {
  public:
   LinePerception() : Node("line_perception"), buffer_(get_clock()), listener_(buffer_) {
-    grid_.near_x = declare_parameter("near_x", .25);
+    // Small ground grids run with bounded OpenCV scheduling overhead.
+    cv::setNumThreads(1);
+    grid_.near_x = declare_parameter("near_x", .10);
     grid_.far_x = declare_parameter("far_x", .75);
-    grid_.half_width = declare_parameter("half_width", .30);
+    grid_.half_width = declare_parameter("half_width", .50);
     grid_.step = declare_parameter("grid_step", .005);
     grid_.ground_z = declare_parameter("ground_z", -.03325);
     grid_.validate();
     threshold_ = declare_parameter("black_threshold", 65.);
     min_width_ = declare_parameter("min_line_width", .008);
     max_width_ = declare_parameter("max_line_width", .05);
-    min_length_ = declare_parameter("min_visible_length", .18);
-    seed_limit_ = declare_parameter("seed_lateral_limit", .12);
+    min_length_ = declare_parameter("min_visible_length", .10);
+    seed_limit_ = declare_parameter("seed_lateral_limit", .45);
     min_confidence_ = declare_parameter("min_confidence", .5);
     max_age_ = declare_parameter("max_image_age", .35);
     frame_ = declare_parameter("base_frame", std::string("base_link"));
@@ -43,8 +46,10 @@ class LinePerception : public rclcpp::Node {
       [this](sensor_msgs::msg::CameraInfo::ConstSharedPtr info) {
         infos_.push_back(info); if (infos_.size() > 5) infos_.pop_front(); try_process();
       });
-    image_sub_ = create_subscription<sensor_msgs::msg::Image>("image", 1,
-      [this](sensor_msgs::msg::Image::ConstSharedPtr image) { pending_ = image; try_process(); });
+    image_sub_ = create_subscription<sensor_msgs::msg::Image>("image", rclcpp::SensorDataQoS().keep_last(3),
+      [this](sensor_msgs::msg::Image::ConstSharedPtr image) {
+        images_.push_back(image); if(images_.size()>3)images_.pop_front(); try_process();
+      });
   }
  private:
   void publish_invalid(const std_msgs::msg::Header &header, const std::string &reason) {
@@ -55,13 +60,20 @@ class LinePerception : public rclcpp::Node {
     std_msgs::msg::String status; status.data = reason; status_pub_->publish(status);
   }
   void try_process() {
-    if (!pending_) return;
-    auto image = pending_;
+    sensor_msgs::msg::Image::ConstSharedPtr image;
     sensor_msgs::msg::CameraInfo::ConstSharedPtr info;
-    for (const auto &candidate : infos_)
-      if (candidate->header.stamp == image->header.stamp) info = candidate;
-    if (!info) return;  // The controller age watchdog handles a missing info stream.
-    pending_.reset();
+    // Independent DDS streams may deliver the next image before the previous
+    // CameraInfo. Match the newest complete pair without starving older pairs.
+    for(auto it=images_.rbegin();it!=images_.rend() && !info;++it) {
+      for(const auto &candidate:infos_)if(candidate->header.stamp==(*it)->header.stamp) {
+        image=*it;info=candidate;break;
+      }
+    }
+    if(!info)return;
+    while(!images_.empty()) {
+      auto front=images_.front();images_.pop_front();if(front==image)break;
+    }
+    const auto processing_start=std::chrono::steady_clock::now();
     try {
       double age = (now()-rclcpp::Time(image->header.stamp)).seconds();
       if (age < -.02 || age > max_age_ || rclcpp::Time(image->header.stamp).nanoseconds() <= 0)
@@ -135,6 +147,7 @@ class LinePerception : public rclcpp::Node {
         gray_pub_->publish(*cv_bridge::CvImage(image->header,"mono8",ground).toImageMsg());
       std_msgs::msg::String status;
       status.data = detection.reason + " confidence=" + std::to_string(detection.confidence) + " end=" + detection.end_reason;
+      status.data += " processing_ms=" + std::to_string(std::chrono::duration<double,std::milli>(std::chrono::steady_clock::now()-processing_start).count());
       status_pub_->publish(status);
       if (debug_pub_->get_subscription_count()) {
         cv::Mat debug; cv::cvtColor(ground, debug, cv::COLOR_GRAY2BGR);
@@ -160,7 +173,7 @@ class LinePerception : public rclcpp::Node {
   std::string frame_;
   tf2_ros::Buffer buffer_;
   tf2_ros::TransformListener listener_;
-  sensor_msgs::msg::Image::ConstSharedPtr pending_;
+  std::deque<sensor_msgs::msg::Image::ConstSharedPtr> images_;
   std::deque<sensor_msgs::msg::CameraInfo::ConstSharedPtr> infos_;
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr image_sub_;
   rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr info_sub_;

@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文
 
-2026-09-14 更新：[C++ 单分支视觉循线](../../../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整比赛路线和实车验收仍待完成。
+2026-09-16 更新：[C++ 单分支视觉循线](../../../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整地图连续循线现已通过仿真验证；实车验收仍待完成。
 
 启动组合与机器人运行配置。
 
@@ -31,3 +31,9 @@
 
 追加 `course:=competition` 使用[比赛参考图赛道](../../../simulation/COMPETITION_COURSE_cn.md)，
 默认 `course:=empty` 保留空场。`course_overview:=true` 添加俯视检查相机；比赛场景不能使用 sensor_targets。
+
+## 当前实现 — 2026-09-16
+
+完整地图使用 `competition_lap.launch.py`，局部循线实验使用 `line_following.launch.py`。两者均为仿真入口，实车启动集成仍待完成。
+
+入口、参数与验收见[competition lap](../../../simulation/COMPETITION_LAP_cn.md).

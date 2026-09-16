@@ -5,13 +5,15 @@ English | [Chinese](RESULTS_cn.md)
 The final frozen implementation passed **42/42 tracking trials and 12/12 fault trials**.
 All 54 trials used one binary version; the archived source matched the workspace at freeze time.
 Competition-map generation and documentation have since changed to default scale 2 with fixed stroke width;
-perception, control and evaluation algorithms are unchanged; pre-commit cleanup only removed whitespace in a controller header and evaluator script. The source-match field in `results.json` records the freeze-time check, not a live check of the current workspace.
+subsequent map-wave development also changes perception and control, so the results here apply only to the original frozen version. The source-match field in `results.json` records the freeze-time check, not a live check of the current workspace.
 This is Gazebo validation of the existing vehicle under an engineering corridor condition;
 it does not establish hardware performance or official competition compliance.
 
 [Criteria](acceptance.json) | [Machine-readable results](results.json) |
 [Implementation and launch](../../simulation/LINE_FOLLOWING.md) |
 [Independent evaluation and reproduction](../../simulation/ISOLATED_LINE_VALIDATION.md)
+
+This page records the original frozen version. Subsequent [map wave tracking changes](../../simulation/COMPETITION_WAVES.md) modify perception and control; these 54 trials are not repeated acceptance of the new version.
 
 ## Fixed-parameter tracking
 

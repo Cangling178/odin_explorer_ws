@@ -116,3 +116,9 @@ and 23 colcon test results (21 C++ cases plus two suite results).
 All 17 synthetic ROS checks in `validate_line_controller.py` and 20 arming trials in `validate_arming_clock.py` passed.
 Map tests cover stroke width and connectivity at scales 2, 2.5 and 4, default spawn, and preserved sensors and physics.
 The 54 Gazebo trials were not rerun for this commit; no new full-course tracking acceptance is claimed.
+
+## Current lap validation summary — 2026-09-16
+
+Three independent nominal starts passed at 0.05 m/s in 367.26–367.36 s. One 0.10 m/s trial passed in 197.43 s with 5.60/24.14 mm RMS/maximum error. Every run passed 185/185 ordered gates without a mid-lap stop. Repeatability at 0.10 m/s is untested; the default remains 0.05 m/s. Hardware milestone dependencies M2–M8 remain open.
+
+[Results](../../experiments/competition_lap/RESULTS.md).

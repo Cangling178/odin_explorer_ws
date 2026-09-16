@@ -2,7 +2,7 @@
 
 English | [Chinese](06_interfaces_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is validated in simulation; hardware acceptance remains pending.
 
 The isolated-scene implementation uses `racer_interfaces/LineObservation` v0.1.0
 on `/sim/racer/line/observation`. It atomically associates path, image health,

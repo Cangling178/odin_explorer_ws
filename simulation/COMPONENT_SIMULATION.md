@@ -2,7 +2,7 @@
 
 English | [Chinese](COMPONENT_SIMULATION_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+2026-09-16 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is now validated in simulation; hardware acceptance remains pending.
 
 Status date: 2026-09-13. Applies to the current Gazebo Classic 11 / ROS 2 Humble
 vehicle motion scene with onboard Odin sensors enabled by default. This document
@@ -130,8 +130,7 @@ image/cloud/IMU geometry and motion response have passed validation. Full comman
 thresholds, historical metrics and local report locations are in the [simulation guide](README.md).
 
 The [competition drawing scene](COMPETITION_COURSE.md) passes initial-straight overhead/onboard
-projection and short forward-motion checks. Autonomous full-course tracking
-remain absent. With the overview camera enabled, this run received about 333 Hz IMU and 10 Hz
+projection and short forward-motion checks. Selected-route autonomous full laps are now validated separately. With the overview camera enabled, this run received about 333 Hz IMU and 10 Hz
 image/cloud output; 400 Hz in configuration is a target, so use the actual run report.
 
 Current checks support model placement, basic motion interfaces, sensor transforms

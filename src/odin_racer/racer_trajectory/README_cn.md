@@ -16,3 +16,9 @@
 ## 配置
 
 所有 `*.template.yaml` 都是规格表，不是运行中的 ROS 参数文件。实现组件时再添加运行依赖、可执行程序和经过测试的参数。厂商代码和大型录制数据不放在本包中。
+
+## 当前实现 — 2026-09-16
+
+独立规划节点仍在规划中。有序进度和按曲率限制速度现已实现在 `lap_controller` 与 `lap_route.hpp` 中；预测制动仍待实现。
+
+入口、参数与验收见[competition lap](../../../simulation/COMPETITION_LAP_cn.md).

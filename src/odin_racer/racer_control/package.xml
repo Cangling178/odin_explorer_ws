@@ -16,4 +16,8 @@
   <depend>tf2_ros</depend>
   <test_depend>ament_cmake_gtest</test_depend>
   <export><build_type>ament_cmake</build_type></export>
+  <depend>eigen</depend>
+  <depend>racer_perception</depend>
+  <depend>sensor_msgs</depend>
+  <depend>libopencv-dev</depend>
 </package>

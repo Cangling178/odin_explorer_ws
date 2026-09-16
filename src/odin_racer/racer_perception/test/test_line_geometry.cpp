@@ -101,3 +101,13 @@ TEST_F(LineTest, HintDirectionUsesSupportedChordNotPixelEdge) {
     EXPECT_TRUE(d.valid()) << row << " " << d.reason;
   }
 }
+
+TEST_F(LineTest, ShortVisibleCurveUsesConfiguredLengthAndConfidence) {
+  line(0., -1.2);
+  gray.rowRange(27, gray.rows).setTo(180);
+  EXPECT_FALSE(run().valid());
+  auto result=detect(gray,visible,grid,65,.008,.05,.10,.12);
+  ASSERT_TRUE(result.valid()) << result.reason;
+  EXPECT_GE(result.confidence,.5);
+  EXPECT_FALSE(result.corner_valid);
+}

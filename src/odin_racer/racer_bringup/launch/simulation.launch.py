@@ -54,6 +54,7 @@ def start(context):
              remappings=[("/tf", "/sim/racer/tf"), ("/tf_static", "/sim/racer/tf_static")], output="screen"),
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(gazebo/"launch/gazebo.launch.py")),
                                  launch_arguments={"world": str(world), "gui": LaunchConfiguration("gui"),
+                                                   "lockstep": LaunchConfiguration("lockstep"),
                                                    "params_file": LaunchConfiguration("gazebo_params")}.items()),
         RegisterEventHandler(OnProcessExit(target_action=spawner, on_exit=check_spawner)),
         spawner,
@@ -65,6 +66,8 @@ def generate_launch_description():
     control = Path(get_package_share_directory("racer_control"))
     return LaunchDescription([
         DeclareLaunchArgument("gui", default_value="true"),
+        DeclareLaunchArgument("lockstep", default_value="false",
+                              description="Synchronize physics with camera rendering"),
         DeclareLaunchArgument("gazebo_params", default_value=""),
         DeclareLaunchArgument("sensors", default_value="true", description="Enable onboard Odin sensor output"),
         DeclareLaunchArgument("sensor_targets", default_value="false", description="Add known sensor test fixtures"),

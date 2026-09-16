@@ -2,7 +2,11 @@
 
 English | [Chinese](README_cn.md)
 
-2026-09-14 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Full-course routing and hardware acceptance remain pending.
+Current lap baseline: 3/3 independent nominal starts passed at 0.05 m/s; one 0.10 m/s trial passed in 197.43 s. The default remains 0.05 m/s. A 0.20 m/s trial has not been run and exceeds the current controller parameter limit. See [full results](../experiments/competition_lap/RESULTS.md).
+
+2026-09-16 update: [continuous full-map lap](COMPETITION_LAP.md) passed the initial run, three nominal repeat runs and one 0.10 m/s speed trial with 185/185 gates and no mid-lap stop. C++ tracks a prerecorded route with onboard visual alignment; hardware and official competition acceptance remain pending.
+
+2026-09-16 update: [C++ single-branch visual tracking](LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is now validated in simulation; hardware acceptance remains pending.
 
 See [component simulation scope and hardware differences](COMPONENT_SIMULATION.md)
 for modeled behavior and approximations by component, and the [model gap list](MODEL_GAPS_TEMP.md)
@@ -10,7 +14,7 @@ for follow-up priorities.
 
 The complete competition drawing is available as `course:=competition`; see
 [course launch, scale and validation](COMPETITION_COURSE.md). This is an image reconstruction;
-single-branch visual tracking is available through the new launch; full-course tracking remains pending.
+single-branch tracking and continuous full-map tracking are available through separate launches.
 
 The current backend is Gazebo Classic 11 / ROS 2 Humble. Standalone Odin sensor
 outputs, chassis contact using the existing masses, and basic ros2_control motion

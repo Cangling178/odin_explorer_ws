@@ -63,3 +63,7 @@ expected lighting. Confirm that a visible line can be projected into a stable
 ground frame with error small enough for the proposed budget. If that fails,
 resolve mounting/calibration or choose a rule-compatible sensing alternative
 before spending time tuning a high-speed controller.
+
+## Real-camera integration gap — 2026-09-16
+
+Local vendor source publishes `odin1/image`; this source inspection found no companion CameraInfo publisher. Current perception requires exact image/CameraInfo timestamps, the `fishpoly` model and acquisition-time TF. An adapter must supply matching calibration while preserving image acquisition timestamps and distinguish raw from rectified image models. The existing device calibration copy does not establish measured mounting extrinsics or ground height. Next validate real images, frame rate/latency and ground projection, then moving replay and chassis closure. Current simulation launches are not hardware entry points.

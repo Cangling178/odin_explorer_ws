@@ -2,7 +2,7 @@
 
 [English](06_interfaces.md) | 简体中文
 
-2026-09-14 更新：[C++ 单分支视觉循线](../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整比赛路线和实车验收仍待完成。
+2026-09-16 更新：[C++ 单分支视觉循线](../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整地图连续循线已通过仿真验证；实车验收仍待完成。
 
 独立场景使用 `racer_interfaces/LineObservation` v0.1.0，通过 `/sim/racer/line/observation` 将路径、
 图像健康、置信度、角点和出口证据与 `path.header` 中的采集时间原子关联；`local_path` 保留为调试视图。

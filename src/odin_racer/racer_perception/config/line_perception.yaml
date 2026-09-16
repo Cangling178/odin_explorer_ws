@@ -1,16 +1,16 @@
 # Runtime single-branch detector; flat simulation ground and FishPoly images.
 /**:
   ros__parameters:
-    near_x: 0.25
+    near_x: 0.10
     far_x: 0.75
-    half_width: 0.30
+    half_width: 0.50
     grid_step: 0.005
     ground_z: -0.03325
     black_threshold: 65.0
     min_line_width: 0.008
     max_line_width: 0.05
-    min_visible_length: 0.18
-    seed_lateral_limit: 0.12
+    min_visible_length: 0.10
+    seed_lateral_limit: 0.45
     min_confidence: 0.5
     max_image_age: 0.35
     base_frame: base_link

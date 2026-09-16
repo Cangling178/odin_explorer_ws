@@ -18,7 +18,7 @@ def render(path):
         ref=np.array(report['fixture']['reference']);trajectory=np.array([[s['x'],s['y']] for s in samples])
         fig,axes=plt.subplots(2,2,figsize=(11,8),constrained_layout=True)
         a=axes[0,0];a.plot(ref[:,0],ref[:,1],color='.7',label='Reference (evaluation only)')
-        phases={'RUNNING':'#1368a5','APPROACH':'#e69f00','CORNER_STOP':'#777777','TURN':'#9b4f96','REACQUIRE':'#009e73'}
+        phases={'CURVE_ALIGN':'#bb5566','RUNNING':'#1368a5','APPROACH':'#e69f00','CORNER_STOP':'#777777','TURN':'#9b4f96','REACQUIRE':'#009e73'}
         for phase,color in phases.items():
             rows=np.array([[s['x'],s['y']] for s in samples if s['state']==phase])
             if len(rows):a.scatter(rows[:,0],rows[:,1],s=5,color=color,label=phase)
@@ -32,6 +32,7 @@ def render(path):
         a.set(xlabel='Time [s]',ylabel='Distance from reference [m]',title='Physical envelope (not only axle center)');a.legend(fontsize=8)
         fig.suptitle(report['course']+' — '+('PASS' if report['passed'] else 'FAIL'))
         fig.savefig(folder/'evaluation.png',dpi=160);plt.close(fig)
+    grid=report.get('ground_grid',dict(near_x=.25,half_width=.30,grid_step=.005))
     for entry in report.get('captures',[]):
         name=entry['files'].get('ground')
         if not name:continue
@@ -42,7 +43,7 @@ def render(path):
         except ValueError:telemetry={}
         target=telemetry.get('target')
         if target:
-            col=int((.30-target[1])/.005*scale);row=int((target[0]-.25)/.005*scale)+100
+            col=int((grid['half_width']-target[1])/grid['grid_step']*scale);row=int((target[0]-grid['near_x'])/grid['grid_step']*scale)+100
             if 0<=col<width*scale and 100<=row<canvas.shape[0]:cv2.drawMarker(canvas,(col,row),(255,150,0),cv2.MARKER_CROSS,14,2)
         lines=[f"t={entry['time']:.2f}s  {telemetry.get('state','no control telemetry')}",
                f"age={telemetry.get('observation_age','?')}  L={telemetry.get('lookahead','?')}",
