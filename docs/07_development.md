@@ -42,3 +42,7 @@ See [vendor build](../vendor_ws/README.md). Build outputs, maps and bags are loc
 - Update Chinese and English documentation together; add focused validation as actual motion functions are implemented.
 
 Model preview is the only runnable entry point. Successful builds do not establish base, localization or navigation acceptance.
+
+## Official navigation stack
+
+Follow [integration instructions](../third_party/README.md) and run `bash tools/setup_odin_nav_stack.sh`. This only prepares isolated ROS1 sources, patch and configuration, without installing runtimes or starting motion. Build it separately from the ROS2 packages.

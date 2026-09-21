@@ -1,0 +1,3 @@
+[submodule "third_party/Odin-Nav-Stack"]
+	path = third_party/Odin-Nav-Stack
+	url = https://github.com/ManifoldTechLtd/Odin-Nav-Stack.git

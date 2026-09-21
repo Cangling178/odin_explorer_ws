@@ -1,0 +1,131 @@
+diff --git a/config/control_command.yaml b/config/control_command.yaml
+index 5e7f364..a64121c 100644
+--- a/config/control_command.yaml
++++ b/config/control_command.yaml
+@@ -6,7 +6,7 @@ register_keys:
+   # 0: use odin internal system time as data time stamp, typical and recommended;
+   # 1: use host ros time (upon receive) as data time stamp, only use if you specifically require this setup, not recommended for most users
+   # 2: align odin1 time to host time, timestamp is the sensor data reception time on host time axis
+-  use_host_ros_time: 0  # Changed to 0 to use device timestamp without PTP offset correction
++  use_host_ros_time: 1  # Odin-Nav-Stack tutorial; validate timing on the device.
+ 
+   streamctrl: 1           # 0: off; 1: on
+ 
+@@ -122,7 +122,7 @@ register_keys:
+   showpath: 0             # 0: off; 1: on
+   showcamerapose: 0       # 0: off; 1: on
+   
+-  custom_map_mode: 1      # 0: Odometry mode 1: SLAM mode 2: Relocalization mode
++  custom_map_mode: 1      # Start with mapping; relocalization needs a saved map.
+   custom_init_pos: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+   custom_init_pose_search_radius: 4.0 # max position offset in meters, recommended <= 10
+   custom_init_pose_max_rot_deg: 180.0 # max rotation offset in degrees, up to 180
+diff --git a/include/host_sdk_sample.h b/include/host_sdk_sample.h
+index f162c2c..d1df972 100644
+--- a/include/host_sdk_sample.h
++++ b/include/host_sdk_sample.h
+@@ -1571,18 +1571,7 @@ void publishRgb(capture_Image_List_t *stream) {
+                 case OdometryType::STANDARD:
+                     {
+                     if (getRosNodeControl()->sendOdomBaseLinkTF()) {
+-                        geometry_msgs::TransformStamped transformStamped;
+-                        transformStamped.header.stamp = msg.header.stamp;
+-                        transformStamped.header.frame_id = "odom";
+-                        transformStamped.child_frame_id = "imu";
+-                        transformStamped.transform.translation.x = msg.pose.pose.position.x;
+-                        transformStamped.transform.translation.y = msg.pose.pose.position.y;
+-                        transformStamped.transform.translation.z = msg.pose.pose.position.z;
+-                        transformStamped.transform.rotation.x = msg.pose.pose.orientation.x;
+-                        transformStamped.transform.rotation.y = msg.pose.pose.orientation.y;
+-                        transformStamped.transform.rotation.z = msg.pose.pose.orientation.z;
+-                        transformStamped.transform.rotation.w = msg.pose.pose.orientation.w;
+-                        tf_broadcaster->sendTransform(transformStamped);
++                        // odom -> imu is published from HIGHFREQ below.
+ 
+                         // Publish til (imu -> lidar) and wc (odom -> camera_0)
+                         std::lock_guard<std::mutex> lock(extrinsics_mutex_);
+@@ -1697,7 +1686,23 @@ void publishRgb(capture_Image_List_t *stream) {
+                     }
+                     break;
+                 case OdometryType::HIGHFREQ:
++                    {
++                    if (getRosNodeControl()->sendOdomBaseLinkTF()) {
++                        geometry_msgs::TransformStamped transformStamped;
++                        transformStamped.header.stamp = msg.header.stamp;
++                        transformStamped.header.frame_id = "odom";
++                        transformStamped.child_frame_id = "imu";
++                        transformStamped.transform.translation.x = msg.pose.pose.position.x;
++                        transformStamped.transform.translation.y = msg.pose.pose.position.y;
++                        transformStamped.transform.translation.z = msg.pose.pose.position.z;
++                        transformStamped.transform.rotation.x = msg.pose.pose.orientation.x;
++                        transformStamped.transform.rotation.y = msg.pose.pose.orientation.y;
++                        transformStamped.transform.rotation.z = msg.pose.pose.orientation.z;
++                        transformStamped.transform.rotation.w = msg.pose.pose.orientation.w;
++                        tf_broadcaster->sendTransform(transformStamped);
++                    }
+                     odom_highfreq_publisher_.publish(msg);
++                    }
+                     break;
+                 case OdometryType::TRANSFORM:
+                     {
+diff --git a/package.xml b/package.xml
+index fa5516c..ac6518f 100755
+--- a/package.xml
++++ b/package.xml
+@@ -1,33 +1,33 @@
+ <?xml version="1.0"?>
+ <package format="3">
+   <name>odin_ros_driver</name>
+-  <version>0.14.2</version>
+-  <description>ROS2 driver for Odin sensor</description>
++  <version>0.14.4</version>
++  <description>ROS driver for Odin sensor</description>
+   <maintainer email="oliveiratang@manifoldtech.cn">rlk</maintainer>
+   <license>Apache 2.0</license>
+-  <!-- ROS2 uses colcon as the build tool -->
+-  <buildtool_depend>ament_cmake</buildtool_depend>
+-  <!-- ROS2 dependencies -->
+-  <depend>rclcpp</depend>
+-  <!-- System dependencies -->
++
++  <!-- ROS1 uses catkin as the build tool -->
++  <buildtool_depend>catkin</buildtool_depend>
++
++  <!-- ROS1 dependencies -->
++  <depend>roscpp</depend>
+   <depend>std_msgs</depend>
+   <depend>sensor_msgs</depend>
+   <depend>nav_msgs</depend>
+-  <depend>geometry_msgs</depend>
+   <depend>cv_bridge</depend>
+   <depend>image_transport</depend>
+-  <depend>pcl_conversions</depend>
+-  <depend>message_filters</depend>
+-  <depend>tf2</depend>
+-  <depend>tf2_ros</depend>
+-  <depend>tf2_geometry_msgs</depend>
+-  <depend>ament_index_cpp</depend>
++
+   <!-- AE/AWB debug services (custom .srv files in srv/) -->
+-  <buildtool_depend>rosidl_default_generators</buildtool_depend>
+-  <exec_depend>rosidl_default_runtime</exec_depend>
+-  <member_of_group>rosidl_interface_packages</member_of_group>
+-  <!-- Specify build type as ament -->
+-  <export>  
+-    <build_type>ament_cmake</build_type>  
+-  </export> 
+-</package>
+\ No newline at end of file
++  <build_depend>message_generation</build_depend>
++  <exec_depend>message_runtime</exec_depend>
++
++  <!-- System dependencies -->
++  <depend>eigen</depend>
++  <depend>opencv</depend>
++  <depend>yaml-cpp</depend>
++
++  <!-- Specify build type as catkin -->
++  <export>
++    <build_type>catkin</build_type>
++  </export>
++</package>

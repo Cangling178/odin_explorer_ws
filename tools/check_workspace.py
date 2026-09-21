@@ -29,7 +29,8 @@ def main():
             ast.parse(launch.read_text(), filename=str(launch))
 
     roots = [ROOT / 'docs', ROOT / 'hardware', ROOT / 'firmware', ROOT / 'src']
-    documents = [*ROOT.glob('*.md'), *(ROOT / 'vendor_ws').glob('*.md')]
+    documents = [*ROOT.glob('*.md'), *(ROOT / 'vendor_ws').glob('*.md'),
+                 *(ROOT / 'third_party').glob('*.md')]
     for folder in roots:
         documents.extend(folder.rglob('*.md'))
     for doc in documents:

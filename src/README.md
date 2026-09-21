@@ -22,3 +22,5 @@ Each package declares ROS dependencies in `package.xml`, installs resources with
 Model dimensions and inertia include assumptions. Real mounting extrinsics require measurement. Preview publishes synthetic wheel joint states, not real base feedback.
 
 [Project structure](../README.md#project-structure) · [Architecture and data flow](../docs/02_architecture.md) · [Development](../docs/07_development.md)
+
+Official ROS1 navigation algorithms live in the separate `third_party/Odin-Nav-Stack` submodule; see [integration](../third_party/README.md). Their presence does not change the first-party ROS2 implementation status above.
