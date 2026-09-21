@@ -81,5 +81,3 @@ mkdir -p vendor_ws/src
 git clone https://github.com/manifoldsdk/odin_ros_driver.git vendor_ws/src/odin_ros_driver
 git -C vendor_ws/src/odin_ros_driver checkout --detach f51051f2d861f7643d4d33d2ade2952efe1a4672
 ```
-
-The official navigation stack and its ROS1 driver copy live in `third_party/Odin-Nav-Stack`; see [integration](../third_party/README.md). This underlay retains the independent ROS2 driver. Do not connect both copies to the same device simultaneously.

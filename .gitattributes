@@ -6,6 +6,3 @@
 *.SLDPRT binary
 *.STEP binary
 *.stp binary
-
-# Preserve upstream context/deletion whitespace inside unified patch artifacts.
-third_party/patches/*.patch -whitespace

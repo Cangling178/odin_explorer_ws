@@ -70,5 +70,3 @@ mkdir -p vendor_ws/src
 git clone https://github.com/manifoldsdk/odin_ros_driver.git vendor_ws/src/odin_ros_driver
 git -C vendor_ws/src/odin_ros_driver checkout --detach f51051f2d861f7643d4d33d2ade2952efe1a4672
 ```
-
-官方导航栈及其 ROS 1 驱动副本放在 `third_party/Odin-Nav-Stack`，见[导航栈接入](../third_party/README_cn.md)。本目录仍保留独立 ROS 2 驱动；二者不可同时占用同一设备。

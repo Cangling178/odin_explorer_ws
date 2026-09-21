@@ -22,7 +22,6 @@ odin_explorer_ws/
 │   ├── explorer_localization/  # 连续里程计与建图接入
 │   └── explorer_navigation/    # 避障导航、自主探索和巡航
 ├── vendor_ws/src/odin_ros_driver/  # 独立厂商源码与 SDK
-├── third_party/Odin-Nav-Stack/ # 官方 ROS 1 导航栈，独立子模块
 ├── firmware/                   # 下位机固件；目前只有协议说明
 ├── hardware/                   # CAD、标定、BOM 和待测规格
 ├── docs/                       # 架构、接口、开发与联调
@@ -55,6 +54,4 @@ ros2 launch explorer_bringup preview.launch.py
 | [厂商驱动](vendor_ws/README_cn.md) | 独立版本与构建入口 |
 | [迁移记录](docs/MIGRATION_cn.md) | 保留、删除和原工程追溯 |
 
-不包含赛道、世界生成、Gazebo 插件、黑线循迹或整圈测试。保留一个结构与模型检查工具及一个第三方源码准备脚本；实车通信及停车功能实现时再补对应测试。规格中的 `null` 尚待实测，`*.template.yaml` 不能作为运行参数。
-
-官方导航栈已按上游目录独立接入，准备方法与 ROS 1/ROS 2 差异见[导航栈接入](third_party/README_cn.md)。运行 `bash tools/setup_odin_nav_stack.sh` 可恢复其子模块和驱动补丁；它尚未完成 F4 底盘适配。
+不包含赛道、世界生成、Gazebo 插件、黑线循迹或整圈测试。仅保留一个结构与模型检查工具；实车通信及停车功能实现时再补对应测试。规格中的 `null` 尚待实测，`*.template.yaml` 不能作为运行参数。

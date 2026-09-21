@@ -20,5 +20,3 @@ Use measured footprint, braking and sensor coverage. Unknown is not free; avoid 
 Start disarmed. Stale input, invalid localization, boundary violation or communication faults stop motion; restored data does not rearm. An independent F4 watchdog is required. These motion functions remain unimplemented.
 
 Decision: laboratory exploration replaces ordered-track following. Retain the Humble candidate and separate vendor underlay; the Jetson combination still needs validation.
-
-New integration candidate: [official Odin-Nav-Stack](../third_party/README.md) uses ROS1 and NeuPAN, not Nav2. Sources are integrated independently; bridging versus porting remains undecided. It does not implement the Nav2 architecture above. First evaluate its manual mapping, cloud saving and grid conversion workflow.

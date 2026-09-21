@@ -22,5 +22,3 @@
 模型尺寸和惯性含建模假设；真实设备安装外参仍需测量。预览发布虚拟轮关节状态，不能作为真实底盘反馈。
 
 [工程结构](../README_cn.md#工程结构) · [架构与数据流](../docs/02_architecture_cn.md) · [开发流程](../docs/07_development_cn.md)
-
-官方 ROS 1 导航算法位于独立 `third_party/Odin-Nav-Stack` 子模块，见[接入记录](../third_party/README_cn.md)。它不改变上表自研 ROS 2 包的实现状态。

@@ -22,7 +22,6 @@ odin_explorer_ws/
 │   ├── explorer_localization/  # Odometry and mapping integration
 │   └── explorer_navigation/    # Navigation, exploration and patrol
 ├── vendor_ws/src/odin_ros_driver/  # Separate vendor sources and SDK
-├── third_party/Odin-Nav-Stack/ # Official ROS1 navigation stack submodule
 ├── firmware/                   # MCU firmware; protocol notes only
 ├── hardware/                   # CAD, calibration, BOM and specifications
 ├── docs/                       # Architecture, interfaces and bringup
@@ -45,6 +44,4 @@ Preview connects to no actuators or sensor devices. See [development](docs/07_de
 
 [Packages](src/README.md) · [Architecture](docs/02_architecture.md) · [Interfaces](docs/06_interfaces.md) · [Assignments](docs/planning/TEAM_ASSIGNMENTS.md) · [Bringup](docs/09_bringup.md) · [Hardware](hardware/README.md) · [Firmware](firmware/README.md) · [Vendor](vendor_ws/README.md) · [Migration](docs/MIGRATION.md).
 
-No tracks, world generators, Gazebo plugins, line following or lap tests. One structural/model check and a third-party setup script remain. Add transport and stopping tests when those functions are implemented. Null values require measurements; `*.template.yaml` files are not runtime parameters.
-
-The official stack is integrated as an isolated submodule. See [navigation stack integration](third_party/README.md) for setup and ROS1/ROS2 differences. Run `bash tools/setup_odin_nav_stack.sh` to restore dependencies and the driver patch. F4 adaptation remains pending.
+No tracks, world generators, Gazebo plugins, line following or lap tests. One structural/model check remains. Add transport and stopping tests when those functions are implemented. Null values require measurements; `*.template.yaml` files are not runtime parameters.

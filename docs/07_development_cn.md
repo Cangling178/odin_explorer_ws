@@ -42,7 +42,3 @@ ros2 launch explorer_bringup preview.launch.py rviz:=false
 - 中英文说明同步更新；新运动功能实现后再添加有针对性的验证。
 
 当前唯一可运行入口是模型预览；构建成功不能代替底盘、定位或导航验收。
-
-## 官方导航栈
-
-按[导航栈接入](../third_party/README_cn.md)运行 `bash tools/setup_odin_nav_stack.sh`。该工具只准备独立 ROS 1 源码、补丁和配置，不安装环境或启动运动。它与现有 ROS 2 构建分开。
