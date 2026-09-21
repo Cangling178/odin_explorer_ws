@@ -2,16 +2,7 @@
 
 English | [Chinese](README_cn.md)
 
-Local visual black-line detection and metric ground centerlines.
+C++17 `line_perception` projects same-frame FishPoly images/CameraInfo onto a flat ground grid using acquisition-time TF. It publishes `LineObservation`, ground masks and debug views. `line_offline` supports image replay; geometry is in `include/racer_perception/line_geometry.hpp`.
 
-C++17 node `line_perception` is implemented with algorithm logic separate from ROS plumbing.
-Runtime parameters are in `config/line_perception.yaml`; `*.template.yaml` remain design specifications.
-
-Implementation, topics, parameters, launch and tests: [visual line following](../../../simulation/LINE_FOLLOWING.md).
-Ordered full-course routing and crossing selection are implemented in the simulation lap controller. Hardware calibration and F4 integration remain pending.
-
-## Current implementation — 2026-09-16
-
-The same C++ perception node supplies both controllers. The lap controller uses the ground black mask for map alignment and LineObservation for image health.
-
-Launch, parameters and acceptance: [competition lap](../../../simulation/COMPETITION_LAP.md).
+Both controllers share this node: local tracking uses path/corner evidence, while lap tracking uses image health and `black_mask` for map alignment. Configuration: `config/line_perception.yaml`. [Algorithm and interfaces](../../../simulation/LINE_FOLLOWING.md) · [Camera convention](../../../simulation/FISHPOLY_CAMERA.md).
+Real-image calibration, installation and timing still need [hardware validation](../../../docs/09_bringup.md).

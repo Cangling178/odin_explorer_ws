@@ -1,8 +1,8 @@
 item_id,component,ownership_status,model,quantity,interface,notes
 HW-001,Four-wheel chassis,available,rear_differential_with_two_front_casters,1,mechanical,Measure axle separation caster locations and footprint
-HW-002,Rear drive motors,available,unknown,2,unknown,Confirm voltage gearing and encoder feedback
+HW-002,Rear drive motors,available,MG513X_reference,2,GMR_encoder,Recorded 500-line 1:28 reference; verify electrical ratings and output-revolution counting
 HW-003,Jetson Orin Nano,planned_or_unconfirmed,unknown,1,unknown,Confirm carrier RAM and ownership
-HW-004,Manifold ODIN1,planned_or_unconfirmed,ODIN1,1,verify_vendor_interface,Confirm ownership firmware and supplied cables
+HW-004,Manifold ODIN1,workstation_observed,ODIN1,1,USB,Workstation point-cloud display recorded; verify firmware calibration and Jetson integration
 HW-005,Motor driver,unknown,unknown,,unknown,Select from motor voltage current and feedback needs
 HW-006,Lower-level controller,available,F4_exact_board_unknown,1,transport_unknown,Confirm exact chip board pinout and existing firmware
 HW-007,Battery and regulators,unknown,unknown,,power,Measure load and verify board ratings

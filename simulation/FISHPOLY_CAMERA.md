@@ -73,7 +73,7 @@ Standard ROS image pipelines do not automatically support this contract. Use
 
 ```bash
 source /opt/ros/humble/setup.bash
-colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+colcon build --base-paths src
 source install/setup.bash
 python3 tools/check_workspace.py
 python3 -m unittest discover -s tests -v
@@ -90,7 +90,7 @@ Run the moving sensor test using the [onboard instructions](README.md), with an 
 Run the competition test using the [course instructions](COMPETITION_COURSE.md).
 Both validators now use FishPoly: densely sampled curved target edges, and calibrated pixel rays intersected with the floor.
 
-Local results on 2026-09-14:
+Local results on Historical validation date 2026-09-14; model scope:
 
 | Check | Result |
 | --- | --- |

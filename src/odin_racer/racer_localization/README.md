@@ -2,26 +2,6 @@
 
 English | [Chinese](README_cn.md)
 
-Continuous body state and global alignment.
+Planned: standalone continuous local state, covariance/reset semantics and TF ownership. Current simulation wheel odometry comes from the drive controller; map alignment lives inside `lap_controller`.
 
-## Status
-
-Planned: selected wheel/ODIN1 inputs, covariance policy, single TF authority and reset handling. No EKF configuration is presented as validated.
-
-## Responsibility and acceptance
-
-Backlog: LOC-001, CAL-001. See the root architecture and interface documents.
-This package currently installs assets/documentation through ament_cmake.
-A successful build is not evidence that a planned subsystem runs.
-
-## Configuration
-
-Any `*.template.yaml` is a specification form, not a live ROS parameter file.
-Add runtime dependencies, executables and tested parameters when implementing
-the component. Keep vendor code and large recordings outside this package.
-
-## Current implementation — 2026-09-16
-
-The standalone estimator is planned. Current simulation map alignment lives inside `lap_controller`; wheel odometry comes from the simulated diff-drive controller.
-
-Launch, parameters and acceptance: [competition lap](../../../simulation/COMPETITION_LAP.md).
+This package currently installs documentation and specification templates only. `*.template.yaml` files are not runtime parameters. See [architecture](../../../docs/02_architecture.md), [interfaces](../../../docs/06_interfaces.md) and [remaining work](../../../docs/planning/README.md).

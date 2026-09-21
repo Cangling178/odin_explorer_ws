@@ -17,7 +17,7 @@ preserved without forcing the model to match approximate published dimensions.
 
 odin_link is the bottom mounting-hole group center, X forward/Y left/Z up.
 Conversion in mm: (x,y,z)=(CAD_Z-20.4,-CAD_X,31-CAD_Y).
-Not the driver's IMU/lidar/camera frame; internal TF and sensor simulation pending.
+This is not the driver's IMU/lidar/camera frame. Xacro now includes simulated sensor TF and the device calibration copy supplies FishPoly geometry. Vehicle installation extrinsics remain unmeasured; see [model scope](../../../simulation/MODEL.md).
 Front four holes interpreted as the central 84x30.3 mm group, not caster mounts:
 CAD X=-41.742355/42.257645, Z=-140.688953/-110.388953 mm.
 Adjacent plate top verified at CAD Y=3.5 mm. Direct flat mounting, facing forward,

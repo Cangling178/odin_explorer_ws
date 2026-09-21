@@ -5,7 +5,7 @@ English | [Chinese](COMPETITION_COURSE_cn.md)
 The complete track has been reconstructed from the supplied [competition drawing](../tracks/reference/course_reference.jpg),
 including straights, the central crossing, loops, tight bends and lower S-bends. It uses the existing
 vehicle physics, ros2_control and onboard Odin image, CameraInfo, cloud and IMU. The scene supports
-black-line perception development. Single-branch low-speed tracking is implemented; see [line following](LINE_FOLLOWING.md) and [right-straight/lower-wave tracking](COMPETITION_WAVES.md). Full-course routing and crossing selection are validated with the selected simulation route; see [continuous lap](COMPETITION_LAP.md).
+black-line perception development. Single-branch low-speed tracking is implemented; see [line following](LINE_FOLLOWING.md) and [right-straight/lower-wave tracking](LINE_FOLLOWING.md). Full-course routing and crossing selection are validated with the selected simulation route; see [continuous lap](COMPETITION_LAP.md).
 
 ## Launch
 
@@ -70,7 +70,7 @@ centerline suitable as hardware ground truth has been generated.
 Original texture and mesh are checked in; source extraction is unnecessary for normal use. Runtime uses OpenCV to generate temporary assets with a fixed physical stroke width.
 `course_parameters` accepts `scale` (default 2.0), `line_width` (default about 0.02116 m), and `spawn_x/y/yaw`.
 Default spawn scales with the map; explicit spawn coordinates are world metres and are not scaled again.
-See [line following](LINE_FOLLOWING.md#scaled-map-with-original-nominal-stroke-width) for the corresponding upper-right spawn.
+See [line following](LINE_FOLLOWING.md#competition-wave-segment) for the corresponding upper-right spawn.
  After changing the
 specification, regenerate, rebuild and restart:
 
@@ -103,6 +103,8 @@ In another terminal with the same ROS/workspace environment and `ROS_DOMAIN_ID=7
 python3 tools/validate_competition_course.py
 ```
 
+This projection validator uses original resource coordinates and requires `scale: 1.0` as above; it does not validate the default scale-2 map.
+
 The validator commands 0.08 m/s on the upper straight for 1.5 simulated seconds, then stops. Restart
 before repeating. It compares overhead black pixels to the texture and checks onboard projection
 using CameraInfo, TF and settled Gazebo poses. It also checks cloud ground returns, stationary IMU,
@@ -110,12 +112,7 @@ received sensor rates and short forward motion. Overhead comparison excludes the
 onboard comparison covers useful forward ground within 1 m, not complete-course visibility.
 The JSON report and two pairs of PNGs are written to `data/generated/competition_course_validation*`.
 
-Historical validation (2026-09-13, former pinhole version; see [FishPoly results](FISHPOLY_CAMERA.md)): forward displacement about 0.116 m; overhead black IoU
-about 0.853/0.851 and onboard IoU about 0.926/0.933, with thresholds 0.85/0.70 respectively.
-Raster sampling and rendered boundaries affect these values. Received image, CameraInfo and cloud
-rates were about 10 Hz, overview 2 Hz and IMU 333 Hz, measured in simulation time. The configured
-IMU target is 400 Hz, which this scene did not receive; the rate check allows +/-20% of the target.
-Real-time factor was about 0.84 for this computer, scene and validator load, not Jetson performance.
+Current camera evidence is in [FishPoly validation](FISHPOLY_CAMERA.md); former pinhole metrics are not the current baseline.
 
 Structural tests are in `tests/test_course_world.py`:
 

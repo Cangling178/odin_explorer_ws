@@ -1,16 +1,8 @@
-# C++ low-speed visual following in isolated scenes
+# C++ local visual tracking
 
 English | [Chinese](LINE_FOLLOWING_cn.md)
 
-For the prerecorded-route assisted continuous full-map entry, see [competition lap](COMPETITION_LAP.md).
-
-Current competition right-straight/lower-wave development: [map wave tracking](COMPETITION_WAVES.md).
-
-Historical isolated acceptance scope: the existing simulated vehicle follows straight lines, left/right arcs,
-an S bend and one left/right right-angle corner from onboard FishPoly images.
-Intersection selection, complete competition laps, hardware and official corridor
-certification are excluded. Implementation is separate from acceptance: all
-attempts and failures are retained in the [validation notes](ISOLATED_LINE_VALIDATION.md).
+Use `line_controller` for straight, arc, S-curve and single-corner experiments. It can stop and turn and does not have a full-course route. Use [lap control](COMPETITION_LAP.md) for continuous ordered laps. Historical frozen acceptance and reproduction are in [isolated results](../experiments/isolated_line/RESULTS.md); those results do not certify later controller changes.
 
 ## Build and run
 
@@ -186,24 +178,45 @@ Images publish only with subscribers. Commands go to
 streams. Runtime nodes never subscribe to Gazebo truth, overview cameras, fixture
 geometry or reference paths.
 
-## Scaled map with original nominal stroke width
+## Competition wave segment
 
-To preserve the previous upper-right position and heading on the 2-times map (multiply the former 2.5-times coordinates by 2/2.5):
+After building and sourcing ROS and the workspace:
 
 ```bash
 ros2 launch racer_bringup line_following.launch.py course:=competition gui:=true \
   course_parameters:='{scale: 2.0, line_width: 0.02116, spawn_x: 1.614118, spawn_y: 1.284377, spawn_yaw: -1.570796}'
 ```
 
-`line_width` is in world metres independently of `scale`. Map preparation extracts
-an unsmoothed connected skeleton from the original texture, then repaints it at
-four-times texture resolution using the requested physical width. Original PNG/DAE
-assets remain unchanged; generated texture and DAE live in the simulation resource
-directory. Original pixel errors and local spurs remain. This produces a uniform
-nominal engineering width rather than restoring each varying original stroke.
-The 2.5-times map straight measures approximately 22 mm with rasterization error.
-The earlier map-only change preserved vehicle geometry and isolated fixtures, and verified
-texture width, connectivity and generated resources. Current tracking changes and segment
-evidence are documented in [competition waves](COMPETITION_WAVES.md). Restart the simulation to load new resources.
+Enable after READY using the service shown above.
+Normal launch does not automatically stop at this segment endpoint.
 
-Line-following defaults to `lockstep:=true` and a 64 MiB Fast DDS shared-memory profile. Images use SensorDataQoS; the image deadline remains 0.35 s and the wall watchdog 1 s. Configuration and transport details are in [competition waves](COMPETITION_WAVES.md).
+This command starts an isolated simulation, actively enables tracking and stops at the evaluation endpoint.
+A working DISPLAY is required:
+
+```bash
+python3 tools/validate_isolated_line.py --course competition --duration 240 \
+  --output data/generated/my_competition_waves
+python3 tools/report_isolated_line.py data/generated/my_competition_waves
+```
+
+Reference geometry is extracted from the connected right/bottom source-image skeleton solely for
+error, order and endpoint checks; runtime algorithms never receive it. The spawn precedes the visible
+straight, so its tangent is extended backward only for initial-error and footprint measurement.
+The scene is unchanged. The endpoint is at the left end of the waves before the small source-image gap.
+Reports include axle error and chassis sweep; the inherited 230 mm corridor half-width is an engineering condition only.
+
+## Simulation timing
+
+Normal validation uses onboard image, TF and odometry directly, enabling relays only for the selected fault injection.
+Perception/control default to Release; perception, camera plugin and evaluator limit OpenCV workers.
+Line-following enables `lockstep:=true` to synchronize physics and rendering; actual speed depends on host load.
+Map, output resolution/calibration, physics integration step and vehicle speed retain their original values.
+
+A 1600 by 1296 RGB frame is about 6.22 MB, exceeding Fast DDS's default 512 KiB shared-memory segment.
+When reception drops frames while the source keeps producing them, adjusting rendering threads or watchdogs does not fix transport.
+Line-following defaults to [line_fastdds.xml](../src/odin_racer/racer_bringup/config/line_fastdds.xml),
+providing 64 MiB shared memory per DDS participant while retaining UDP discovery; image receivers use SensorDataQoS.
+See the [Fast DDS shared-memory documentation](https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/transport/shared_memory/shared_memory.html).
+Override with `dds_profile:=...`; an existing `FASTRTPS_DEFAULT_PROFILES_FILE` environment setting is respected.
+
+Image freshness remains 0.35 s and the wall watchdog 1 s. The 12 s path memory only bridges geometric blind regions while healthy images continue.

@@ -1,8 +1,6 @@
-# Proposed interfaces
+# Current and proposed interfaces
 
 English | [Chinese](06_interfaces_cn.md)
-
-2026-09-16 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is validated in simulation; hardware acceptance remains pending.
 
 The isolated-scene implementation uses `racer_interfaces/LineObservation` v0.1.0
 on `/sim/racer/line/observation`. It atomically associates path, image health,
@@ -13,6 +11,12 @@ These are first-party design contracts. Hardware adaptation remains pending; sim
 These names are not claims about the vendor driver's current API.
 Prefer standard ROS messages. Add custom messages only when branch/progress
 semantics cannot be expressed unambiguously; document their version first.
+
+## Current simulation
+
+`lap_controller` consumes `observation`, `black_mask`, wheel `odom` and acquisition-time TF, and loads its route from CSV. It publishes `cmd_vel`, `tracking_status` and `control_debug`, with `~/enable` (`SetBool`) for explicit arming. Current names/remappings are in [lap operation](../simulation/COMPETITION_LAP.md); hardware topic names below are proposals.
+
+## Proposed hardware interfaces
 
 | Topic | Type | Producer -> consumer | Contract |
 | --- | --- | --- | --- |
@@ -55,4 +59,4 @@ configure `use_stamped_vel` explicitly. The preview has no command publisher.
 The F4 lower-level board is confirmed; Jetson-to-F4 CAN or serial transport
 remains undecided. The eventual protocol
 needs version, sequence number, bounded left/right wheel rad/s targets, checksum/error detection, status,
-feedback, heartbeat and explicit enable state. See [protocol plan](../firmware/protocol/README.md).
+feedback, heartbeat and explicit enable state. See [protocol plan](../firmware/README.md).

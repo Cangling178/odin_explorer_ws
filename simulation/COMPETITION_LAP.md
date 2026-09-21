@@ -33,7 +33,7 @@ source /opt/ros/humble/setup.bash
 colcon build --base-paths src --symlink-install
 source install/local_setup.bash
 export ROS_DOMAIN_ID=96
-export GAZEBO_MASTER_URI=http://127.0.0.1: 11396
+export GAZEBO_MASTER_URI=http://127.0.0.1:11396
 ros2 launch racer_bringup competition_lap.launch.py gui:=true
 ```
 
@@ -67,15 +67,6 @@ These are engineering criteria, not a promise that the axle always lies inside t
 Reports include `report.json`, `trajectory.png`, `launch.log` and source/binary hashes.
 Gazebo truth is used only by the evaluator and is never fed back to control.
 
-## Validation status
-
-One complete dynamic lap passed: 367.29 s, 185/185 gates, no mid-lap stop; axle RMS 5.32 mm, maximum 22.25 mm, minimum driving speed 19.13 mm/s.
-
-[Acceptance result and scope](../experiments/competition_lap/RESULTS.md). Raw HTML report: `data/generated/competition_lap/attempt07/index.html`.
-
-Final checks: all 11 packages built; 32 C++ test records reported by colcon passed (including suite results); 41 Python tests and 12 ROS controller checks passed.
-The historical 54-run isolated dynamic matrix was not repeated and does not cover this new controller.
-
 ## Repeated independent trials
 
 Run three sequential, independently started simulations with the same program, map, parameters and acceptance criteria. Each trial rebuilds the simulation world at the nominal start. Use a new output directory:
@@ -86,6 +77,6 @@ python3 tools/repeat_competition_lap.py --output data/generated/competition_lap/
 
 The output directory contains `index.html` and `summary.json`, plus separate reports and logs for each trial. Input and binary fingerprints guard against combining different runtime versions. This tests repeatability at the nominal start, not arbitrary initial poses, disturbances or hardware robustness.
 
-## Latest results
+## Scope and configuration
 
-All three independent 0.05 m/s starts passed in 367.26–367.36 s; one 0.10 m/s trial passed in 197.43 s. The default remains 0.05 m/s and the speed parameter upper limit is 0.10 m/s. Metrics and scope: [results](../experiments/competition_lap/RESULTS.md).
+Default speed 0.05 m/s; allowed speed up to 0.10 m/s, lookahead 0.06–0.20 m (default 0.10 m). `speed:=0.10` selects the recorded faster setting. The repeat tool currently has no speed/lookahead flags. Route generation and launch are fixed to the selected 4×3 m map; generic course scaling does not scale this CSV route. For regeneration, first create `data/generated/competition_lap/`, then run `python3 tools/generate_competition_lap.py` and rebuild. This overwrites generated route resources; keep route/map versions paired. [Recorded results](../experiments/competition_lap/RESULTS.md) are historical and do not constitute a new run.

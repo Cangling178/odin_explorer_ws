@@ -1,69 +1,52 @@
-# 开发流程
+# 开发与仓库规范
 
 [English](07_development.md) | 简体中文
 
-## 平台基线
+本机开发基线为 Ubuntu 22.04／ROS 2 Humble，目标 Jetson 组合尚未验收。在干净的 ROS 2 终端、工作空间根目录执行命令。
 
-在干净的终端环境中使用目标 ROS 发行版。基础工程面向 Humble，本地工作站无需 Jetson 或 ODIN1 即可构建资源。目标设备投入使用时，在 `hardware/platform_lock.template.yaml` 记录实际软件版本。初始化脚本不会自动刷写设备、安装软件包、修改 udev 规则或启动电机。
-
-## 构建和检查
+## 构建与预览
 
 ```bash
-cd ~/odin_racer_ws
 source /opt/ros/humble/setup.bash
-colcon list --base-paths src
+rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
 colcon build --symlink-install --base-paths src
 source install/local_setup.bash
-ros2 launch racer_bringup preview.launch.py --show-args
 ros2 launch racer_bringup preview.launch.py
 ```
 
-预览需要对应 ROS 安装中的 `robot_state_publisher`、`joint_state_publisher`、`xacro` 和 `rviz2`。
-启动文件默认打开带模型与 TF 配置的 RViz；追加 `rviz:=false` 可关闭窗口。
-有时钟源时，也支持 `use_sim_time:=true`。预览中的轮关节状态为静止示意。
-独立传感器、落地接触与整车运动仿真的启动和验证命令见[仿真说明](../simulation/README_cn.md)。
+`rosdep` 会安装依赖，需已完成 rosdep 初始化。预览使用 RViz、robot_state_publisher、joint_state_publisher 和 xacro；`rviz:=false` 关闭窗口。预览不发布电机指令。仿真运行入口见[仿真说明](../simulation/README_cn.md)。
 
-安装并初始化 ROS 和 rosdep 后，可按需执行标准依赖安装步骤：
+接入厂商硬件时，先构建并加载[厂商底层工作空间](../vendor_ws/README_cn.md)，再构建、加载自研叠加层。不要混用 ROS 发行版。`vendor_ws/COLCON_IGNORE` 与 `--base-paths src` 隔离厂商包。
 
-```bash
-rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
-```
-
-此命令可能安装系统软件包，基础工程创建时没有执行它。规划中的包仅声明现有代码真正使用的依赖。实现实际节点时再添加运行依赖，避免给仅含文档的包强加完整导航/GPU 软件栈。
-
-## 离线检查
+## 检查
 
 ```bash
 python3 tools/check_workspace.py
 python3 -m unittest discover -s tests -v
-python3 tools/evaluate_run.py experiments/examples/synthetic_samples.csv \
-  --metadata experiments/examples/synthetic_run.json
+colcon test --base-paths src --packages-select racer_perception racer_control
+colcon test-result --verbose
 git diff --check
 ```
 
-结构检查器依赖 PyYAML，评测器及其测试仅使用 Python 标准库。接触模型测试还需 NumPy、PyYAML 和已加载的 ROS xacro 环境，见 `tools/requirements-dev.txt`。GitHub Actions 已配置为在 push/pull_request 时执行结构检查、离线测试和资源构建；它不运行需要渲染环境的 Gazebo 动态验证。
+Python 依赖见 `tools/requirements-dev.txt`，图像测试还使用 OpenCV，几何测试使用 xacro；独立 CSV 评测器使用标准库。CI 执行仓库检查、Python 测试、构建及 C++ 测试，不运行需要渲染的 Gazebo 场景或实车。
 
-## 厂商底层工作空间
-
-在 `vendor_ws/` 中使用经过独立审阅的厂商构建。`COLCON_IGNORE` 防止从根目录意外递归发现厂商包。构建自研叠加工作空间前先加载厂商安装环境，然后加载叠加层的 `install/local_setup.bash`。根目录构建明确使用 `--base-paths src`。不要在同一终端里混合加载 ROS 1 或另一 ROS 2 发行版。
-
-## Git 工作流
-
-保持 `main` 为经过检查的基础版本。开发时使用聚焦任务的分支，如 `codex/encoder-odometry`。需要时在提交中关联需求/任务编号。提交说明保持简洁，例如 `feat(hardware): add wheel feedback parser` 或 `docs(course): record crossing order`。合并前执行相关检查。记录真实里程碑依据后再打标签，不给未经测试的自主行驶能力打标签。
-
-远程 `origin` 已配置为 [GitHub 仓库](https://github.com/Cangling178/odin_racer_ws)，许可见根目录 LICENSE。
-提交时同步中英文文档、验证记录和 [项目计划](planning/README_cn.md)，检查通过后再推送。
-构建产物、厂商源码、录包和 `data/generated/` 报告保持本地保存；复现命令和关键结果写入文档。
-
-## C++ 循线检查
-
-新增运行节点与参数见[低速视觉循线](../simulation/LINE_FOLLOWING_cn.md)。构建后执行：
+构建并加载工作空间后，可执行合成 ROS 控制器检查：
 
 ```bash
-source install/local_setup.bash
-colcon test --base-paths src --packages-select racer_perception racer_control
-colcon test-result --verbose
 python3 tools/validate_line_controller.py
+python3 tools/validate_arming_clock.py
+python3 tools/validate_lap_controller.py
 ```
 
-Gazebo 动态循线验证需渲染环境，不在 CI 中执行。纯 ROS 控制器故障验证使用隔离 domain 92，不连接硬件。
+这些检查使用隔离 domain 和合成输入。动态验证需要渲染环境，命令见[整圈](../simulation/COMPETITION_LAP_cn.md)及[局部循线](../simulation/LINE_FOLLOWING_cn.md)。验证范围和证据集中在[实验索引](../experiments/README_cn.md)，各使用文档不重复维护测试总数。
+
+## 文件归属与协作
+
+- 代码与运行配置放在 `src/odin_racer/` 所属包；硬件事实放在 `hardware/`，赛道事实放在 `tracks/`，实验摘要放在 `experiments/`。
+- `*.template.yaml` 是规格表。未知事实保持未填，实现组件时再建立经过验证的运行参数；分别记录几何、路线和调参版本。
+- 厂商源码、SDK 二进制、录包、凭据和生成报告不纳入 Git；记录上游版本／许可、数据路径／哈希。本地原始证据位于 `data/generated/`，不作为源码说明文件混管。
+- 保留英文和对应 `_cn.md`，双向链接，同步技术含义。标识符、程序面向用户的字符串和提交说明使用英文；代码及配置注释可用中文。
+- 每个主题保留一个权威页面，引用验收结果，不在多处复制成绩。不新增空目录说明或重复路线图；待办统一在[项目计划](planning/README_cn.md)。
+- 使用聚焦分支和提交，说明行为、相关验证与限制，区分仿真、合成数据和实测。按变更运行必要检查，行为变化按需补回归；包构建通过不代表实车就绪。
+
+远程仓库：[Cangling178/odin_racer_ws](https://github.com/Cangling178/odin_racer_ws)。遵循 [LICENSE](../LICENSE)，保留上游权利说明。`.github/` 中的 PR／Issue 模板用于简洁记录问题和验证依据。

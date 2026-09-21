@@ -1,14 +1,9 @@
-# Visual line observation interface
+# LineObservation contract
 
-[English](README.md) | [Chinese](README_cn.md)
-`LineObservation` atomically carries the acquisition-stamped local path, image
-health, path validity/confidence, corner position, observed exit direction and
-exit count. All geometry uses `path.header.frame_id`; the stamp is the original
-camera acquisition time. `image_valid` does not imply a visible line.
+English | [Chinese](README_cn.md)
 
-Empty/invalid paths authorize no normal translation. Only the bounded corner
-state machine can temporarily use a previously observed corner in wheel odometry,
-while new healthy images, TF and odometry remain mandatory. Multiple exits are
-rejected. No scenario name, reference route, ground truth or end region is carried.
+Interface version 0.1.0. [LineObservation.msg](msg/LineObservation.msg) atomically carries the acquisition stamp/frame in `path.header`, image health, path validity/confidence, corner and exit evidence. Geometry uses that frame; `image_valid` certifies image/projection health, not visible line support.
 
-Interface version: 0.1.0 (isolated-scene prototype).
+Local `line_controller` requires usable path evidence for ordinary tracking, rejects multiple exits and permits only bounded reuse of observed geometry during corner/curve maneuvers. `lap_controller` uses image health plus a separately published ground `black_mask` to align its prerecorded route; local `path_valid=false` alone does not mean the lap must stop. Image/odometry freshness and visual-alignment travel bounds still apply.
+
+The message contains no simulator truth, scene identity or finish region. [Current and proposed interfaces](../../../docs/06_interfaces.md) distinguish implemented topics from hardware plans.

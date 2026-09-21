@@ -2,6 +2,8 @@
 
 English | [Chinese](README_cn.md)
 
+Documentation consolidated 2026-09-21; the 2026-09-11 import/build record below is retained. No driver upgrade or new firmware/device acceptance was performed.
+
 The local checkout contains `src/odin_ros_driver` cloned from the vendor repository. Vendor sources,
 SDK binaries and underlay build products are ignored in the parent Git repository.
 `COLCON_IGNORE` prevents accidental root-level discovery. The first-party build
@@ -15,7 +17,7 @@ procedure within this directory; the first-party foundation does not invoke it.
 The imported commit, license, SDK provenance, local build and initial point cloud
 check are recorded below; device firmware and target-platform acceptance remain pending.
 Source this underlay before the first-party overlay. See
-[ODIN1 integration](../docs/04_odin1_integration.md) for acceptance.
+[ODIN1 integration](../docs/09_bringup.md) for acceptance.
 The vendor driver has been built separately into local `vendor_ws/install/`;
 the root first-party build does not automatically download, build or install it.
 

@@ -67,15 +67,6 @@ python3 tools/report_competition_lap.py data/generated/competition_lap/my_run
 报告包括`report.json`、`trajectory.png`、`launch.log`以及源文件、二进制摘要。
 进度与停止检查用Gazebo独立位姿，评测结果不回传控制器。
 
-## 验证状态
-
-已完成一次整圈动态验收：367.29 s，185/185检查点，中途不停；轮轴偏线RMS5.32 mm、最大22.25 mm，最低行驶速度19.13 mm/s。
-
-[验收结果和范围](../experiments/competition_lap/RESULTS_cn.md)。原始HTML报告为`data/generated/competition_lap/attempt07/index.html`。
-
-最终检查：11个包构建通过；colcon统计32项C++测试记录通过（含测试套件结果）；41项Python测试通过；12项ROS控制器检查通过。
-历史54次独立场景验收不覆盖新整圈控制器，本次未重跑该历史动态矩阵。
-
 ## 重复运行验证
 
 使用同一份程序、地图、参数和验收标准，按顺序独立启动3次仿真。每次重新生成仿真世界并从名义起点出发。输出目录必须是新的：
@@ -86,6 +77,6 @@ python3 tools/repeat_competition_lap.py --output data/generated/competition_lap/
 
 汇总为输出目录中的`index.html`与`summary.json`，每次运行保留独立报告和日志。程序运行中会检查输入文件及二进制摘要，防止不同版本的结果被合并为重复验收。此检查只验证名义起点下的重复性，不代表任意起点、扰动或实车稳定性。
 
-## 最新结果
+## 范围与配置
 
-0.05 m/s 三次独立启动均通过，圈时 367.26–367.36 s；0.10 m/s 单次通过，圈时 197.43 s。默认仍为 0.05 m/s，速度参数上限 0.10 m/s。完整指标及适用范围见[results](../experiments/competition_lap/RESULTS_cn.md).
+默认速度 0.05 m/s，允许上限 0.10 m/s；前视范围 0.06–0.20 m，默认 0.10 m。`speed:=0.10` 选择已有提速记录的设置，重复工具目前没有速度／前视选项。路线生成与启动固定使用所选 4×3 m 地图，通用场景缩放不会缩放此 CSV。重新生成前先建立 `data/generated/competition_lap/`，再执行 `python3 tools/generate_competition_lap.py` 并构建；会覆盖生成路线资源，需保持路线／地图版本配对。[已有成绩](../experiments/competition_lap/RESULTS_cn.md)是历史记录，不代表本次重新试跑。

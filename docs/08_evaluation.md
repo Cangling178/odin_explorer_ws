@@ -2,6 +2,8 @@
 
 English | [Chinese](08_evaluation_cn.md)
 
+Current Gazebo acceptance and historical results are in the [validation index](../experiments/README.md). The measurement semantics below remain general; real-vehicle acquisition and ROS evaluation integration are not implemented.
+
 ## Define what is measured
 
 Confirm the competition's judged point on the robot. Until then, report errors
@@ -74,4 +76,4 @@ and crossing event logs before accepting an apparent speed improvement.
 | Controller restart / command loss | Lower-level watchdog |
 | Repeated full route | Thermal, battery and accumulated drift |
 
-The test matrix is a plan; no real-world results are included at initialization.
+This is the hardware test plan; existing simulation evidence is recorded separately by version.

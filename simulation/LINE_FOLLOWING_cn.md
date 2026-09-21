@@ -1,14 +1,8 @@
-# C++ 独立场景低速视觉循线
+# C++ 局部视觉循线
 
 [English](LINE_FOLLOWING.md) | 简体中文
 
-完整比赛地图的预录路线辅助连续整圈入口见[整圈循迹](COMPETITION_LAP_cn.md)。
-
-当前比赛地图右侧直线到下方波浪段的开发与复现见[地图波浪循线](COMPETITION_WAVES_cn.md)。
-
-原独立验收范围：现有仿真车辆，在直线、左右圆弧、S 弯和单个左右直角场景中使用车载 FishPoly 图像跟踪。
-交叉点选路、完整比赛跑圈、实车及正式比赛走廊不在本次验收范围内。实现不等于场景验收通过；
-所有尝试、失败原因及重复矩阵结果见 [独立验证说明](ISOLATED_LINE_VALIDATION_cn.md)。
+`line_controller` 用于直线、圆弧、S 弯和单角点实验，可停车转向，没有完整赛道路线。连续有序整圈使用[整圈控制器](COMPETITION_LAP_cn.md)。历史冻结验收和复现集中在[独立场景结果](../experiments/isolated_line/RESULTS_cn.md)，不代表后续控制器改动已通过同一矩阵。
 
 ## 构建与启动
 
@@ -57,7 +51,7 @@ ros2 launch racer_bringup line_following.launch.py course:=competition gui:=true
 上面的S弯示例显式指定2倍比例。
 地图缩放本身不改变车辆和相机内参；当前循线算法参数见下表。`scale: 1.0`可恢复原比例；显式`spawn_x/y`使用缩放后的世界米制坐标，
 不会再次乘比例，默认起点则随地图缩放。GUI观察视点及可选俯视相机位置同步调整，原地图资源文件不变。
-完整地图的紧凑S弯不属于原独立S弯验收矩阵；当前分段开发结果见[地图波浪循线](COMPETITION_WAVES_cn.md)。
+完整地图的紧凑S弯不属于原独立S弯验收矩阵；当前分段开发结果见[地图波浪循线](LINE_FOLLOWING_cn.md)。
 
 ## 感知实现
 
@@ -150,20 +144,41 @@ RUNNING → APPROACH → CORNER_STOP → TURN → REACQUIRE → RUNNING
 测试用 `image_topic`、`odom_topic`、`tf_topic` 可重映射到故障注入中继；默认直接连接仿真车载数据。
 控制器不订阅 Gazebo 真值、俯视相机、场景几何或参考路径。
 
-## 放大地图并保持原线宽
+## 比赛地图波浪段
 
-在2倍地图上保持此前右上角的对应位置和朝向，可使用（原2.5倍地图坐标乘以2/2.5）：
+在已构建并加载ROS和工作区环境的终端执行：
 
 ```bash
 ros2 launch racer_bringup line_following.launch.py course:=competition gui:=true \
   course_parameters:='{scale: 2.0, line_width: 0.02116, spawn_x: 1.614118, spawn_y: 1.284377, spawn_yaw: -1.570796}'
 ```
 
-`line_width`单位是世界坐标米，与`scale`独立。生成器从原纹理提取连通骨架，在4倍纹理分辨率上
-按指定米制线宽重新绘制，不平滑切弯，不改变交叉点连接。原始PNG/DAE资源保持不变，
-新纹理及引用它的DAE保存在本次仿真的临时资源目录。骨架保留原图的像素误差和局部毛刺；
-这是约21 mm的统一工程线宽，并非逐点还原原图不均匀的笔画宽度。2.5倍地图直线实测约22 mm，
-存在栅格误差。此前地图修改未改变车辆和独立场景；本轮感知、控制参数调整见上文。
-关闭旧仿真后重新启动以加载新纹理；此前地图修改仅验证纹理线宽、连通性和生成资源，当前循线改动及分段证据见[地图波浪循线](COMPETITION_WAVES_cn.md)。
+READY 后使用上文的使能服务。普通启动不会在本段终点自动停车。
 
-循线启动默认启用 `lockstep:=true` 与64 MiB Fast DDS共享内存配置，图像使用SensorDataQoS接收，图像期限仍为0.35 s、墙钟看门狗1 s。配置及传输问题说明见[地图波浪循线](COMPETITION_WAVES_cn.md)。
+下面命令会新建隔离仿真、主动使能，并在独立评测终点停车；需要有效DISPLAY：
+
+```bash
+python3 tools/validate_isolated_line.py --course competition --duration 240 \
+  --output data/generated/my_competition_waves
+python3 tools/report_isolated_line.py data/generated/my_competition_waves
+```
+
+评测参考线从原纹理的右侧和底部连通骨架提取，仅供误差、顺序和结束区域检查；不传入算法。
+出生点位于可见直线起点之前，评测器沿该直线向后延伸用于计算初始误差和车体包络，未修改场景。
+终点位于波浪左端、原图左侧小断口之前。报告同时记录车轴误差和车体扫掠，230 mm半宽仅为沿用的工程评测条件。
+
+## 仿真时序
+
+正常验证直接使用车载图像、TF和里程计，仅在指定故障注入时启用对应转发。
+感知、控制默认Release构建；感知、相机插件与评测器限制OpenCV工作线程，减少调度开销。
+循线启动启用 `lockstep:=true`，同步物理与渲染，实际速度受本机负载限制。
+地图、相机输出分辨率/标定、物理积分步长和车辆速度均保持原值。
+
+1600×1296 RGB图像单帧约6.22 MB，大于Fast DDS默认512 KiB共享内存段。
+源头连续出图而接收端断帧时，单纯调整渲染线程或停车期限不能解决传输问题。
+循线启动默认加载 [line_fastdds.xml](../src/odin_racer/racer_bringup/config/line_fastdds.xml)，
+为每个DDS参与者提供64 MiB共享内存，保留UDP发现；图像接收使用SensorDataQoS。
+配置依据见[Fast DDS共享内存说明](https://fast-dds.docs.eprosima.com/en/2.6.x/fastdds/transport/shared_memory/shared_memory.html)。
+可通过 `dds_profile:=...` 覆盖；已有 `FASTRTPS_DEFAULT_PROFILES_FILE` 环境配置优先保留。
+
+图像期限保持 0.35 s，墙钟看门狗 1 s；12 s 路径记忆仅用于健康图像持续更新时的几何盲区。

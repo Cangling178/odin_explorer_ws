@@ -1,97 +1,52 @@
-# Development workflow
+# Development and repository conventions
 
 English | [Chinese](07_development_cn.md)
 
-## Platform baseline
+The local development baseline is Ubuntu 22.04 / ROS 2 Humble. Target Jetson compatibility is not yet validated. Run commands from the workspace root in a clean ROS 2 terminal.
 
-Use a clean shell with the intended ROS distribution. The foundation targets
-Humble; the local workstation can build assets without a Jetson or ODIN1.
-Record actual software versions in `hardware/platform_lock.template.yaml` when
-the target is commissioned. No setup script flashes devices, installs packages,
-changes udev rules or starts motors automatically.
-
-## Build and inspect
+## Build and preview
 
 ```bash
-cd ~/odin_racer_ws
 source /opt/ros/humble/setup.bash
-colcon list --base-paths src
+rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
 colcon build --symlink-install --base-paths src
 source install/local_setup.bash
-ros2 launch racer_bringup preview.launch.py --show-args
 ros2 launch racer_bringup preview.launch.py
 ```
 
-Preview needs `robot_state_publisher`, `joint_state_publisher`, `xacro` and `rviz2`
-from the selected ROS installation. The launch opens RViz with model and TF
-configuration by default; append `rviz:=false` to disable the window.
-The package launch also supports `use_sim_time:=true` when a clock is supplied.
-Wheel joint states in preview are stationary illustrations. See
-[simulation documentation](../simulation/README.md) for standalone sensor, contact
-and vehicle-motion launch and validation commands.
+`rosdep` installs dependencies and assumes rosdep is initialized. Preview uses RViz, robot_state_publisher, joint_state_publisher and xacro; `rviz:=false` disables the window. Preview publishes no motor commands. Simulation entry points are in [simulation](../simulation/README.md).
 
-After ROS and rosdep are installed and initialized, the standard optional
-dependency step is:
+For vendor hardware, first build/load the [vendor underlay](../vendor_ws/README.md), then build/load this overlay. Do not mix ROS distributions. `vendor_ws/COLCON_IGNORE` and `--base-paths src` isolate vendor packages.
 
-```bash
-rosdep install --from-paths src --ignore-src --rosdistro humble -r -y
-```
-
-This command may install system packages; it has not been run by this scaffold.
-Planning packages intentionally declare only dependencies used by existing code.
-Add runtime dependencies as real nodes are implemented, rather than forcing a
-full navigation/GPU stack onto a documentation-only package.
-
-## Offline checks
+## Checks
 
 ```bash
 python3 tools/check_workspace.py
 python3 -m unittest discover -s tests -v
-python3 tools/evaluate_run.py experiments/examples/synthetic_samples.csv \
-  --metadata experiments/examples/synthetic_run.json
+colcon test --base-paths src --packages-select racer_perception racer_control
+colcon test-result --verbose
 git diff --check
 ```
 
-The structural checker requires PyYAML; the evaluator and its tests use the
-Python standard library. See `tools/requirements-dev.txt`. The optional GitHub
-workflow runs structural checks, offline tests and an asset build on push/pull_request.
-It does not run Gazebo dynamic validation, which needs a rendering environment.
+Python requirements are in `tools/requirements-dev.txt`; image tests also use OpenCV and geometry tests use xacro. The standalone CSV evaluator uses the standard library. CI runs repository checks, Python tests, builds and C++ tests; it does not run rendered Gazebo scenarios or hardware.
 
-## Vendor underlay
-
-Use a separately audited vendor build in `vendor_ws/`. A `COLCON_IGNORE` file
-prevents accidental recursive discovery from the root. Source its installed
-setup before building the first-party overlay, then source the overlay's
-`install/local_setup.bash`. The root build uses `--base-paths src` explicitly.
-Do not source ROS 1 or a different ROS 2 distribution in the same shell.
-
-## Git workflow
-
-Keep `main` as the reviewed foundation. For work use a focused branch such as
-`codex/encoder-odometry`. Link commits to requirement/backlog IDs where useful.
-Use concise messages such as `feat(hardware): add wheel feedback parser` or
-`docs(course): record crossing order`. Run relevant checks before merging.
-Tag actual milestones after recording evidence; do not tag untested autonomy.
-
-Remote `origin` points to the [GitHub repository](https://github.com/Cangling178/odin_racer_ws);
-licensing is in the root LICENSE. Synchronize English/Chinese documentation, validation evidence
-and the [project plan](planning/README.md) before committing, and push after checks pass.
-Keep build outputs, vendor sources, bags and `data/generated/` reports local; document
-reproduction commands and key results.
-
-Contact-model tests additionally require NumPy, PyYAML and xacro from a sourced
-ROS environment; see `tools/requirements-dev.txt`. The evaluator tests themselves
-still use only the Python standard library.
-
-## C++ tracking checks
-
-Runtime nodes and parameters are documented in [visual line following](../simulation/LINE_FOLLOWING.md). After building:
+After building and sourcing the overlay, synthetic ROS controller checks are:
 
 ```bash
-source install/local_setup.bash
-colcon test --base-paths src --packages-select racer_perception racer_control
-colcon test-result --verbose
 python3 tools/validate_line_controller.py
+python3 tools/validate_arming_clock.py
+python3 tools/validate_lap_controller.py
 ```
 
-Gazebo tracking validation requires rendering and is not run in CI. The synthetic ROS controller fault test uses isolated domain 92 and no hardware.
+These use isolated domains and synthetic inputs. Dynamic tests require a rendering environment and are documented with [lap](../simulation/COMPETITION_LAP.md) and [local tracking](../simulation/LINE_FOLLOWING.md) entry points. Validation scope and evidence live in [experiments](../experiments/README.md), not duplicate running totals in every guide.
+
+## File ownership and contributions
+
+- Code and runtime configuration belong to the owning package under `src/odin_racer/`; device facts to `hardware/`; course facts to `tracks/`; run summaries to `experiments/`.
+- `*.template.yaml` files are specification forms. Keep unknown facts unset; create validated runtime parameter files when implementing a component. Record geometry, route and tuning versions separately.
+- Keep vendor sources, SDK binaries, recordings, credentials and generated reports out of Git. Record upstream revision/license and data paths/hashes. Raw local evidence lives under `data/generated/` and must not be mistaken for source documentation.
+- Retain English and matching `_cn.md` documents with reciprocal links. Identifiers, user-facing program strings and commit messages remain English; code/config comments may be Chinese. Keep technical meaning synchronized.
+- Keep one authoritative page per topic; link to test results rather than copying them into status pages. Do not add empty directory READMEs or duplicate roadmaps. The project backlog is [planning](planning/README.md).
+- Use focused branches and commits. Document behavior, relevant validation and limitations; distinguish simulation, synthetic data and real measurements. Run relevant checks; test behavior changes where needed, without pretending that package builds prove hardware readiness.
+
+Remote repository: [Cangling178/odin_racer_ws](https://github.com/Cangling178/odin_racer_ws). Follow [LICENSE](../LICENSE) and retain upstream ownership notices. PR/issue templates in `.github/` support concise evidence-based changes.

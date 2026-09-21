@@ -15,6 +15,8 @@ English | [Chinese](01_requirements_cn.md)
 | REQ-007 | Jetson host and a separate F4 lower-level controller | Board identification and transport test |
 | REQ-008 | Treat prior mapping, preloaded routes and camera line recognition as allowed | Owner clarification; retain remaining judging questions |
 
+Reference dimensions are in [hardware records](../hardware/README.md); deployment steps in [bringup and calibration](09_bringup.md).
+
 ## Course evidence
 
 The supplied image labels the outer board as 200 cm by 150 cm and the red
@@ -28,8 +30,8 @@ start/finish, required crossing order, line width or scoring tolerances.
 
 | ID | Unknown | Design consequence |
 | --- | --- | --- |
-| Q-01 | Exact rear-axle dimensions, front caster geometry and footprint? | Differential kinematics calibration and swept volume |
-| Q-02 | Encoder resolution, gearing and motor/driver ratings? | Closed-loop wheel control and odometry |
+| Q-01 | Do reference geometry and the actual loaded wheel size, spacing, supports and footprint agree? | Differential-drive calibration and swept clearance |
+| Q-02 | GMR 500-line / 1:28 references are recorded; what are the verified output-revolution counts and motor/driver ratings? | Wheel-speed loop and odometry |
 | Q-03 | Camera ground coverage and exposure on the actual mount? | Visual feedback feasibility; camera use is allowed |
 | Q-04 | Exact F4 board, firmware toolchain and motor-driver transport? | Lower-level implementation; prior routes are allowed |
 | Q-05 | Start, direction, laps and crossing branch sequence? | Ordered route and completion logic |

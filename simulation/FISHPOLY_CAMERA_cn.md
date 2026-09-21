@@ -2,7 +2,7 @@
 
 [English](FISHPOLY_CAMERA.md) | 简体中文
 
-2026-09-14：台架与整车的 Odin 相机均采用设备 O1-P040100136 的 FishPoly 几何投影。
+历史验证日期 2026-09-14；当前模型说明：台架与整车的 Odin 相机均采用设备 O1-P040100136 的 FishPoly 几何投影。
 原始 [calib_device.yaml](../hardware/mechanical/odin1/calib_device.yaml) 未修改，构建时原样安装到
 `share/racer_description/config/calib_device.yaml`。内参、畸变和输出尺寸来自该文件；相机相对外参沿用原有 Xacro。
 比赛场景的固定俯视相机仍为针孔，属于检查仪器。
@@ -66,7 +66,7 @@ FishPoly 包含连续二至七次项，不能将这六个系数直接传给 Open
 
 ```bash
 source /opt/ros/humble/setup.bash
-colcon build --base-paths src --packages-select racer_description racer_control racer_bringup
+colcon build --base-paths src
 source install/setup.bash
 python3 tools/check_workspace.py
 python3 -m unittest discover -s tests -v
@@ -78,7 +78,7 @@ python3 tools/validate_fishpoly_render.py
 可用 `--domain`、`--port` 指定空闲值。它使用同一场景生成器，移除地面和外壳遮挡，仅验证镜头几何。
 输出在 `data/generated/fishpoly_render_validation.{json,png,log}`。
 
-整车传感器检查按 [随车传感器说明](README_cn.md#随车-odin-传感器) 启动空场和 sensor_targets；
+整车传感器检查按 [随车传感器说明](README_cn.md#随车传感器目标) 启动空场和 sensor_targets；
 比赛场景按 [赛道验证说明](COMPETITION_COURSE_cn.md) 启动。两个验收脚本已适配 FishPoly；
 彩色目标采用边缘密集采样，地面黑线通过 FishPoly 反投影射线与地面求交。
 

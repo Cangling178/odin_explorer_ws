@@ -2,20 +2,6 @@
 
 English | [Chinese](README_cn.md)
 
-ODIN1 vendor adaptation and timestamp/frame contracts.
+Planned: vendor-topic adaptation, matching image calibration, timestamps, TF and health checks. Vendor source/build records remain in `vendor_ws/`; this package has no adapter node.
 
-## Status
-
-Planned: audited topic mapping, frame/model conversion, time handling and sensor health. Vendor SDK remains in a separate underlay.
-
-## Responsibility and acceptance
-
-Backlog: SENS-001, SENS-002. See the root architecture and interface documents.
-This package currently installs assets/documentation through ament_cmake.
-A successful build is not evidence that a planned subsystem runs.
-
-## Configuration
-
-Any `*.template.yaml` is a specification form, not a live ROS parameter file.
-Add runtime dependencies, executables and tested parameters when implementing
-the component. Keep vendor code and large recordings outside this package.
+This package currently installs documentation and specification templates only. `*.template.yaml` files are not runtime parameters. See [architecture](../../../docs/02_architecture.md), [interfaces](../../../docs/06_interfaces.md) and [remaining work](../../../docs/planning/README.md).

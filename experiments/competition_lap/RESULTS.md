@@ -2,6 +2,8 @@
 
 English | [Chinese](RESULTS_cn.md)
 
+Historical evidence from 2026-09-16. Documentation reviewed 2026-09-21; metrics, original criteria and JSON files are unchanged. No new dynamic run was performed during cleanup.
+
 Current summary: initial acceptance passed, followed by three passing 0.05 m/s repeats and one passing 0.10 m/s trial. The first table records initial acceptance; later sections record repeat and speed results.
 
 **One complete continuous Gazebo lap passed: 185/185 ordered gates, no mid-lap stop, and automatic stop at the finish.**

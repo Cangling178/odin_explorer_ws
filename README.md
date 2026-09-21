@@ -2,57 +2,29 @@
 
 English | [Chinese](README_cn.md)
 
-Current lap baseline: 3/3 independent nominal starts passed at 0.05 m/s; one 0.10 m/s trial passed in 197.43 s. The default remains 0.05 m/s. A 0.20 m/s trial has not been run and exceeds the current controller parameter limit. See [full results](experiments/competition_lap/RESULTS.md).
+ROS 2 line-following robot for Jetson Orin Nano, ODIN1 and an F4 controller, with two rear drive wheels and two passive front supports.
 
-A ROS 2 four-wheel line-following robot: Jetson Orin Nano + ODIN1 + an F4 controller. The goal is accurate, fast tracking of a marked competition course without a dedicated line-tracking module.
-
-**The foundation for simulated line-following development is available: model preview, a competition drawing scene, onboard sensors, ros2_control base control and offline evaluation run. C++ single-branch tracking and a prerecorded-route assisted continuous full-map lap are implemented in simulation; hardware control and official competition acceptance remain pending.**
-
-Continuous full-map lap: 185/185 gates, 367.29 s, no mid-lap stop; see [lap acceptance](experiments/competition_lap/RESULTS.md).
-
-Historical frozen-version isolated simulation acceptance: 42/42 tracking and 12/12 fault trials passed; see [results and scope](experiments/isolated_line/RESULTS.md). The competition map defaults to 4 by 3 m with about 21.2 mm stroke width.
+**The C++ perception and ordered-route controller have completed simulation laps. Hardware communication, Jetson deployment, calibration and real-vehicle integration remain unfinished.**
+The Gazebo course defaults to 4×3 m with approximately 21.2 mm lines. Recorded results: 0.05 m/s passed 3/3 independent starts; 0.10 m/s passed once. The default remains 0.05 m/s. See [lap evidence](experiments/competition_lap/RESULTS.md) for metrics and scope.
 
 ## Start here
 
-| Task | Entry point |
+| Task | Guide |
 | --- | --- |
-| Run a continuous full-map lap | [Competition lap](simulation/COMPETITION_LAP.md) |
-| Run C++ visual tracking | [Line following](simulation/LINE_FOLLOWING.md) |
-| Find the main code and module responsibilities | [Source guide](src/README.md) → `src/odin_racer/` |
-| Build and preview the robot model | [Development](docs/07_development.md) |
-| Run the competition course and onboard sensors | [Course launch and validation](simulation/COMPETITION_COURSE.md) |
-| Understand design and interfaces | [Architecture](docs/02_architecture.md), [interface contracts](docs/06_interfaces.md) |
-| Find the next task | [Project plan](docs/planning/README.md) |
-| Find other documentation | [Documentation map](docs/README.md) |
+| Build, check or contribute | [Development](docs/07_development.md) |
+| Run a complete simulation lap | [Competition lap](simulation/COMPETITION_LAP.md) |
+| Run component or local tracking simulations | [Simulation](simulation/README.md) |
+| Understand code and data flow | [Package map](src/README.md), [architecture](docs/02_architecture.md), [interfaces](docs/06_interfaces.md) |
+| Connect the real vehicle | [Bringup and calibration](docs/09_bringup.md), [hardware records](hardware/README.md) |
+| Check remaining work | [Project plan](docs/planning/README.md), [requirements](docs/01_requirements.md) |
+| Find test evidence | [Validation index](experiments/README.md) |
 
-## Workspace layout
+## Workspace
 
-| Directory | Contents |
-| --- | --- |
-| `src/odin_racer/` | First-party ROS 2 packages; implement the main functions here |
-| `firmware/` | F4 firmware and protocol; documentation only for now |
-| `hardware/` | Inventory, measured geometry, wiring and calibration |
-| `tracks/` | Course reference image, simulation extraction settings and unfilled surveyed route data |
-| `tools/`, `tests/` | Offline evaluation, course generation, simulation validation, repository checks and unit tests |
-| `experiments/` | Run records, result table and synthetic examples |
-| `data/` | Large local captures and generated results, excluded from Git |
-| `vendor_ws/` | Separate vendor driver workspace; v0.14.4 built locally; point cloud display confirmed |
-| `simulation/` | Usage and validation for the competition course, sensors, ground contact and vehicle motion |
-| `docs/` | Technical docs, contribution guide and changelog; plans in `planning/` |
+`src/odin_racer/` holds eleven first-party ROS packages; `tools/` and `tests/` hold generation and independent validation tools.
+`hardware/`, `tracks/` and `firmware/` hold device facts, course sources and the F4 protocol proposal. `vendor_ws/` isolates the vendor driver.
+`data/generated/`, `build/`, `install/` and `log/` are local data/build outputs, excluded from Git.
+`*.template.yaml` files are incomplete specification forms, not runnable ROS parameters.
 
-The root is also the colcon workspace root. `build/`, `install/` and `log/` are generated build outputs. `*.template.yaml` files are specification forms, not runtime ROS parameters.
-
-## Run the offline example first
-
-From the workspace root, without connecting a robot:
-
-```bash
-python3 tools/evaluate_run.py experiments/examples/synthetic_samples.csv \
-  --metadata experiments/examples/synthetic_run.json
-```
-
-The output uses synthetic data, not measured robot performance. Build, preview and full check commands are maintained in [Development](docs/07_development.md).
-
-Before hardware integration, fill the [inventory](hardware/bom.csv) and [robot specification](hardware/robot_spec.template.yaml), then follow the [project plan](docs/planning/README.md). Two rear drive wheels and two front passive casters are confirmed; the exact F4 board, motors and encoders still need verification.
-
-See [LICENSE](LICENSE) for licensing and [References](docs/REFERENCES.md) for sources.
+Documentation keeps one technical home per topic with English/Chinese counterparts. Historical evidence retains its original version and date; current status does not imply that old tests were rerun.
+[Changes](docs/CHANGELOG.md) · [Sources](docs/REFERENCES.md) · [License](LICENSE)

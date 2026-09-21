@@ -1,115 +1,70 @@
-# System architecture
+# Architecture and tracking design
 
 English | [Chinese](02_architecture_cn.md)
 
-2026-09-16 update: [C++ single-branch visual tracking](../simulation/LINE_FOLLOWING.md) is implemented with explicit enabling and latched fault stops. Continuous full-map tracking is validated in simulation; hardware acceptance remains pending.
+Reviewed against the repository on 2026-09-21. [Package implementation status](../src/README.md) is distinct from the hardware target below.
 
-## Data and command flow
-
-The diagram shows the target architecture. Available components are model preview,
-the standalone Odin sensor bench, chassis contact and ros2_control motion simulation,
-and offline error evaluation. Onboard sensors and C++ single-branch perception/tracking are integrated. Ordered route selection and continuous-lap states now run inside `lap_controller`. Hardware race
-integration and F4 communication remain unimplemented.
-See [source navigation](../src/README.md) for package status.
-
-Motion simulation can select the [competition drawing scene](../simulation/COMPETITION_COURSE.md),
-providing line images, CameraInfo, IMU, clouds, TF, odometry and velocity commands as a foundation
-for local visual tracking development. The course is not surveyed; Gazebo truth and the overhead
-camera are independent validation inputs, not tracking-algorithm inputs.
-
-```mermaid
-flowchart TD
-  O[ODIN1 vendor driver] --> A[racer_odin adapter]
-  A --> P[racer_perception: local line observations]
-  A --> L[racer_localization: pose and health]
-  H[racer_hardware: encoder feedback] --> L
-  R[Surveyed or observed ordered course] --> T[racer_trajectory]
-  P --> T
-  L --> T
-  T --> C[racer_control: tracking and speed limits]
-  C --> G[Command selection and stop gate]
-  N[Optional Nav2 mode] --> G
-  U[Teleoperation] --> G
-  G --> H
-  H --> M[F4: wheel loops and command watchdog]
-  M --> W[Four-wheel chassis]
-  E[racer_evaluation and bags] -. observes .-> P
-  E -. observes .-> L
-  E -. observes .-> T
-```
-
-Only the selected operating mode can command the motor adapter. Race control,
-teleoperation and optional Nav2 never directly share the final actuator topic.
-The F4 lower-level controller owns the final command-age watchdog; a ROS process alone
-cannot guarantee a stop when the host freezes. Its reset state is motor-disabled.
-
-## Compute boundaries
-
-| Layer | Responsibility | Initial rate budget, subject to measurement |
-| --- | --- | --- |
-| F4 lower-level controller | Left/right wheel velocity feedback, limits, communications watchdog | 100-500 Hz if supported |
-| Jetson hardware interface | Commands, wheel states, device diagnostics | 50-100 Hz |
-| Jetson state estimation | Time-aligned body pose and health | 50-100 Hz |
-| Jetson local vision | Ground projection, line candidates, confidence | Measure actual RGB rate; target 20-30 Hz if available |
-| Jetson route tracking | Progress-constrained association and speed command | 50 Hz initial budget |
-| Development workstation | Bags, calibration, experiments and optional simulation | Offline |
-
-These are proposed loop budgets. They are not claims about ODIN1 output rates.
-An estimator running at 100 Hz does not turn old camera samples into fresh data.
-Profile acquisition-to-actuation delay, not only callback frequency.
-
-## Coordinate frames and authority
-
-Follow ROS body conventions: x forward, y left, z up, SI units. Camera optical
-frames use x right, y down, z forward. The proposed global tree is:
+## Current simulation pipeline
 
 ```text
-map                         course/world reference when alignment is available
-  odom                      continuous local reference
-    base_link               chosen body/control origin
-      wheel_*_link          measured wheel transforms
-      odin_link             measured mounting transform
-        odin_camera_optical_frame
+FishPoly image + CameraInfo + acquisition-time TF
+    -> line_perception -> LineObservation + ground black_mask
+wheel odometry + ordered CSV route + observations
+    -> lap_controller -> TwistStamped -> diff_drive_controller -> wheel PI / Gazebo
+Gazebo truth -> independent Python evaluator (no feedback to control)
 ```
 
-The current model places `base_link` at the midpoint of the rear drive axle.
-Verify this reference on hardware, with the judged point represented by a measured
-fixed offset if needed. The front ball transfers are passive supports and receive
-no drive command.
+`line_perception` projects images onto a flat metric grid and extracts black-line geometry. `lap_controller` aligns visible skeleton points against the full mapped route to correct the odom-to-route transform. It constrains driving projection to a local, monotonically advancing progress window to distinguish repeated crossing visits. Map alignment currently lives inside the controller; it is not a standalone localization node or a published `map -> odom` TF.
 
-`robot_state_publisher` owns body/joint transforms. The local estimator owns
-`odom -> base_link`. A separately validated global alignment owns `map -> odom`.
-The ODIN1 adapter transforms vendor frames and timestamps; audit and disable
-conflicting vendor TF broadcasts before adopting this tree. Every transform
-has one publisher. If global alignment is unavailable, omit `map -> odom`
-and operate explicitly in a local reference; do not publish a fictitious identity.
+Pure Pursuit uses a forward target, curvature-based speed limiting and command slew limits. Healthy images and odometry must remain fresh; travel without successful visual alignment is limited to 0.65 m of route progress. The ordered route comes from image reconstruction, not a surveyed course. Exact limits and startup are documented in [competition lap](../simulation/COMPETITION_LAP.md).
 
-ODIN1 pose can contain its own IMU information. Do not fuse the same sensor's
-pose and raw IMU as independent measurements without accounting for correlation.
-Begin with a measured wheel-based local estimate and a separately characterized
-ODIN1 pose reference. Choose fusion inputs after inspecting covariances and drift.
-Loop-closure jumps must not appear as instantaneous physical velocity.
+`line_controller` is a separate local-vision baseline. It retains observed geometry in odom and can stop/turn/reacquire at individual corners; it has no full-course route. Use one controller per command output. See [local tracking](../simulation/LINE_FOLLOWING.md).
 
-In the current motion simulation, `diff_drive_controller` publishes `odom -> base_link`
-from wheel position feedback, and `robot_state_publisher` publishes internal transforms
-on `/sim/racer/tf` and `/sim/racer/tf_static`. Simulated sensor frames use `odin_sim_*`
-names; the vehicle publishes images, clouds and IMU under `/sim/racer/odin1` by default. Gazebo world truth
-is used independently for validation, not as wheel-odometry input. Neither
-`world -> odom` nor `map -> odom` is published. Assign TF ownership explicitly when
-adding a localization node.
+## Hardware target and ownership
 
-## Operating states, proposed
+| Component | Responsibility still to integrate on hardware |
+| --- | --- |
+| `racer_odin` | Vendor adaptation, image calibration, timestamps and device health |
+| `racer_hardware` / F4 | Communication and measured wheel states / wheel-speed feedback and independent watchdog |
+| `racer_localization` | Continuous local state, reset semantics and TF ownership |
+| `racer_trajectory` | Ordered route metadata and predictive acceleration/braking constraints |
+| `racer_control` / bringup | Final command selection, readiness and deployment |
+| `racer_evaluation` | Synchronized real-vehicle recording and independent route association |
 
-`DISARMED -> READY -> RUNNING -> FINISHED`; faults enter `STOPPED` and require
-explicit re-arming after healthy data and a new start decision. `READY` requires
-valid geometry, fresh observations appropriate to the selected mode, controller
-health and a valid route. Localization-only fallback needs its own bounded trial;
-it is not enabled automatically after line loss.
+F4 receives bounded wheel-speed targets in rad/s and returns measured wheel feedback. A single upper-level command selector owns the final drive output. Teleoperation, racing and optional Nav2 must not compete on that output. F4 must stop independently if the host freezes, and boot disabled. These hardware components are not implemented merely because their packages build.
 
-The lap controller implements explicit enable, readiness, running, finish and latched stops in simulation. Hardware mode arbitration remains pending. The base-only simulation launch activates
-the joint state broadcaster and differential drive controller, then waits for external
-stamped velocity commands without sending nonzero velocity automatically. Its command
-timeout uses simulation time and does not replace the independent F4 watchdog.
-Future race launch must reject incomplete calibration and must never arm motors as
-a side effect of startup. See [simulation documentation](../simulation/README.md)
-for available entry points and validation scope.
+## Coordinates, timing and state
+
+Use SI units, body x forward/y left/z up and optical x right/y down/z forward. `base_link` is the rear axle midpoint in the current model. The scoring reference point remains unconfirmed.
+
+```text
+map -> odom -> base_link -> wheels / odin_link -> sensor frames
+```
+
+This is the target tree. In simulation the differential drive controller owns `odom -> base_link`; `robot_state_publisher` owns internal transforms on `/sim/racer/tf` and `/sim/racer/tf_static`. No global map/world alignment TF is published. Each hardware TF edge must also have one owner; audit vendor broadcasts before adding an estimator.
+
+Align data at acquisition timestamps and use monotonic time for host watchdogs. Never re-stamp stale observations as new. ODIN pose may already incorporate its IMU; do not fuse correlated pose/IMU as independent measurements without a model. Simulation control ticks at 50 Hz; target-platform rates and end-to-end delays require measurement.
+
+Lap states: `DISARMED -> READY -> RUNNING -> FINISHED`; faults latch `STOPPED`. Healthy data alone does not restart motion; explicit re-enable is required. A fresh full lap requires restarting the simulation to reset progress and initial pose. Hardware calibration checks and mode arbitration remain planned.
+
+## Design decisions and next algorithm work
+
+| Decision | Status / reason |
+| --- | --- |
+| ADR-0001, 2026-09-10: Humble baseline | Workstation baseline; Jetson image, firmware and ARM64 compatibility must be verified before platform lock |
+| ADR-0002, 2026-09-10: ordered route plus visual feedback | Selected; mapping/pre-recording/cameras are allowed by the owner; shortest-path navigation must not skip prescribed branches |
+| ADR-0003, 2026-09-10: first-party workspace plus vendor underlay | Adopted; vendor versions and licenses remain separately recorded |
+
+The former standalone ADR pages are consolidated here; decision identities and status are retained. Future changes should record the superseding decision and evidence.
+
+Next speed planning can propagate acceleration/braking bounds along the route:
+
+```text
+v_curve <= sqrt(a_lateral_max / abs(kappa))
+v_yaw <= omega_max / abs(kappa)
+v_next^2 <= v_current^2 + 2*a_accel*ds
+v_current^2 <= v_next^2 + 2*a_brake*ds
+d_stop >= v*total_latency + v^2/(2*a_brake) + margin
+```
+
+These predictive limits are proposals, not calibrated hardware capabilities. Check wheel saturation, available view and full-body swept clearance, and guard zero curvature. A moving robot with bounded angular velocity cannot track a mathematical sharp corner exactly; permissible error and stopping rules must determine the feasible maneuver. [Requirements](01_requirements.md) and [evaluation](08_evaluation.md) define the remaining decisions and measurement principles.

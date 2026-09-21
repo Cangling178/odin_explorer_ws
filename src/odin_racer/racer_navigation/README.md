@@ -2,20 +2,6 @@
 
 English | [Chinese](README_cn.md)
 
-Optional Nav2 integration.
+Optional future Nav2 integration. No navigation node or runtime Nav2 configuration is implemented; it is outside the initial race baseline.
 
-## Status
-
-Planned extension: navigation mode, environment representation and controller adapter after race requirements are satisfied. No fake Nav2 parameter file is installed.
-
-## Responsibility and acceptance
-
-Backlog: NAV-001. See the root architecture and interface documents.
-This package currently installs assets/documentation through ament_cmake.
-A successful build is not evidence that a planned subsystem runs.
-
-## Configuration
-
-Any `*.template.yaml` is a specification form, not a live ROS parameter file.
-Add runtime dependencies, executables and tested parameters when implementing
-the component. Keep vendor code and large recordings outside this package.
+This package currently installs documentation and specification templates only. `*.template.yaml` files are not runtime parameters. See [architecture](../../../docs/02_architecture.md), [interfaces](../../../docs/06_interfaces.md) and [remaining work](../../../docs/planning/README.md).

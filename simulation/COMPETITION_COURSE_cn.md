@@ -4,7 +4,7 @@
 
 已根据仓库的[比赛参考图](../tracks/reference/course_reference.jpg)搭建完整 Gazebo 赛道，
 保留直线、中央交叉点、回环、紧弯和下方连续 S 弯。整车沿用现有动力学、ros2_control 和
-随车 Odin 图像、CameraInfo、点云、IMU。已实现单分支低速视觉循线，见[循线说明](LINE_FOLLOWING_cn.md)和[右侧直线/波浪段](COMPETITION_WAVES_cn.md)；选定仿真路线的完整跑圈与交叉点选路已验证，见[连续整圈](COMPETITION_LAP_cn.md)。
+随车 Odin 图像、CameraInfo、点云、IMU。已实现单分支低速视觉循线，见[循线说明](LINE_FOLLOWING_cn.md)；选定仿真路线的完整跑圈与交叉点选路已验证，见[连续整圈](COMPETITION_LAP_cn.md)。
 
 ## 启动
 
@@ -64,7 +64,7 @@ ros2 launch racer_bringup simulation.launch.py course:=competition
 
 原始纹理和网格已入库，运行无需重新提取。默认运行时使用OpenCV生成固定米制线宽的临时纹理及网格引用。
 `course_parameters`支持`scale`（默认2.0）、`line_width`（默认约0.02116 m）和`spawn_x/y/yaw`。
-默认出生点随比例缩放；显式出生坐标为世界米制坐标，不再乘比例。右上角对应位置示例见[循线说明](LINE_FOLLOWING_cn.md#放大地图并保持原线宽)。
+默认出生点随比例缩放；显式出生坐标为世界米制坐标，不再乘比例。右上角对应位置示例见[循线说明](LINE_FOLLOWING_cn.md#比赛地图波浪段)。
 修改提取参数后执行以下命令并重新构建、启动：
 
 ```bash
@@ -101,11 +101,7 @@ python3 tools/validate_competition_course.py
 俯视比较排除车体与阴影区域；随车比较只覆盖前方 1 m 内有用视野，不是全赛道可见性验收。
 JSON 报告及前后两组 PNG 保存至 `data/generated/competition_course_validation*`。
 
-历史记录（2026-09-13，旧针孔版本；新结果见 [FishPoly 验收](FISHPOLY_CAMERA_cn.md)）：实际前进约 0.116 m；两次俯视黑线 IoU 约 0.853/0.851，
-随车投影 IoU 约 0.926/0.933（阈值分别为 0.85/0.70，受纹理采样和渲染边界影响）。
-图像、CameraInfo 和点云实收约 10 Hz，俯视图约 2 Hz，IMU 约 333 Hz，均按仿真时间计。
-IMU 配置目标为 400 Hz，本场景未实收到该频率；频率检查允许目标值 ±20%。
-本次实时因子约 0.84，是当前电脑、场景与验证负载下的结果，不代表 Jetson 性能。
+当前相机投影依据见 [FishPoly 验收](FISHPOLY_CAMERA_cn.md)，旧针孔指标不作为当前基线。
 
 结构测试为 `tests/test_course_world.py`；运行方式：
 

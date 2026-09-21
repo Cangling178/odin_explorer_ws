@@ -1,67 +1,48 @@
-# Bringup and operation plan
+# Hardware bringup and calibration
 
 English | [Chinese](09_bringup_cn.md)
 
-## Stage 0: foundation, available now
+As of the 2026-09-21 repository review, simulation tracking works, but the host hardware adapters, F4 communication, real wheel odometry and race startup remain unfinished. Vendor-driver workstation build and point-cloud display are the only recorded device bringup progress; see [vendor record](../vendor_ws/README.md).
 
-Build packages, run offline checks and launch the model preview. The current model
-contains CAD plate and Odin1 meshes, wheels with recorded dimensions, simplified
-assemblies, approximate inertias and collision shapes. Verify measured geometry
-before hardware planning or footprint acceptance. Standalone Odin sensors, chassis
-contact and ros2_control motion scenes have launch entry points and validation records;
-see [simulation documentation](../simulation/README.md). The vehicle motion scene
-produces onboard sensor data; local tracking and selected-route continuous laps are implemented.
-See [full-map simulation](../simulation/COMPETITION_LAP.md). Stages 1–5 below describe outstanding hardware work.
+## 1. Confirm hardware and rules
 
-## Stage 1: electrical and motor bench, not implemented
+Fill [BOM](../hardware/bom.csv), [robot specification](../hardware/robot_spec.template.yaml) and [platform lock](../hardware/platform_lock.template.yaml). Mechanical records already identify MG513X GMR 500-line, 1:28 reference motors; voltage/current ratings, encoder counting interpretation, actual board, driver and transport still require verification. The word F4 alone does not identify pin assignments or a toolchain.
 
-Verify wiring/rating records and the physical motor stop. With wheels supported
-off the surface, check each channel's direction, measured feedback and velocity
-limit. Unplug communications and restart the host; the lower-level controller
-must time out and require a deliberate re-arm. Record measured stopping behavior.
+Confirm the carrier, RAM, JetPack/OS, device firmware, USB link and power wiring. Record battery, regulators, fuse, stop circuit, common grounds and cable restraint; verify ratings against actual boards. Measure loaded voltage drop, temperature and disconnects. Confirm course dimensions, direction, crossing order, scoring point and tolerances in [requirements](01_requirements.md).
 
-## Stage 2: ODIN1 and estimator bench, partial integration started
+## 2. Wheel-control bench
 
-The vendor driver has been built on the development laptop, and the user confirmed
-RViz point cloud display; see [vendor notes](../vendor_ws/README.md). The target
-Jetson/device firmware pair, image and IMU quality, body adapter and estimator still
-need validation or implementation.
+With wheels clear of the ground, verify directions, measured encoder counts, bounded wheel-speed commands and feedback. Implement and test the [F4 protocol](../firmware/README.md): malformed/stale/repeated packets, reconnect, reset, saturation and watchdog. Removing communication or restarting the host must stop the motors and require deliberate re-enable. Record physical stop latency and distance separately from the timeout setting.
 
-Capture vendor data first. Audit frame directions, acquisition times and reset
-behavior. Inspect static scenes, known translation and both rotations. Confirm
-one TF publisher per edge and valid camera projection before fusing inputs.
+## 3. ODIN images and stationary projection
 
-## Stage 3: low-speed floor trials, not implemented
+Load the reviewed vendor version and inspect actual topics, types, frames, QoS and acquisition timestamps. Capture straight lines, tight turns and crossings at the intended installation and lighting; measure near/far ground coverage, black-line pixel width, exposure and processing delay.
 
-Start with a straight line and broad turn. Compare encoder/ODIN1/independent
-motion measurements; calibrate wheel scales and effective track width if
-applicable. Verify line visibility over the needed preview range. Stop on invalid
-data before testing any degraded operating mode.
+The repository's 2026-09-16 vendor-source inspection found `odin1/image` but no matching CameraInfo publisher. Recheck the installed driver during integration. Current `line_perception` requires matching image/CameraInfo timestamps and dimensions, the custom `fishpoly` model and acquisition-time TF. `racer_odin` must provide correctly matched calibration while retaining acquisition time; distinguish raw and rectified images. [FishPoly convention](../simulation/FISHPOLY_CAMERA.md) is not interchangeable with OpenCV fisheye coefficients.
 
-## Stage 4: full course accuracy, not implemented
+Measure `base_link -> ODIN1`, mounting height/pitch and ground plane. Existing [device calibration](../hardware/mechanical/odin1/calib_device.yaml) is not vehicle installation calibration. Verify known ground points and self-occlusion before moving. If visibility fails, fix installation/calibration or evaluate another permitted ordinary camera. Dedicated line-sensor modules remain outside scope.
 
-Load the validated ordered route; the owner allows advance route preparation. Test the crossing and tight
-bends independently, then the complete route. Verify checkpoint/finish semantics
-and measure error using an external reference. Meet the agreed accuracy gate.
+## 4. Motion calibration and simple tracking
 
-## Stage 5: speed trials, not implemented
+Measure loaded rolling circumference and counts per wheel revolution, including quadrature and gearing. Fit forward/backward distance scale with residuals. Use low-speed turns and arcs on the actual floor to estimate effective wheel separation, then check at another speed. Characterize passive-support alignment, slip and asymmetry; do not copy the simulation's 1.10 wheel-separation multiplier.
 
-Introduce bounded curvature speed limits and measured braking. Run repeated
-paired trials, preserve raw evidence and report unsuccessful runs. Change one
-setting at a time. Do not trade wrong-route shortcuts for faster completion.
+Check TF ownership and device reset semantics. Measure acquisition-to-callback and command-to-motion delays, clock offset and restart behavior; retain raw timestamps and uncertainty. Begin with straight lines and broad arcs, independently measure error, and verify invalid input stops before testing degraded operation.
 
-## Diagnostic guide
+## 5. Surveyed route and full laps
 
-| Symptom | First checks |
+Measure board corners and internal reference points, ordered centerline samples, line width and uncertainty. Retain distinct visits at identical crossing coordinates. Verify tight turns using the full body footprint and permitted corridor, then run the full prescribed route. Use calibrated overhead measurement or another independent reference. Repeat before raising speed; preserve failed attempts. Predictive braking needs measured actuator response.
+
+Store each calibration revision under `hardware/calibration/<revision>/` with device ID, date, units, source data/hash, residuals, conditions and uncertainty. Recalibrate after changes to wheels, load, supports or camera configuration. No calibration results currently exist in that location; create it when measurements are available.
+
+## Troubleshooting
+
+| Symptom | Check first |
 | --- | --- |
-| Robot model absent | Source overlay; model topic; RViz fixed frame |
-| Pose rotates in wrong direction | Frame convention, IMU axes, encoder signs |
-| Duplicate/jumping TF | Competing vendor/estimator broadcasters, loop closure |
-| Straight tracking oscillates | Timestamp delay, lookahead, wheel response, exposure |
-| Wrong branch at crossing | Segment/progress association and exit hysteresis |
-| Turns cut inside line | Feasible radius, preview distance, speed and footprint |
-| Sensor disconnects under motion | Power sag, cable movement, USB and thermal logs |
-| Excellent internal error but visible drift | Wrong reference, circular evaluation or calibration |
+| Wrong rotation or drifting TF | Encoder/IMU signs, transform direction, competing publishers, vendor relocalization |
+| Straight-line oscillation | Timestamp delay, wheel response, lookahead and exposure |
+| Wrong crossing branch | Ordered progress association and pose correction |
+| Tight-turn cutting | Feasible turn, lookahead, speed and swept footprint |
+| Sensor disconnect under load | Power drop, USB/cables and temperature |
+| Low internal error but visible drift | Calibration, reference frame and independent measurement |
 
-Record faults as reproducible backlog items with commit, parameters and evidence.
-There is deliberately no race.launch.py until the dependent components exist.
+There is no real-vehicle `race.launch.py`. Current simulation launch files are not hardware deployment entry points. Remaining work and acceptance gates are maintained in [planning](planning/README.md).

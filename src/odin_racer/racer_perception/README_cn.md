@@ -2,16 +2,7 @@
 
 [English](README.md) | 简体中文
 
-局部视觉黑线检测与地面中心线。
+C++17 `line_perception` 使用同帧 FishPoly 图像／CameraInfo 和采集时刻 TF 投影平地网格，发布 `LineObservation`、地面掩膜及调试图。`line_offline` 支持图像回放，几何实现位于 `include/racer_perception/line_geometry.hpp`。
 
-已实现 C++17 节点 `line_perception`，算法和 ROS 接口分离。运行参数为 `config/line_perception.yaml`；
-`*.template.yaml` 仍是设计规格表，不能作为运行参数。
-
-实现、话题、参数、启动与测试命令见[低速视觉循线](../../../simulation/LINE_FOLLOWING_cn.md)。
-完整有序路线与交叉点选择已在仿真整圈控制器中实现；实车标定及 F4 接入仍待完成。
-
-## 当前实现 — 2026-09-16
-
-同一 C++ 感知节点服务于两种控制器。整圈控制器使用地面黑线掩膜进行地图对齐，并通过 LineObservation 检查图像健康。
-
-入口、参数与验收见[competition lap](../../../simulation/COMPETITION_LAP_cn.md).
+两套控制器共用本节点：局部循线使用路径／角点证据，整圈使用图像健康与 `black_mask` 对齐地图。配置为 `config/line_perception.yaml`。[算法与接口](../../../simulation/LINE_FOLLOWING_cn.md) · [相机约定](../../../simulation/FISHPOLY_CAMERA_cn.md)。
+真实图像标定、安装和时序仍需[实车验证](../../../docs/09_bringup_cn.md)。

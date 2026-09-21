@@ -1,14 +1,18 @@
-# 拟定接口
+# 当前接口与实车提案
 
 [English](06_interfaces.md) | 简体中文
-
-2026-09-16 更新：[C++ 单分支视觉循线](../simulation/LINE_FOLLOWING_cn.md)已实现，含显式使能与锁存停车；完整地图连续循线已通过仿真验证；实车验收仍待完成。
 
 独立场景使用 `racer_interfaces/LineObservation` v0.1.0，通过 `/sim/racer/line/observation` 将路径、
 图像健康、置信度、角点和出口证据与 `path.header` 中的采集时间原子关联；`local_path` 保留为调试视图。
 详见[消息约定](../src/odin_racer/racer_interfaces/README_cn.md)。
 
 以下是自研模块的设计约定。实车适配仍待实现；仿真循线接口见上方入口，这些名称不是对厂商驱动当前 API 的声明。优先使用标准 ROS 消息；只有标准消息不能明确表达分支/进度语义时才添加自定义消息，并先记录版本。
+
+## 当前仿真
+
+`lap_controller` 使用 `observation`、`black_mask`、轮式 `odom` 和采集时刻 TF，从 CSV 加载路线；发布 `cmd_vel`、`tracking_status`、`control_debug`，用 `~/enable`（`SetBool`）显式使能。实际命名与重映射见[整圈运行](../simulation/COMPETITION_LAP_cn.md)，下表实车话题仍是提案。
+
+## 拟定实车接口
 
 | 话题 | 类型 | 发布者 → 使用者 | 约定 |
 | --- | --- | --- | --- |
@@ -38,4 +42,4 @@
 
 ## 下位机通信
 
-F4 下位机已确认；Jetson 到 F4 使用 CAN 还是串口仍未决定。最终协议需要版本、序列号、有界的左右轮 rad/s 目标、校验和/错误检测、状态、反馈、心跳和明确使能状态。参见[协议计划](../firmware/protocol/README_cn.md)。
+F4 下位机已确认；Jetson 到 F4 使用 CAN 还是串口仍未决定。最终协议需要版本、序列号、有界的左右轮 rad/s 目标、校验和/错误检测、状态、反馈、心跳和明确使能状态。参见[协议计划](../firmware/README_cn.md)。

@@ -2,18 +2,10 @@
 
 English | [Chinese](README_cn.md)
 
-Low-speed path tracking, explicit enabling and invalid-input stops.
+C++17 tracking, explicit enable and latched fault stops. Select one controller per drive output:
 
-C++17 node `line_controller` is implemented with algorithm logic separate from ROS plumbing.
-Runtime parameters are in `config/line_controller.yaml`; `*.template.yaml` remain design specifications.
+- `lap_controller`: ordered CSV route, whole-map visual alignment and wheel odometry; [full-lap operation](../../../simulation/COMPETITION_LAP.md).
+- `line_controller`: observed local paths and bounded corner stop/turn/reacquire; [local tracking](../../../simulation/LINE_FOLLOWING.md).
 
-Implementation, topics, parameters, launch and tests: [visual line following](../../../simulation/LINE_FOLLOWING.md).
-Ordered full-course routing and crossing selection are implemented in the simulation lap controller. Hardware calibration and F4 integration remain pending.
-
-Existing `config/simulation_controllers.yaml` retains the ros2_control drive, joint-state broadcaster and underlying command timeout.
-
-## Current implementation — 2026-09-16
-
-`lap_controller` is the current continuous full-map controller: ordered route progress, full-map visual alignment, wheel odometry, explicit enable and latched fault stops. `line_controller` remains the independent local-vision/corner controller. Only one is launched at a time.
-
-Launch, parameters and acceptance: [competition lap](../../../simulation/COMPETITION_LAP.md).
+`config/line_controller.yaml` configures local tracking; lap parameters are supplied by its launch and node defaults. `config/simulation_controllers.yaml` configures the simulated differential drive and wheel-state broadcaster. Route geometry is in `config/competition_lap.csv`, with source metadata alongside it. `test/` covers tracking geometry and ordered route behavior.
+Hardware command arbitration, F4 integration and real calibration remain pending; `control_contract.template.yaml` is only a specification.
