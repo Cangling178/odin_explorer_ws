@@ -3,7 +3,8 @@
 English | [Chinese](CONTRIBUTING_cn.md)
 
 Keep English documentation and provide sibling `_cn.md` Chinese translations for Markdown documents.
-Use English for identifiers, code comments and commit messages. Update both language
+Code and configuration comments may use English or Chinese. Use English for identifiers,
+user-facing strings and commit messages. Update both language
 versions when technical requirements change.
 Keep changes tied to a requirement/backlog item and explain behavior and evidence.
 Keep `main` usable; make focused branches with descriptive names.

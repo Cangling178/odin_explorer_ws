@@ -11,7 +11,7 @@ English | [Chinese](01_requirements_cn.md)
 | REQ-003 | Integrate Manifold ODIN1 | Timestamped sensor capture and frame checks |
 | REQ-004 | Follow the supplied marked course without a dedicated line module | Hardware inventory and full-route trial |
 | REQ-005 | Evaluate both accuracy and speed | Error report plus timed valid completion |
-| REQ-006 | Clear English workspace, local Git history and matching `_cn.md` Chinese documentation | Repository review |
+| REQ-006 | English identifiers and user-facing strings, local Git history, matching `_cn.md` Chinese documentation, and optional Chinese code/configuration comments | Repository review |
 | REQ-007 | Jetson host and a separate F4 lower-level controller | Board identification and transport test |
 | REQ-008 | Treat prior mapping, preloaded routes and camera line recognition as allowed | Owner clarification; retain remaining judging questions |
 

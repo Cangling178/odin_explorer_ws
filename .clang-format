@@ -1,0 +1,21 @@
+# C++ 统一格式：双空格缩进、100 列换行，展开控制流以便逐步阅读。
+BasedOnStyle: Google
+Language: Cpp
+Standard: c++17
+ColumnLimit: 100
+IndentWidth: 2
+ContinuationIndentWidth: 4
+AccessModifierOffset: -1
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
+BinPackArguments: false
+BinPackParameters: false
+# 保留现有头文件顺序与控制流结构，使改动限于排版和注释。
+SortIncludes: Never
+ReflowComments: false
+PointerAlignment: Right
+DerivePointerAlignment: false

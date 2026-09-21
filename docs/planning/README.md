@@ -109,6 +109,7 @@ risk only with a test or resolved rule, not with a proposed mitigation alone.
 | 2026-09-10 | Prior mapping, preloaded routes and camera recognition allowed | Confirmed by owner | Use hybrid route/visual strategy |
 | 2026-09-10 | Keep physical dimensions, route order and limits unfilled | Accepted foundation choice | Requires measurement |
 | 2026-09-11 | Preserve English documents and add sibling `_cn.md` Chinese translations | Requested by owner | Bidirectional language links; code and configuration identifiers remain English |
+| 2026-09-21 | Allow Chinese in code and configuration comments | Confirmed by owner | Identifiers, user-facing strings and commit messages remain English; repository checker enforces comment-only use |
 
 Motor/encoder details, exact F4 board, driver/transport, start/direction and
 precise judging limits remain unresolved. Do not infer approval from elapsed time.
