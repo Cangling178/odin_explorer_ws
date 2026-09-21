@@ -1,45 +1,25 @@
-# 当前接口与实车提案
+# 接口约定
 
 [English](06_interfaces.md) | 简体中文
 
-独立场景使用 `racer_interfaces/LineObservation` v0.1.0，通过 `/sim/racer/line/observation` 将路径、
-图像健康、置信度、角点和出口证据与 `path.header` 中的采集时间原子关联；`local_path` 保留为调试视图。
-详见[消息约定](../src/odin_racer/racer_interfaces/README_cn.md)。
+以下是目标接口，尚无实车适配实现；不是厂商话题名称声明。
 
-以下是自研模块的设计约定。实车适配仍待实现；仿真循线接口见上方入口，这些名称不是对厂商驱动当前 API 的声明。优先使用标准 ROS 消息；只有标准消息不能明确表达分支/进度语义时才添加自定义消息，并先记录版本。
+| 接口 | 类型 | 发布者 → 使用者 |
+| --- | --- | --- |
+| `/sensors/odin/points` | sensor_msgs/PointCloud2 | ODIN 适配 → 建图、障碍物处理 |
+| `/sensors/odin/odometry` | nav_msgs/Odometry | ODIN 适配 → 所选定位方案 |
+| `/wheel/odometry` | nav_msgs/Odometry | 轮反馈估计 → 定位 |
+| `/joint_states` | sensor_msgs/JointState | 实车轮反馈 → 模型 |
+| `/odometry/filtered` | nav_msgs/Odometry | 连续局部状态 → 导航 |
+| `/map` | nav_msgs/OccupancyGrid | 建图 → 探索、Nav2 |
+| `NavigateToPose` action | nav2_msgs/action/NavigateToPose | 探索目标选择 → Nav2；命名空间待配置 |
+| `/navigation/cmd_vel` | geometry_msgs/TwistStamped | 导航适配 → 仲裁 |
+| `/teleop/cmd_vel` | geometry_msgs/TwistStamped | 遥控 → 仲裁 |
+| `/drive/cmd_vel` | geometry_msgs/TwistStamped | 最终停车控制 → 差速控制器 |
+| `/diagnostics` | diagnostic_msgs/DiagnosticArray | 组件 → 日志、操作者 |
 
-## 当前仿真
+`/drive/cmd_vel` 只有最终出口发布，按安装的差速控制器实际订阅名重映射。Nav2 输出类型按锁定版本核对，必要时适配；不可丢弃时间戳或将过期命令重新标新。单位为 m、rad、s；轮速目标为 rad/s。
 
-`lap_controller` 使用 `observation`、`black_mask`、轮式 `odom` 和采集时刻 TF，从 CSV 加载路线；发布 `cmd_vel`、`tracking_status`、`control_debug`，用 `~/enable`（`SetBool`）显式使能。实际命名与重映射见[整圈运行](../simulation/COMPETITION_LAP_cn.md)，下表实车话题仍是提案。
+按采集时间做 TF 查询；核对 QoS、时钟映射、数据年龄和设备复位。地图供晚加入订阅者获取完整内容；不能无记录地混用不同地图原点。实时点云只代表观测范围，不自动证明盲区可通行。
 
-## 拟定实车接口
-
-| 话题 | 类型 | 发布者 → 使用者 | 约定 |
-| --- | --- | --- | --- |
-| `/sensors/odin/image_raw` | sensor_msgs/msg/Image | ODIN 适配层 → 感知 | 采集时间、光学坐标系 |
-| `/sensors/odin/camera_info` | sensor_msgs/msg/CameraInfo | ODIN 适配层 → 感知 | 仅在正确转换为受支持的相机模型后发布 |
-| `/sensors/odin/imu` | sensor_msgs/msg/Imu | ODIN 适配层 → 所选估计器 | 已核对单位和协方差 |
-| `/sensors/odin/points` | sensor_msgs/msg/PointCloud2 | ODIN 适配层 → 可选环境检查 | 米制坐标系、限定数据年龄 |
-| `/sensors/odin/odometry` | nav_msgs/msg/Odometry | ODIN 适配层 → 定位 | 真实位姿参考系和复位含义 |
-| `/wheel/odometry` | nav_msgs/msg/Odometry | 硬件 → 定位 | 实测编码器反馈、车体速度 |
-| `/joint_states` | sensor_msgs/msg/JointState | 硬件 → 模型 | 一致车轮顺序、SI 单位 |
-| `/odometry/filtered` | nav_msgs/msg/Odometry | 定位 → 跟踪 | 连续局部位姿、质量依据 |
-| `/track/local_path` | nav_msgs/msg/Path | 感知 → 轨迹 | 所选候选的有序点；不能暗含未说明的分支选择 |
-| `/race/reference_path` | nav_msgs/msg/Path | 轨迹 → 控制器 | 明确坐标系；路线元数据另存 |
-| `/race/cmd_vel` | geometry_msgs/msg/TwistStamped | 控制器 → 指令选择器 | 带时效检查的车体目标 |
-| `/teleop/cmd_vel` | geometry_msgs/msg/TwistStamped | 遥控 → 指令选择器 | 仅在该模式选中时使用 |
-| `/navigation/cmd_vel` | geometry_msgs/msg/TwistStamped | 导航适配层 → 选择器 | 显式转换已装 Nav2 的输出 |
-| `/drive/cmd_vel` | geometry_msgs/msg/TwistStamped | 最终停止控制 → 硬件 | 只有最终指令出口可以发布 |
-| `/diagnostics` | diagnostic_msgs/msg/DiagnosticArray | 各组件 → 操作者/日志 | 设备健康信息；不是电机停止机制 |
-
-比赛进度需要路线 ID/哈希、分段 ID、有方向的进度 `s`、检查点状态、横向误差、航向误差、置信度、有效性和源时间戳。仅靠 `nav_msgs/Path` 没有分段 ID 或速度曲线；未来轨迹 API 需要用定义清楚的消息或同步约定另行传输。拟定结构见 `racer_trajectory/config/route_contract.template.yaml`。
-
-## 时间与 QoS
-
-核对发布者兼容性后，才能选择 best-effort 传感器 QoS；限制队列长度，避免处理过期图像。指令使用可靠的小队列，并明确检查数据年龄。拒绝非有限数值、过期/未来时间戳和不可信的坐标系 ID。看门狗时长使用单调时钟，数据对齐使用 ROS 时间戳；回放时各节点一致使用 `/clock`。
-
-不能无记录地将带时间戳指令转换为不带时间戳的指令，从而丢失时效检查。差速控制器应重映射到其真实命名空间下的指令话题，并明确配置 `use_stamped_vel`。预览不包含指令发布者。
-
-## 下位机通信
-
-F4 下位机已确认；Jetson 到 F4 使用 CAN 还是串口仍未决定。最终协议需要版本、序列号、有界的左右轮 rad/s 目标、校验和/错误检测、状态、反馈、心跳和明确使能状态。参见[协议计划](../firmware/README_cn.md)。
+F4 协议沿用[固件约定](../firmware/README_cn.md)。上位机完成差速运动学，F4 完成轮速闭环和独立超时停车。通信、采样频率、超时、协方差、TF 发布归属均须实测确定。

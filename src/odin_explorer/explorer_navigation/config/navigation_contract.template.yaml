@@ -1,0 +1,13 @@
+schema_version: 1
+status: design_only_not_runtime
+mode: laboratory_exploration_and_mapping
+nav2_version: null
+mapping_backend: null
+occupancy_grid_source: null
+exploration_goal_selector: null
+operating_boundary: null
+footprint_xy_m: []
+observation_timeout_s: null
+command_adapter: null
+completion_policy: no_reachable_frontiers_or_operator_stop
+restart_requires_explicit_enable: true

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>explorer_bringup</name>
+  <version>0.1.0</version>
+  <description>Currently provides only preview.launch.py for model visualization, with no actuator connection. Mapping, base and navigation launches await validated interfaces.</description>
+  <maintainer email="maintainer@example.invalid">Project Maintainer</maintainer>
+  <license>Proprietary</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>explorer_description</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

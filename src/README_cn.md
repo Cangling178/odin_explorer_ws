@@ -2,21 +2,23 @@
 
 [English](README.md) | 简体中文
 
-十一个自研 ROS 2 包位于 `src/odin_racer/`，在工作空间根目录执行 `colcon build --base-paths src`。厂商代码隔离在 `vendor_ws/`。
+自研代码集中在 `src/odin_explorer/`。当前有六个 ROS 2 包；仅模型及预览有可运行实现，其余包保留开发所需的接口规格。
 
-| 包 | 当前实现 |
-| --- | --- |
-| [racer_interfaces](odin_racer/racer_interfaces/README_cn.md) | 原子 `LineObservation` 消息 |
-| [racer_description](odin_racer/racer_description/README_cn.md) | 模型资源、物理／传感器／赛道生成及 FishPoly 插件 |
-| [racer_perception](odin_racer/racer_perception/README_cn.md) | C++ 地面投影、黑线观测及离线图像处理 |
-| [racer_control](odin_racer/racer_control/README_cn.md) | 局部和有序整圈控制、使能／停车、仿真底盘设置 |
-| [racer_bringup](odin_racer/racer_bringup/README_cn.md) | 预览、底盘仿真、局部循线和整圈启动 |
-| [racer_hardware](odin_racer/racer_hardware/README_cn.md) | 仅规格，尚无 F4 通信或真实轮反馈 |
-| [racer_odin](odin_racer/racer_odin/README_cn.md) | 仅规格，尚无实机适配 |
-| [racer_localization](odin_racer/racer_localization/README_cn.md) | 仅规格，当前地图对齐在整圈控制器中 |
-| [racer_trajectory](odin_racer/racer_trajectory/README_cn.md) | 仅规格，当前路线进度／曲率限速在整圈控制器中 |
-| [racer_evaluation](odin_racer/racer_evaluation/README_cn.md) | 仅规格，可运行独立评测在 `tools/` |
-| [racer_navigation](odin_racer/racer_navigation/README_cn.md) | 可选后续导航 |
+| 包 | 职责 | 当前实现 |
+| --- | --- | --- |
+| `explorer_description` | 车体、车轮、电机和 ODIN 外壳模型，部件坐标关系 | Xacro、STL、RViz 配置和预览启动 |
+| `explorer_bringup` | 组合模块、配置运行模式和启动顺序 | 仅 `preview.launch.py`；无电机或设备连接 |
+| `explorer_hardware` | 上位机与 F4 通信、轮反馈及差速底盘接口 | 规格模板；无通信实现或硬件插件 |
+| `explorer_odin` | 厂商点云/位姿的数据、时钟与 TF 适配 | 规格模板；实际驱动在独立厂商空间 |
+| `explorer_localization` | 连续里程计、全局定位和导航栅格接入 | 规格模板；无估计器或栅格生成实现 |
+| `explorer_navigation` | Nav2 避障导航、探索目标选择和定点巡航 | 规格模板；无导航启动入口 |
 
-运行[完整整圈](../simulation/COMPETITION_LAP_cn.md)或[局部循线](../simulation/LINE_FOLLOWING_cn.md)，均为仿真入口，不是实车部署。
-[架构](../docs/02_architecture_cn.md)区分现有数据流与未来职责，[开发流程](../docs/07_development_cn.md)定义配置和测试规范。保留 CMake 安装所需包 README，通过链接引用状态与命令，避免重复。
+每个包的 `package.xml` 声明 ROS 依赖，`CMakeLists.txt` 安装资源，`config/` 保存配置或设计规格；已实现的启动入口位于 `launch/`。只有 description 包包含 `urdf/` 与 `meshes/`。`*.template.yaml` 不是 ROS 运行参数。
+
+`explorer_hardware` 运行在上位机；根目录 `firmware/` 用于将来运行在 F4 上的代码，目前只有协议说明。差速运动学由上位机完成，F4 负责轮速闭环与独立指令看门狗，相关实现仍待补全。
+
+`vendor_ws/src/odin_ros_driver/` 是独立厂商仓库，不属于自研 `colcon build --base-paths src` 的范围，也不随主仓库 Git 推送。重新克隆后按[厂商说明](../vendor_ws/README_cn.md)获取锁定源码并单独构建。
+
+模型尺寸和惯性含建模假设；真实设备安装外参仍需测量。预览发布虚拟轮关节状态，不能作为真实底盘反馈。
+
+[工程结构](../README_cn.md#工程结构) · [架构与数据流](../docs/02_architecture_cn.md) · [开发流程](../docs/07_development_cn.md)

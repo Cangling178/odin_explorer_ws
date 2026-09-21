@@ -1,6 +1,6 @@
 schema_version: 1
 status: unmeasured
-robot_id: odin_racer_01
+robot_id: odin_explorer_01
 drive_model: rear_differential_two_front_casters
 geometry:
   body_length_m: null

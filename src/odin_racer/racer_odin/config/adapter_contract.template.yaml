@@ -1,8 +1,0 @@
-schema_version: 1
-status: design_only_not_runtime
-vendor_commit: null
-topic_remaps: {}
-vendor_tf_publishers: []
-camera_projection_model: null
-clock_mapping: null
-max_observation_age_s: null

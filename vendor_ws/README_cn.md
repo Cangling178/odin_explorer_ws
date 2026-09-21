@@ -10,7 +10,7 @@
 
 导入提交、许可证、SDK 来源及本机构建/点云初检已记录在下方；实物固件和目标平台验收仍待完成。
 先加载此底层工作空间，再加载自研叠加层。验收要求见[ODIN1 接入](../docs/09_bringup_cn.md)。
-厂商驱动已单独构建到本地 `vendor_ws/install/`；根目录的自研构建不会自动下载、构建或安装它。
+新克隆已独立复制厂商源码；旧工程 `vendor_ws/install/` 不迁移，需按下方命令在新目录构建。根目录的自研构建不会自动下载、构建或安装厂商驱动。
 
 ## 源码导入记录 — 2026-09-11
 
@@ -26,7 +26,7 @@
 构建审阅记录：`script/build_ros2.sh` 引用了未定义的 `WS_DIR`，并执行
 `rm -rf build install log`。执行前需要明确构建流程。
 
-## 本机构建与初步测试 — 2026-09-11
+## 来源工程的历史构建与初步测试 — 2026-09-11
 
 开发笔记本使用 Ubuntu 22.04 / ROS 2 Humble。用户提供的日志显示编译成功
 （`1 package finished`），并确认已在 RViz 中看到点云。USB 枚举为
@@ -36,7 +36,7 @@
 在项目根目录构建：
 
 ```bash
-cd /home/cangling/odin_racer_ws
+cd /home/cangling/odin_explorer_ws
 source /opt/ros/humble/setup.bash
 CMAKE_BUILD_PARALLEL_LEVEL=2 colcon --log-base vendor_ws/log build \
   --base-paths vendor_ws/src \
@@ -51,7 +51,7 @@ CMAKE_BUILD_PARALLEL_LEVEL=2 colcon --log-base vendor_ws/log build \
 
 ```bash
 source /opt/ros/humble/setup.bash
-source /home/cangling/odin_racer_ws/vendor_ws/install/setup.bash
+source /home/cangling/odin_explorer_ws/vendor_ws/install/setup.bash
 ros2 launch odin_ros_driver odin1_ros2.launch.py
 ```
 
@@ -59,3 +59,14 @@ ros2 launch odin_ros_driver odin1_ros2.launch.py
 需再次构建以更新安装副本。也可通过 launch 的 `config_file` 参数直接指定
 主驱动 YAML，但辅助节点仍读取安装目录的默认配置。厂商源码和构建产物仍被
 Git 忽略，克隆主仓库后需另行获取。
+
+## 新克隆获取厂商源码
+
+本机已独立复制此源码；新机器克隆主工程后需执行一次。已有目录时不要覆盖，先核对其版本。
+
+```bash
+# From the odin_explorer_ws root
+mkdir -p vendor_ws/src
+git clone https://github.com/manifoldsdk/odin_ros_driver.git vendor_ws/src/odin_ros_driver
+git -C vendor_ws/src/odin_ros_driver checkout --detach f51051f2d861f7643d4d33d2ade2952efe1a4672
+```

@@ -1,30 +1,47 @@
-# Odin Racer
+# Odin Explorer
 
-English | [Chinese](README_cn.md)
+English | [简体中文](README_cn.md)
 
-ROS 2 line-following robot for Jetson Orin Nano, ODIN1 and an F4 controller, with two rear drive wheels and two passive front supports.
+ROS 2 laboratory exploration and mapping with Jetson Orin Nano, ODIN1 and an F4 differential-drive base.
 
-**The C++ perception and ordered-route controller have completed simulation laps. Hardware communication, Jetson deployment, calibration and real-vehicle integration remain unfinished.**
-The Gazebo course defaults to 4×3 m with approximately 21.2 mm lines. Recorded results: 0.05 m/s passed 3/3 independent starts; 0.10 m/s passed once. The default remains 0.05 m/s. See [lap evidence](experiments/competition_lap/RESULTS.md) for metrics and scope.
+**An independently cloned, reduced development foundation, not a completed autonomous robot.** Six packages build and model preview runs. Vendor sources are separate. F4 transport, continuous odometry, navigation grids, Nav2 and exploration goal selection remain unimplemented and unvalidated on hardware.
 
-## Start here
+GitHub: <https://github.com/Cangling178/odin_explorer_ws> (private; access required).
 
-| Task | Guide |
-| --- | --- |
-| Build, check or contribute | [Development](docs/07_development.md) |
-| Run a complete simulation lap | [Competition lap](simulation/COMPETITION_LAP.md) |
-| Run component or local tracking simulations | [Simulation](simulation/README.md) |
-| Understand code and data flow | [Package map](src/README.md), [architecture](docs/02_architecture.md), [interfaces](docs/06_interfaces.md) |
-| Connect the real vehicle | [Bringup and calibration](docs/09_bringup.md), [hardware records](hardware/README.md) |
-| Check remaining work | [Project plan](docs/planning/README.md), [requirements](docs/01_requirements.md) |
-| Find test evidence | [Validation index](experiments/README.md) |
+Milestones: manually moved mapping → teleoperated base and stopping → goal navigation while mapping → autonomous exploration → waypoint patrol.
 
-## Workspace
+## Project structure
 
-`src/odin_racer/` holds eleven first-party ROS packages; `tools/` and `tests/` hold generation and independent validation tools.
-`hardware/`, `tracks/` and `firmware/` hold device facts, course sources and the F4 protocol proposal. `vendor_ws/` isolates the vendor driver.
-`data/generated/`, `build/`, `install/` and `log/` are local data/build outputs, excluded from Git.
-`*.template.yaml` files are incomplete specification forms, not runnable ROS parameters.
+```text
+odin_explorer_ws/
+├── src/odin_explorer/
+│   ├── explorer_description/   # Model and RViz preview
+│   ├── explorer_bringup/       # Launch composition
+│   ├── explorer_hardware/      # Host-side base interface
+│   ├── explorer_odin/          # ODIN data adaptation
+│   ├── explorer_localization/  # Odometry and mapping integration
+│   └── explorer_navigation/    # Navigation, exploration and patrol
+├── vendor_ws/src/odin_ros_driver/  # Separate vendor sources and SDK
+├── firmware/                   # MCU firmware; protocol notes only
+├── hardware/                   # CAD, calibration, BOM and specifications
+├── docs/                       # Architecture, interfaces and bringup
+│   └── planning/               # Milestones and assignments
+├── tools/check_workspace.py    # Minimal structure/model check
+├── .github/workflows/          # Automated build and checks
+└── build/ · install/ · log/     # Local build outputs, ignored by Git
+```
 
-Documentation keeps one technical home per topic with English/Chinese counterparts. Historical evidence retains its original version and date; current status does not imply that old tests were rerun.
-[Changes](docs/CHANGELOG.md) · [Sources](docs/REFERENCES.md) · [License](LICENSE)
+```bash
+cd /home/cangling/odin_explorer_ws
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --symlink-install
+source install/local_setup.bash
+python3 tools/check_workspace.py
+ros2 launch explorer_bringup preview.launch.py
+```
+
+Preview connects to no actuators or sensor devices. See [development](docs/07_development.md) for dependencies.
+
+[Packages](src/README.md) · [Architecture](docs/02_architecture.md) · [Interfaces](docs/06_interfaces.md) · [Assignments](docs/planning/TEAM_ASSIGNMENTS.md) · [Bringup](docs/09_bringup.md) · [Hardware](hardware/README.md) · [Firmware](firmware/README.md) · [Vendor](vendor_ws/README.md) · [Migration](docs/MIGRATION.md).
+
+No tracks, world generators, Gazebo plugins, line following or lap tests. One structural/model check remains. Add transport and stopping tests when those functions are implemented. Null values require measurements; `*.template.yaml` files are not runtime parameters.

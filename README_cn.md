@@ -1,30 +1,57 @@
-# Odin Racer
+# Odin Explorer
 
 [English](README.md) | 简体中文
 
-基于 ROS 2 的循迹小车：Jetson Orin Nano＋ODIN1＋F4，后轮双电机差速驱动、前轮为被动支撑。
+基于 ROS 2 的实验室自主探索与建图工程：Jetson Orin Nano + ODIN1 + F4，后轮差速驱动、前被动支撑。
 
-**C++ 感知与有序路线控制已完成仿真整圈；实车通信、Jetson 部署、标定及整车接入尚未完成。**
-Gazebo 赛道默认 4×3 m、约 21.2 mm 线宽。已有记录：0.05 m/s 独立启动 3/3 次通过，0.10 m/s 单次通过；默认仍为 0.05 m/s。具体指标与适用范围见[整圈验收](experiments/competition_lap/RESULTS_cn.md)。
+**这是从原工程独立克隆并精简后的开发基础，不是已完成的自主导航系统。** 当前可构建六个包并运行模型预览；厂商驱动源码另存。F4 通信、连续里程计、导航栅格、Nav2 和探索目标选择仍待实现和实车验证。
 
-## 从这里开始
+GitHub：<https://github.com/Cangling178/odin_explorer_ws>（私有仓库，需要访问权限）。
 
-| 要做什么 | 文档 |
+近期顺序：人工移动建图验证 → 低速遥控底盘与停车 → 指定目标导航并建图 → 自主探索 → 已建地图内定点巡航。
+
+## 工程结构
+
+```text
+odin_explorer_ws/
+├── src/odin_explorer/
+│   ├── explorer_description/   # 车体模型和 RViz 预览
+│   ├── explorer_bringup/       # 统一启动入口
+│   ├── explorer_hardware/      # 上位机底盘接口
+│   ├── explorer_odin/          # ODIN 数据适配
+│   ├── explorer_localization/  # 连续里程计与建图接入
+│   └── explorer_navigation/    # 避障导航、自主探索和巡航
+├── vendor_ws/src/odin_ros_driver/  # 独立厂商源码与 SDK
+├── firmware/                   # 下位机固件；目前只有协议说明
+├── hardware/                   # CAD、标定、BOM 和待测规格
+├── docs/                       # 架构、接口、开发与联调
+│   └── planning/               # 阶段安排和人员分工
+├── tools/check_workspace.py    # 最小结构与模型检查
+├── .github/workflows/          # 自动构建和检查
+└── build/ · install/ · log/     # 本地构建产物，不纳入 Git
+```
+
+## 使用
+
+```bash
+cd /home/cangling/odin_explorer_ws
+source /opt/ros/humble/setup.bash
+colcon build --base-paths src --symlink-install
+source install/local_setup.bash
+python3 tools/check_workspace.py
+ros2 launch explorer_bringup preview.launch.py
+```
+
+模型预览不连接电机，不启动厂商设备。构建依赖与环境说明见[开发流程](docs/07_development_cn.md)。
+
+| 入口 | 内容 |
 | --- | --- |
-| 构建、检查或参与开发 | [开发流程](docs/07_development_cn.md) |
-| 运行完整仿真整圈 | [整圈循迹](simulation/COMPETITION_LAP_cn.md) |
-| 运行部件或局部循线仿真 | [仿真入口](simulation/README_cn.md) |
-| 理解代码和数据流 | [源码导航](src/README_cn.md)、[架构](docs/02_architecture_cn.md)、[接口](docs/06_interfaces_cn.md) |
-| 接入实车 | [联调与标定](docs/09_bringup_cn.md)、[硬件资料](hardware/README_cn.md) |
-| 查看剩余工作 | [项目计划](docs/planning/README_cn.md)、[需求](docs/01_requirements_cn.md) |
-| 查找测试依据 | [验证索引](experiments/README_cn.md) |
+| [源码](src/README_cn.md) | 六个保留包及实现状态 |
+| [架构](docs/02_architecture_cn.md) / [接口](docs/06_interfaces_cn.md) | 建图、定位、导航和控制边界 |
+| [任务分工](docs/planning/TEAM_ASSIGNMENTS_cn.md) | 三人职责、总负责人及验收阶段 |
+| [实车联调](docs/09_bringup_cn.md) | 建图、底盘和导航验证 |
+| [硬件](hardware/README_cn.md) / [固件](firmware/README_cn.md) | CAD、标定原件、F4 协议 |
+| [厂商驱动](vendor_ws/README_cn.md) | 独立版本与构建入口 |
+| [迁移记录](docs/MIGRATION_cn.md) | 保留、删除和原工程追溯 |
 
-## 工作空间
-
-`src/odin_racer/` 包含十一个自研 ROS 包，`tools/` 与 `tests/` 保存资源生成及独立验证工具。
-`hardware/`、`tracks/`、`firmware/` 分别保存硬件事实、赛道来源与 F4 协议提案；`vendor_ws/` 隔离厂商驱动。
-`data/generated/`、`build/`、`install/`、`log/` 是本地数据或构建产物，不纳入 Git。
-`*.template.yaml` 是未填写完整的规格表，不能直接作为 ROS 运行参数。
-
-每个主题保留一个技术入口及中英文对应版。历史验收保留原版本与日期；更新当前状态不表示重新跑过历史测试。
-[变更记录](docs/CHANGELOG_cn.md) · [参考资料](docs/REFERENCES_cn.md) · [许可](LICENSE)
+不包含赛道、世界生成、Gazebo 插件、黑线循迹或整圈测试。仅保留一个结构与模型检查工具；实车通信及停车功能实现时再补对应测试。规格中的 `null` 尚待实测，`*.template.yaml` 不能作为运行参数。

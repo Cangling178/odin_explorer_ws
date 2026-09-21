@@ -1,4 +1,0 @@
-# The C++ tracker needs clock resolution finer than the odometry period.
-/gazebo:
-  ros__parameters:
-    publish_rate: 100.0

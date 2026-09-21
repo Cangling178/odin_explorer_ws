@@ -1,22 +1,24 @@
-# Source map
+# Source guide
 
-English | [Chinese](README_cn.md)
+English | [简体中文](README_cn.md)
 
-Eleven first-party ROS 2 packages live under `src/odin_racer/`. Build from the workspace root with `colcon build --base-paths src`; vendor code is isolated in `vendor_ws/`.
+First-party code lives under `src/odin_explorer/`. There are six ROS 2 packages; only model/preview functionality is implemented. The other packages retain development contracts.
 
-| Package | Current implementation |
-| --- | --- |
-| [racer_interfaces](odin_racer/racer_interfaces/README.md) | Atomic `LineObservation` message |
-| [racer_description](odin_racer/racer_description/README.md) | Robot assets, physics/sensor/course generators and FishPoly plugin |
-| [racer_perception](odin_racer/racer_perception/README.md) | C++ ground projection, black-line observations and offline image processing |
-| [racer_control](odin_racer/racer_control/README.md) | Local tracking and ordered full-lap controllers, enable/stop logic, simulation drive settings |
-| [racer_bringup](odin_racer/racer_bringup/README.md) | Preview, base simulation, local tracking and lap launches |
-| [racer_hardware](odin_racer/racer_hardware/README.md) | Specification only; no F4 transport or real wheel feedback |
-| [racer_odin](odin_racer/racer_odin/README.md) | Specification only; no real-device adapter |
-| [racer_localization](odin_racer/racer_localization/README.md) | Specification only; current map alignment is inside lap control |
-| [racer_trajectory](odin_racer/racer_trajectory/README.md) | Specification only; current route progress/curvature limiting is inside lap control |
-| [racer_evaluation](odin_racer/racer_evaluation/README.md) | Specification only; runnable independent evaluators live in `tools/` |
-| [racer_navigation](odin_racer/racer_navigation/README.md) | Optional future navigation |
+| Package | Responsibility | Current implementation |
+| --- | --- | --- |
+| `explorer_description` | Body, wheel, motor and ODIN housing geometry and frames | Xacro, STL, RViz configuration and preview launch |
+| `explorer_bringup` | Module composition, operating modes and launch order | Only `preview.launch.py`; no actuator or sensor connection |
+| `explorer_hardware` | Host-to-F4 transport, wheel feedback and differential base interface | Contract templates; no transport or hardware plugin |
+| `explorer_odin` | Vendor cloud/pose, clock and TF adaptation | Contract templates; actual driver lives in the vendor underlay |
+| `explorer_localization` | Continuous odometry, global localization and occupancy integration | Contract templates; no estimator or occupancy mapper |
+| `explorer_navigation` | Nav2 obstacle avoidance, exploration goals and waypoint patrol | Contract templates; no navigation launch |
 
-Run [full laps](../simulation/COMPETITION_LAP.md) or [local tracking](../simulation/LINE_FOLLOWING.md). These are simulation entry points, not real-vehicle deployment.
-[Architecture](../docs/02_architecture.md) records implemented data flow and future ownership; [development](../docs/07_development.md) defines configuration and testing conventions. Package READMEs remain because CMake installs them; status and commands are linked rather than duplicated.
+Each package declares ROS dependencies in `package.xml`, installs resources with `CMakeLists.txt`, and stores configuration or contracts in `config/`. Implemented launches live in `launch/`; only description has `urdf/` and `meshes/`. `*.template.yaml` files are not runtime parameters.
+
+`explorer_hardware` runs on the host. Root-level `firmware/` is reserved for F4 code and currently contains protocol notes only. The host performs differential kinematics; F4 will own wheel loops and an independent command watchdog. These functions remain unimplemented.
+
+`vendor_ws/src/odin_ros_driver/` is an independent vendor repository. It is excluded from the first-party colcon build and the parent Git push. After cloning, fetch the pinned source and build it separately using the [vendor instructions](../vendor_ws/README.md).
+
+Model dimensions and inertia include assumptions. Real mounting extrinsics require measurement. Preview publishes synthetic wheel joint states, not real base feedback.
+
+[Project structure](../README.md#project-structure) · [Architecture and data flow](../docs/02_architecture.md) · [Development](../docs/07_development.md)

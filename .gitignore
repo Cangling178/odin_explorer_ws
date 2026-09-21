@@ -2,11 +2,6 @@
 /build/
 /install/
 /log/
-/image/install/
-/image/build/
-/image/log/
-# Local camera calibration scratch copy; canonical device YAML is under hardware/.
-/image/cam_in_ex.txt
 __pycache__/
 *.py[cod]
 .pytest_cache/

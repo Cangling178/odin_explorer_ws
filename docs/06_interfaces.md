@@ -1,62 +1,23 @@
-# Current and proposed interfaces
+# Interface contracts
 
-English | [Chinese](06_interfaces_cn.md)
+These are proposed integration interfaces, not implemented hardware adapters or guaranteed vendor topic names.
 
-The isolated-scene implementation uses `racer_interfaces/LineObservation` v0.1.0
-on `/sim/racer/line/observation`. It atomically associates path, image health,
-confidence, corner and exit evidence with the acquisition stamp in `path.header`.
-`local_path` remains a debug view. See [message contract](../src/odin_racer/racer_interfaces/README.md).
+| Interface | Type | Producer → consumer |
+| --- | --- | --- |
+| `/sensors/odin/points` | sensor_msgs/PointCloud2 | ODIN adapter → mapping, obstacles |
+| `/sensors/odin/odometry` | nav_msgs/Odometry | ODIN adapter → selected localization |
+| `/wheel/odometry` | nav_msgs/Odometry | wheel estimation → localization |
+| `/joint_states` | sensor_msgs/JointState | real wheel feedback → model |
+| `/odometry/filtered` | nav_msgs/Odometry | continuous local state → navigation |
+| `/map` | nav_msgs/OccupancyGrid | mapping → exploration, Nav2 |
+| `NavigateToPose` action | nav2_msgs/action/NavigateToPose | exploration → Nav2; namespace TBD |
+| `/navigation/cmd_vel` | geometry_msgs/TwistStamped | navigation adapter → arbitration |
+| `/teleop/cmd_vel` | geometry_msgs/TwistStamped | teleoperation → arbitration |
+| `/drive/cmd_vel` | geometry_msgs/TwistStamped | final stop gate → differential controller |
+| `/diagnostics` | diagnostic_msgs/DiagnosticArray | components → logs/operator |
 
-These are first-party design contracts. Hardware adaptation remains pending; simulation tracking interfaces are documented above.
-These names are not claims about the vendor driver's current API.
-Prefer standard ROS messages. Add custom messages only when branch/progress
-semantics cannot be expressed unambiguously; document their version first.
+Only the final command gate publishes drive commands; remap to the installed controller's actual subscription. Verify the locked Nav2 output type and adapt if necessary. Preserve freshness; never restamp expired commands. SI units; wheel commands in rad/s.
 
-## Current simulation
+Query TF at acquisition time. Verify QoS, clock mapping, age and reset behavior. Late map subscribers need a complete map. Record map origin changes. Clouds do not establish free space outside sensor coverage.
 
-`lap_controller` consumes `observation`, `black_mask`, wheel `odom` and acquisition-time TF, and loads its route from CSV. It publishes `cmd_vel`, `tracking_status` and `control_debug`, with `~/enable` (`SetBool`) for explicit arming. Current names/remappings are in [lap operation](../simulation/COMPETITION_LAP.md); hardware topic names below are proposals.
-
-## Proposed hardware interfaces
-
-| Topic | Type | Producer -> consumer | Contract |
-| --- | --- | --- | --- |
-| `/sensors/odin/image_raw` | sensor_msgs/msg/Image | ODIN adapter -> perception | Acquisition time, optical frame |
-| `/sensors/odin/camera_info` | sensor_msgs/msg/CameraInfo | ODIN adapter -> perception | Only after valid conversion to a supported camera model |
-| `/sensors/odin/imu` | sensor_msgs/msg/Imu | ODIN adapter -> selected estimator | Units and covariance audited |
-| `/sensors/odin/points` | sensor_msgs/msg/PointCloud2 | ODIN adapter -> optional environment checks | Metric frame, bounded age |
-| `/sensors/odin/odometry` | nav_msgs/msg/Odometry | ODIN adapter -> localization | Actual pose reference and reset semantics |
-| `/wheel/odometry` | nav_msgs/msg/Odometry | hardware -> localization | Measured encoder feedback, body twist |
-| `/joint_states` | sensor_msgs/msg/JointState | hardware -> model | Consistent wheel order, SI units |
-| `/odometry/filtered` | nav_msgs/msg/Odometry | localization -> tracking | Continuous local pose, quality evidence |
-| `/track/local_path` | nav_msgs/msg/Path | perception -> trajectory | Ordered points for selected candidate; never carries hidden branch choices |
-| `/race/reference_path` | nav_msgs/msg/Path | trajectory -> controller | Frame explicit; route metadata stored separately |
-| `/race/cmd_vel` | geometry_msgs/msg/TwistStamped | controller -> command selector | Body target with freshness check |
-| `/teleop/cmd_vel` | geometry_msgs/msg/TwistStamped | teleop -> command selector | Selected mode only |
-| `/navigation/cmd_vel` | geometry_msgs/msg/TwistStamped | navigation adapter -> selector | Convert installed Nav2 output explicitly |
-| `/drive/cmd_vel` | geometry_msgs/msg/TwistStamped | stop gate -> hardware | Only final gate can publish |
-| `/diagnostics` | diagnostic_msgs/msg/DiagnosticArray | components -> operator/logger | Device health; not the motor stop mechanism |
-
-Race progress needs route ID/hash, segment ID, directed progress `s`, checkpoint
-state, lateral error, heading error, confidence, validity and source timestamp.
-`nav_msgs/Path` alone has no segment IDs or speed profile: the future trajectory
-API must transport these separately in a defined message or synchronized contract.
-See `racer_trajectory/config/route_contract.template.yaml` for the planned schema.
-
-## Timing and QoS
-
-Choose best-effort sensor QoS only after checking publisher compatibility;
-bound queues to avoid stale image processing. Use reliable, small command queues
-and explicit age checking. Reject nonfinite values, stale/future timestamps and
-untrusted frame IDs. Use monotonic time for watchdog durations and ROS timestamps
-for data alignment; replay uses `/clock` consistently across nodes.
-
-Do not silently convert stamped commands to unstamped ones and lose age checks.
-For a differential controller, remap to its actual scoped command topic and
-configure `use_stamped_vel` explicitly. The preview has no command publisher.
-
-## Lower-level transport
-
-The F4 lower-level board is confirmed; Jetson-to-F4 CAN or serial transport
-remains undecided. The eventual protocol
-needs version, sequence number, bounded left/right wheel rad/s targets, checksum/error detection, status,
-feedback, heartbeat and explicit enable state. See [protocol plan](../firmware/README.md).
+See [F4 contract](../firmware/README.md). The host performs differential kinematics; F4 owns wheel control and its independent watchdog. Rates, timeouts, covariance and TF ownership need hardware validation.
