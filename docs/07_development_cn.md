@@ -40,6 +40,19 @@ python3 tools/validate_lap_controller.py
 
 这些检查使用隔离 domain 和合成输入。动态验证需要渲染环境，命令见[整圈](../simulation/COMPETITION_LAP_cn.md)及[局部循线](../simulation/LINE_FOLLOWING_cn.md)。验证范围和证据集中在[实验索引](../experiments/README_cn.md)，各使用文档不重复维护测试总数。
 
+## 验证工具选择
+
+| 范围 | 保留入口 |
+| --- | --- |
+| Python 单元回归 | `python3 -m unittest discover -s tests -v` |
+| 局部循线／分阶段故障 | `validate_isolated_line.py`，批量用 `run_isolated_matrix.py` |
+| 整圈／重复运行 | `validate_competition_lap.py`、`repeat_competition_lap.py` |
+| 无 Gazebo 的 ROS 输入／时钟 | `validate_line_controller.py`、`validate_lap_controller.py`、`validate_arming_clock.py` |
+| 物理与传感器专项 | `validate_ground_contact.py`、`validate_sim_drive.py`、`validate_sim_sensors.py`、`validate_competition_course.py`、`validate_fishpoly_render.py` |
+| 离线报告 | `report_isolated_line.py`（含转角扫掠）、`report_competition_lap.py` |
+
+旧短程循线入口已由局部验证器取代；早期固定目录汇总已移除，当前矩阵依据 `manifest.json`，报告工具生成浏览用摘要。历史冻结的 42＋12 次汇总保留于验收 JSON，不根据当前结果重新计算。源码检查、离线 CSV 评测和场景生成工具仍各有用途。
+
 ## 文件归属与协作
 
 - 代码与运行配置放在 `src/odin_racer/` 所属包；硬件事实放在 `hardware/`，赛道事实放在 `tracks/`，实验摘要放在 `experiments/`。

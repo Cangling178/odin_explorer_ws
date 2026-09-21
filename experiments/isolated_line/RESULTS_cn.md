@@ -205,3 +205,7 @@ python3 tools/report_isolated_line.py data/generated/my_fixed_matrix
 
 S弯与断图报告分别在同一 `final/` 目录下的 `s_regression/`、`image_drop/`。
 左直角报告在 `corner_left/`，该次几何回归先于最终共享内存修复完成；未重跑整个历史矩阵。
+
+## 当前报告工具
+
+`python3 tools/report_isolated_line.py <运行目录>` 同时生成轨迹／误差图、图像叠加和 HTML。单直角报告有有效扫掠数据时，还生成 `turn_sweep.png` 并在 HTML 中链接，无需单独绘图脚本。历史固定批次的汇总 JSON 原样保留；复现被移除的旧工具可使用 Git 中清理前的版本。

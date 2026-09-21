@@ -239,3 +239,7 @@ Limited regression for that historical version:
 
 S and image-drop reports are in `s_regression/` and `image_drop/` under the same `final/` directory.
 The left-corner report is in `corner_left/`; this geometry regression preceded the final shared-memory fix. The full historical matrix was not rerun.
+
+## Current report tool
+
+`python3 tools/report_isolated_line.py <run-directory>` generates trajectory/error charts, image overlays and HTML. Single-corner reports with valid sweep data also produce `turn_sweep.png`, linked from HTML, without a separate plotting command. Historical fixed-cohort summary JSON is retained unchanged; removed historical tools remain available in Git before cleanup.

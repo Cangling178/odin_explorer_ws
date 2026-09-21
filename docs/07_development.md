@@ -40,6 +40,19 @@ python3 tools/validate_lap_controller.py
 
 These use isolated domains and synthetic inputs. Dynamic tests require a rendering environment and are documented with [lap](../simulation/COMPETITION_LAP.md) and [local tracking](../simulation/LINE_FOLLOWING.md) entry points. Validation scope and evidence live in [experiments](../experiments/README.md), not duplicate running totals in every guide.
 
+## Validation tool selection
+
+| Scope | Retained entry |
+| --- | --- |
+| Python unit regression | `python3 -m unittest discover -s tests -v` |
+| Local tracking / phase-specific faults | `validate_isolated_line.py`, batched by `run_isolated_matrix.py` |
+| Full laps / repeat runs | `validate_competition_lap.py`, `repeat_competition_lap.py` |
+| ROS input / clock without Gazebo | `validate_line_controller.py`, `validate_lap_controller.py`, `validate_arming_clock.py` |
+| Physics and sensor checks | `validate_ground_contact.py`, `validate_sim_drive.py`, `validate_sim_sensors.py`, `validate_competition_course.py`, `validate_fishpoly_render.py` |
+| Offline reports | `report_isolated_line.py` (including turn sweep), `report_competition_lap.py` |
+
+The local validator replaces the old short-run tracking entry. The historical fixed-directory summarizer is removed: current matrices use `manifest.json`, while the report tool creates a browsing summary. Frozen 42+12 results remain in archived acceptance JSON and are not recalculated from current runs. Repository checks, offline CSV evaluation and resource generators retain separate purposes.
+
 ## File ownership and contributions
 
 - Code and runtime configuration belong to the owning package under `src/odin_racer/`; device facts to `hardware/`; course facts to `tracks/`; run summaries to `experiments/`.
