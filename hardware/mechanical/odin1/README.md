@@ -8,8 +8,7 @@ English | [Chinese](README_cn.md)
 - [Original STEP](https://manifoldtechltd.github.io/wiki/odin_series/odin1/assets/stp/Odin1.stp)
 - STEP SHA-256: `92a28478dfcfd8896e287ceecfa283515399f2cff61f0d86ff662433d29ac11f`.
 
-Original manufacturer STEP retained; mesh generated with tools/convert_odin_step.py
-using Gmsh 4.15.2 and trimesh 5.1.0, converting mm to m. No new license is
+Original manufacturer STEP and the generated STL are retained. Historical conversion used Gmsh 4.15.2 and trimesh 5.1.0, converting mm to m. The one-time converter was removed; restore it from `tools/` at Git revision `508bf26` if CAD changes require regeneration. No new license is
 asserted for manufacturer CAD; rights remain with the original owner.
 Official main body: width 100, height 62, depth 43 mm; mass approx 280 g.
 Drawing depth including connector: 45.8 mm. Downloaded CAD bounds: 100x62x46.4 mm;

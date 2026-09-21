@@ -9,13 +9,7 @@
 本目录保留原始 SolidWorks 和 STEP。STEP SHA-256：`3034a4fd0d791a35212bf166a0775f7630fcfa31570a78389df7a697e52937d8`。
 2026-09-12 使用 Gmsh 4.15.2／trimesh 5.1.0 转换，mm 转 m，`(x,y,z)=(-CAD_z,CAD_x,CAD_y)`。网格原点为水平包围盒中心、最低 z=0；外包约 247.416×220×33.5 mm，113696 三角面。外观相对后轴放置于 `(0.103708,0,0.02875)` m。
 
-```bash
-python3 -m venv /tmp/odin-cad-tools
-/tmp/odin-cad-tools/bin/pip install gmsh==4.15.2 trimesh==5.1.0
-/tmp/odin-cad-tools/bin/python tools/convert_chassis_step.py   hardware/mechanical/chassis_plate/车板.STEP   src/odin_racer/racer_description/meshes/chassis_plate.stl
-```
-
-在工作空间根目录执行，输入文件名为原附件名称。日常 ROS 构建直接使用现有 STL，不需要转换依赖。
+现有车板 STL 已入库，日常构建直接使用该资源。一次性 CAD 转换和铜柱生成脚本已从当前工程移除；需要修改 CAD 或重新生成基础网格时，可从 Git 版本 `508bf26` 的 `tools/` 恢复对应工具。上述转换版本、单位和坐标约定继续保留。
 
 ## 已采用的几何
 
@@ -33,7 +27,7 @@ python3 -m venv /tmp/odin-cad-tools
 
 以上取代早期 18 mm 球径、208 mm 球距、23 mm 前边距和 57 mm 板高假设。地面相对 base_link 为 z=−33.25 mm，后轮中心 y=±128.5 mm。四孔 CAD 轴线为 X=±103.111804 mm、Z=−135.498442／−97.198442 mm，沿 CAD Y，半径 2 mm；转换后安装轴 x=215.498442／177.198442 mm、y=±103.111804 mm，板底 z=28.75 mm。
 
-40 与 38.3 mm 孔距差 1.7 mm，对中时每侧差 0.85 mm，实物装配尚未验证。商品法兰总长给定 50 mm，但宽度、厚度和孔径缺失，因此仍省略法兰。铜柱省略螺纹和螺母，生成命令为 `python3 tools/generate_standoff_mesh.py`。
+40 与 38.3 mm 孔距差 1.7 mm，对中时每侧差 0.85 mm，实物装配尚未验证。商品法兰总长给定 50 mm，但宽度、厚度和孔径缺失，因此仍省略法兰。铜柱省略螺纹和螺母，现有基础网格由 Xacro 按尺寸缩放。
 
 ## 电机、支架与质量
 

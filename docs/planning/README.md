@@ -2,6 +2,8 @@
 
 English | [Chinese](README_cn.md)
 
+See [work assignments for the first three development roles](TEAM_ASSIGNMENTS.md) for prerequisites, interfaces, acceptance criteria, and integration handoffs.
+
 Reviewed 2026-09-21. C++ local tracking and image-map-assisted full laps work in simulation. Real-vehicle M1–M8 acceptance is not complete; M0 is the completed foundation milestone. Recorded results live only in the [validation index](../../experiments/README.md).
 
 ## Priority and acceptance

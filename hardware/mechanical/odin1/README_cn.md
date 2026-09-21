@@ -8,8 +8,7 @@
 - [Original STEP](https://manifoldtechltd.github.io/wiki/odin_series/odin1/assets/stp/Odin1.stp)
 - STEP SHA-256: `92a28478dfcfd8896e287ceecfa283515399f2cff61f0d86ff662433d29ac11f`.
 
-本目录保留官方 STEP 原件；网格由 `tools/convert_odin_step.py` 生成，
-需要 Gmsh 4.15.2 和 trimesh 5.1.0，单位由 mm 转为 m。
+本目录保留官方 STEP 原件，现有 STL 已入库。历史转换使用 Gmsh 4.15.2 和 trimesh 5.1.0，单位由 mm 转为 m。一次性转换脚本已移除；修改 CAD 后需重新生成时，可从 Git 版本 `508bf26` 的 `tools/` 恢复。
 未自行声明厂商数模的再许可；权利归原权利人。
 
 官方规格：主体宽 100、高 62、深 43 mm，重量约 280 g。

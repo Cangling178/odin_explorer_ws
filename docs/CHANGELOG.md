@@ -4,6 +4,8 @@ English | [Chinese](CHANGELOG_cn.md)
 
 ## 2026-09-21
 
+Removed three one-time CAD conversion/standoff-generation scripts unused by current build/runtime paths. Retained original CAD, generated STL and conversion provenance, with a Git revision for tool recovery. Course/route generation and independent validation remain available.
+
 Simplified validation tools: removed the superseded short-run tracking validator and the historical fixed-directory summarizer; consolidated corner-sweep plotting into the local report tool. Retained 45 Python unit tests, distinct dynamic checks and original acceptance data; runtime control and acceptance limits are unchanged.
 
 Consolidated documentation by topic: architecture includes tracking decisions; development includes repository/contribution rules; hardware bringup includes calibration and ODIN integration; model scope replaces temporary gap/component lists. Local experiment criteria, reproduction and wave-segment evidence now share the isolated-results page. Removed duplicate directory indexes and superseded status narratives; kept bilingual package READMEs required by installation, original CAD/calibration, source configurations and acceptance artifacts. Corrected inventory reference status. No code or runtime-parameter changes.

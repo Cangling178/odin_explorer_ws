@@ -9,13 +9,7 @@ This page records the final modeling inputs, replacing incremental descriptions 
 Original SolidWorks and STEP files remain in this directory. STEP SHA-256: `3034a4fd0d791a35212bf166a0775f7630fcfa31570a78389df7a697e52937d8`.
 Converted 2026-09-12 with Gmsh 4.15.2 / trimesh 5.1.0; mm to m, `(x,y,z)=(-CAD_z,CAD_x,CAD_y)`. Mesh origin is the horizontal bounding-box center and lowest z=0; bounds approximately 247.416×220×33.5 mm, 113696 triangles. Visual placement relative to the rear axle is `(0.103708,0,0.02875)` m.
 
-```bash
-python3 -m venv /tmp/odin-cad-tools
-/tmp/odin-cad-tools/bin/pip install gmsh==4.15.2 trimesh==5.1.0
-/tmp/odin-cad-tools/bin/python tools/convert_chassis_step.py   hardware/mechanical/chassis_plate/*.STEP   src/odin_racer/racer_description/meshes/chassis_plate.stl
-```
-
-Run from the workspace root. The input filename above is the original supplied filename. Normal ROS builds use the existing STL without these conversion dependencies.
+The chassis STL is checked in and consumed directly by normal builds. One-time CAD conversion and standoff generation scripts have been removed from the current tree; restore the relevant tools from `tools/` at Git revision `508bf26` when changing CAD or regenerating base meshes. Conversion versions, units and coordinate conventions above remain the provenance record.
 
 ## Adopted geometry
 
@@ -33,7 +27,7 @@ Run from the workspace root. The input filename above is the original supplied f
 
 These replace early 18 mm ball diameter, 208 mm ball spacing, 23 mm front offset and 57 mm plate-height assumptions. Ground is at z=−33.25 mm relative to base_link; wheel centers are y=±128.5 mm. Four CAD hole axes: X=±103.111804 mm, Z=−135.498442/−97.198442 mm, along CAD Y, radius 2 mm. In base_link the mounting axes are x=215.498442/177.198442 mm, y=±103.111804 mm, plate underside z=28.75 mm.
 
-The 40 vs 38.3 mm hole spacing differs by 1.7 mm (0.85 mm per side if centered); physical assembly is unverified. A 50 mm product flange length was supplied but flange width/thickness/hole diameter were not, so the flange remains omitted. The standoffs omit threads and nuts. Regenerate their mesh with `python3 tools/generate_standoff_mesh.py`.
+The 40 vs 38.3 mm hole spacing differs by 1.7 mm (0.85 mm per side if centered); physical assembly is unverified. A 50 mm product flange length was supplied but flange width/thickness/hole diameter were not, so the flange remains omitted. The standoffs omit threads and nuts. Xacro scales the existing base mesh to the selected dimensions.
 
 ## Motors, brackets and mass
 
