@@ -2,7 +2,7 @@
 
 ## 获取工程
 
-仓库为私有仓库，使用具有访问权限的 GitHub 账号克隆。主分支为 `main`。
+仓库为公开仓库，可通过 HTTPS 直接克隆。主分支为 `main`。
 
 ```bash
 git clone https://github.com/Cangling178/odin_explorer_ws.git

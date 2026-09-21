@@ -2,7 +2,7 @@
 
 ## Clone the project
 
-This is a private repository; use a GitHub account with access. The main branch is `main`.
+This is a public repository and can be cloned directly over HTTPS. The main branch is `main`.
 
 ```bash
 git clone https://github.com/Cangling178/odin_explorer_ws.git

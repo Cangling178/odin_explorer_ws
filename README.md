@@ -6,7 +6,7 @@ ROS 2 laboratory exploration and mapping with Jetson Orin Nano, ODIN1 and an F4 
 
 **An independently cloned, reduced development foundation, not a completed autonomous robot.** Six packages build and model preview runs. Vendor sources are separate. F4 transport, continuous odometry, navigation grids, Nav2 and exploration goal selection remain unimplemented and unvalidated on hardware.
 
-GitHub: <https://github.com/Cangling178/odin_explorer_ws> (private; access required).
+GitHub: <https://github.com/Cangling178/odin_explorer_ws> (public repository).
 
 Milestones: manually moved mapping → teleoperated base and stopping → goal navigation while mapping → autonomous exploration → waypoint patrol.
 
