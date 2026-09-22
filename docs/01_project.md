@@ -29,7 +29,8 @@
 
 ```text
 ODIN .bin 重定位 → 厂商位姿与 TF → odin_nav_adapter → /odom、导航 TF
-ODIN 实时点云 → PCL 过滤 → 障碍标记点云 + 射线清除点云
+ODIN 实时点云 → 自身包络/高度过滤 → 小簇过滤 → 障碍标记点云
+                                  └→ 保留真实回波 → 射线清除点云
 二维地图 YAML/PGM → map_server → /map
 /map + 实时点云 + 定位 → Nav2 → /cmd_vel
 电脑 RViz → NavigateToPose / FollowWaypoints → Jetson Nav2
@@ -69,7 +70,9 @@ map → odom → base_link → odin_imu → odin_lidar
                    └→ 机器人模型中的其他 link
 ```
 
-`base_to_imu` 必须实测。厂商 `odom → map` 经过求逆和地图对齐后用于导航坐标树；不同时启用 AMCL。时间戳使用厂商时钟对齐功能，点云保留采集时间，不使用任意补发的当前时间代替。
+`base_to_imu` 必须实测。厂商 `odom → map` 经过求逆和地图对齐后用于导航坐标树；不同时启用 AMCL。当前导航配置 `use_host_ros_time: 1`，由厂商驱动以主机接收时间打戳；适配器保留输入时间戳，不再补发当前时间。该模式不同于设备采集时间对齐模式 `2`。
+
+障碍标记在车体坐标系中额外过滤低矮小簇：4 cm 邻接距离、最长边不超过 25 cm、最高点不超过 `base_link` 上方 4 cm。清除点云不应用小簇过滤。参数与使用范围见[导航与巡航](04_navigation.md)。
 
 ## 建图接口与模式区别
 

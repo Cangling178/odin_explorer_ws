@@ -20,6 +20,7 @@
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/static_transform_broadcaster.h>
+#include "small_obstacle_filter.hpp"
 
 class OdinNavAdapter : public rclcpp::Node
 {
@@ -32,6 +33,14 @@ public:
     min_height_ = declare_parameter("obstacle_min_z", 0.02);
     max_height_ = declare_parameter("obstacle_max_z", 1.2);
     floor_z_ = declare_parameter("floor_z_in_base", -0.03325);
+    cluster_tolerance_ = declare_parameter("small_cluster_tolerance", 0.04);
+    small_cluster_extent_ = declare_parameter("small_cluster_max_extent", 0.25);
+    small_cluster_max_z_ = declare_parameter("small_cluster_max_z", 0.04);
+    if (!std::isfinite(cluster_tolerance_) || cluster_tolerance_ <= 0.0 ||
+        !std::isfinite(small_cluster_extent_) || small_cluster_extent_ < 0.0 ||
+        !std::isfinite(small_cluster_max_z_)) {
+      throw std::invalid_argument("小障碍过滤参数无效");
+    }
     self_box_ = declare_parameter<std::vector<double>>("self_box", {-0.06, 0.25, -0.16, 0.16, -0.04, 0.20});
     if (self_box_.size() != 6 || !std::isfinite(min_height_) ||
         !std::isfinite(max_height_) || !std::isfinite(floor_z_) ||
@@ -177,24 +186,29 @@ private:
     crop.filter(*outside);
     pcl::PassThrough<pcl::PointXYZ> pass;
     pass.setInputCloud(outside); pass.setFilterFieldName("z");
-    auto publish = [&](double lower, double upper, auto publisher) {
+    auto publish = [&](double lower, double upper, auto publisher, bool filter_small) {
       Cloud filtered, sensor;
       pass.setFilterLimits(lower, upper); pass.filter(filtered);
+      if (filter_small) {
+        filtered = explorer_odin::filter_small_obstacles(
+          filtered, cluster_tolerance_, small_cluster_extent_, small_cluster_max_z_);
+      }
       // 回到真实雷达原点，Nav2 三维射线清除不能错误地从 base_link 发出。
       pcl::transformPointCloud(filtered, sensor, matrix(base_lidar_.inverse()));
       sensor_msgs::msg::PointCloud2 out; pcl::toROSMsg(sensor, out);
       out.header = input.header; out.header.frame_id = "odin_lidar";
       publisher->publish(out);
     };
-    publish(min_height_, max_height_, obstacles_pub_);
+    publish(min_height_, max_height_, obstacles_pub_, true);
     // 地面不标记为障碍，但保留真实回波用于 VoxelLayer 的三维射线清除。
     // 清除回波不受障碍高度上限裁剪：远处高点的射线也能穿过近处旧障碍。
-    publish(floor_z_ - 0.03, std::numeric_limits<float>::max(), rays_pub_);
+    publish(floor_z_ - 0.03, std::numeric_limits<float>::max(), rays_pub_, false);
   }
   tf2::Transform base_imu_, base_lidar_, map_vendor_map_, vendor_map_odom_, last_pose_;
   bool have_map_{false}, have_lidar_{false};
   int64_t last_stamp_{0};
   double min_height_, max_height_, floor_z_;
+  double cluster_tolerance_, small_cluster_extent_, small_cluster_max_z_;
   std::vector<double> self_box_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> broadcaster_;
   std::unique_ptr<tf2_ros::StaticTransformBroadcaster> static_broadcaster_;

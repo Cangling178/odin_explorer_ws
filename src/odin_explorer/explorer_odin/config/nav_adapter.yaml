@@ -8,6 +8,13 @@ odin_nav_adapter:
     # 低于此高度的地面回波仅用于清除，不标记为障碍。
     obstacle_min_z: 0.02
     obstacle_max_z: 1.2
+    # 仅过滤障碍标记点云；射线清除点云保持完整。
+    # 相邻 4 cm 内的点聚为一簇。只有簇的最长边 <= 25 cm，且所有点
+    # 都低于 base_link 上方 4 cm 时才丢弃（不是离地 4 cm）。
+    # 符合范围的真实低矮小物体也会被忽略；max_extent 设为 0 可关闭。
+    small_cluster_tolerance: 0.04
+    small_cluster_max_extent: 0.25
+    small_cluster_max_z: 0.04
     # PCL CropBox 自身包络：[xmin,xmax,ymin,ymax,zmin,zmax]。
     # 此处是起始参数，需按实物调整；不要把车外障碍包含进自身包络。
     self_box: [-0.06, 0.25, -0.16, 0.16, -0.04, 0.20]

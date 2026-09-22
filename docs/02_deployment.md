@@ -31,7 +31,7 @@ source /opt/ros/humble/setup.bash
 rosdep install --from-paths src/odin_explorer --ignore-src -r -y --rosdistro humble
 
 # 厂商独立工作空间；应用补丁后必须重新编译一次。
-CMAKE_BUILD_PARALLEL_LEVEL=2 colcon --log-base vendor_ws/log build \
+MAKEFLAGS="-j1 -l1" CMAKE_BUILD_PARALLEL_LEVEL=1 colcon --log-base vendor_ws/log build \
   --base-paths vendor_ws/src \
   --build-base vendor_ws/build \
   --install-base vendor_ws/install \
@@ -40,7 +40,7 @@ CMAKE_BUILD_PARALLEL_LEVEL=2 colcon --log-base vendor_ws/log build \
   --cmake-args -DBUILD_SYSTEM=ROS2
 
 source vendor_ws/install/local_setup.bash
-CMAKE_BUILD_PARALLEL_LEVEL=2 colcon build \
+MAKEFLAGS="-j1 -l1" CMAKE_BUILD_PARALLEL_LEVEL=1 colcon build \
   --base-paths src/odin_explorer \
   --packages-up-to explorer_bringup \
   --symlink-install --executor sequential \
@@ -48,9 +48,18 @@ CMAKE_BUILD_PARALLEL_LEVEL=2 colcon build \
 source install/local_setup.bash
 ```
 
+Jetson 已有依赖时跳过 `rosdep install`。本次设备可用总内存约 3.5 GiB，厂商包首次构建有编译进程被系统终止，后使用单线程完成。若已经配置了 `vendor_ws/build/odin_ros_driver`，可直接补编并安装：
+
+```bash
+cmake --build vendor_ws/build/odin_ros_driver --parallel 1 && \
+cmake --install vendor_ws/build/odin_ros_driver
+```
+
 ### 终端 1：启动 ODIN 与导航
 
 以下为当前实机已确认可用的启动命令。用户于 2026-09-22 确认启动问题已解决，且当前定位正确。`base_to_imu` 使用当前车体模型中的 ODIN IMU 中心位置。
+
+2026-09-23 已在 `robotics@robotics.local` 的 `/home/robotics/odin_explorer_ws` 验证此启动；电脑工作区为 `/home/cangling/odin_explorer_ws`。厂商配置中的绝对地图路径在 Jetson 上已改为 `/home/robotics/odin_explorer_ws/data/maps/…`。`0004` 配置补丁保存的是电脑路径，换机时需按实际路径调整。
 
 此启动包含厂商驱动，不要同时另开一份 ODIN 驱动。
 
@@ -59,6 +68,10 @@ cd ~/odin_explorer_ws
 source /opt/ros/humble/setup.bash
 source vendor_ws/install/local_setup.bash
 source install/local_setup.bash
+
+export ROS_DOMAIN_ID=35
+export ROS_LOCALHOST_ONLY=0
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 
 ros2 launch explorer_bringup navigation_jetson.launch.py \
   map:="$PWD/data/maps/lab_01_edit.yaml" \
@@ -96,6 +109,10 @@ cd ~/odin_explorer_ws
 source /opt/ros/humble/setup.bash
 source install/local_setup.bash
 
+export ROS_DOMAIN_ID=35
+export ROS_LOCALHOST_ONLY=0
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+
 ros2 launch explorer_bringup navigation_rviz.launch.py
 ```
 
@@ -121,6 +138,22 @@ ros2 run tf2_ros tf2_echo map base_link
 ```
 
 应能发现 `/map`、`/odom`、`/navigation/obstacle_points`，以及 `/navigate_to_pose`、`/follow_waypoints`。发现不到时先核对网络、域编号和防火墙，不要在电脑上启动第二套导航来代替网络排查。
+
+## 小簇过滤的增量编译与测试
+
+电脑和 Jetson 分别在本机执行；依赖已有时无需重新安装：
+
+```bash
+cd ~/odin_explorer_ws
+source /opt/ros/humble/setup.bash
+MAKEFLAGS="-j1 -l1" CMAKE_BUILD_PARALLEL_LEVEL=1 colcon build \
+  --base-paths src/odin_explorer --packages-select explorer_odin \
+  --symlink-install --executor sequential --cmake-args -DBUILD_TESTING=ON
+ctest --test-dir build/explorer_odin --output-on-failure
+source install/local_setup.bash
+```
+
+源码、参数更新后重启导航入口生效。测试覆盖低矮小簇删除、较高细杆及较大低矮物体保留、空输入和关闭过滤。
 
 ## 工作目录与数据
 
