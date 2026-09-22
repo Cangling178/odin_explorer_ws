@@ -2,9 +2,13 @@
 <package format="3">
   <name>explorer_navigation</name>
   <version>0.1.0</version>
-  <description>Nav2 obstacle avoidance, exploration and later waypoint patrol</description>
+  <description>Nav2 实车导航参数与 RViz 交互配置</description>
   <maintainer email="maintainer@example.invalid">Project Maintainer</maintainer>
   <license>Proprietary</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>nav2_rviz_plugins</exec_depend>
+  <exec_depend>explorer_description</exec_depend>
+  <exec_depend>rviz2</exec_depend>
   <export><build_type>ament_cmake</build_type></export>
 </package>

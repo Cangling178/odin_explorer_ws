@@ -2,6 +2,7 @@
 /build/
 /install/
 /log/
+/symlink_install_manifest.txt
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -32,3 +33,10 @@ __pycache__/
 *.swp
 *~
 .DS_Store
+
+# 本地设备记录与标定归档
+/data/odin_records/
+/data/calibration/
+# 厂商旧路径可能再次生成的设备输出，不作为 ROS 源码提交
+/src/odin_ros_driver/
+/image/

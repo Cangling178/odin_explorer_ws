@@ -1,8 +1,0 @@
-schema_version: 1
-status: design_only_not_runtime
-available_launch: preview.launch.py
-hardware_ready: false
-mapping_launch_implemented: false
-navigation_launch_implemented: false
-calibration_revision: null
-platform_lock_revision: null

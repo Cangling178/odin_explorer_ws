@@ -1,6 +1,5 @@
-# Odin1 official CAD and mounting
+# Odin1 官方数模与安装
 
-English | [Chinese](README_cn.md)
 
 - [Product overview](https://manifoldtechltd.github.io/wiki/odin_series/odin1/1.%20Product%20Overview_.html)
 - [Installation and CAD download](https://manifoldtechltd.github.io/wiki/odin_series/odin1/3.%20Installation%20Guide_.html)
@@ -8,26 +7,28 @@ English | [Chinese](README_cn.md)
 - [Original STEP](https://manifoldtechltd.github.io/wiki/odin_series/odin1/assets/stp/Odin1.stp)
 - STEP SHA-256: `92a28478dfcfd8896e287ceecfa283515399f2cff61f0d86ff662433d29ac11f`.
 
-Original manufacturer STEP and the generated STL are retained. Historical conversion used Gmsh 4.15.2 and trimesh 5.1.0, converting mm to m. The one-time converter was removed; restore it from `tools/` at Git revision `508bf26` if CAD changes require regeneration. No new license is
-asserted for manufacturer CAD; rights remain with the original owner.
-Official main body: width 100, height 62, depth 43 mm; mass approx 280 g.
-Drawing depth including connector: 45.8 mm. Downloaded CAD bounds: 100x62x46.4 mm;
-preserved without forcing the model to match approximate published dimensions.
+本目录保留官方 STEP 原件，现有 STL 已入库。历史转换使用 Gmsh 4.15.2 和 trimesh 5.1.0，单位由 mm 转为 m。一次性转换脚本已移除；修改 CAD 后需重新生成时，可从 Git 版本 `508bf26` 的 `tools/` 恢复。
+未自行声明厂商数模的再许可；权利归原权利人。
 
-odin_link is the bottom mounting-hole group center, X forward/Y left/Z up.
-Conversion in mm: (x,y,z)=(CAD_Z-20.4,-CAD_X,31-CAD_Y).
-This is not the driver's IMU/lidar/camera frame. Original device calibration is retained; simulated sensor TF was removed. Vehicle installation extrinsics remain unmeasured; see [architecture](../../../docs/02_architecture.md).
-Front four holes interpreted as the central 84x30.3 mm group, not caster mounts:
-CAD X=-41.742355/42.257645, Z=-140.688953/-110.388953 mm.
-Adjacent plate top verified at CAD Y=3.5 mm. Direct flat mounting, facing forward,
-center in base_link: (205.538953,0.257645,32.25) mm.
-Official pattern 84.3x30.7 mm differs by 0.15 mm per lateral side and 0.20 mm
-per longitudinal side when centered. Actual assembly fit is not established.
-No unmeasured bracket is added; mounting height/pitch need hardware confirmation.
+官方规格：主体宽 100、高 62、深 43 mm，重量约 280 g。
+尺寸图含接头深度为 45.8 mm；实际下载数模包围盒为 100×62×46.4 mm，
+保留原数模，不强行缩放到文档近似值。
 
-Official installation guidance requires unobstructed FOV and >=10 mm surrounding
-cooling clearance, and strongly recommends the underside >0.2 m from objects.
-This user-directed plate layout does not meet that raised-installation advice;
-FOV, thermal and structural clearances remain unvalidated.
-Mass 0.280 kg added; uniform main-body box estimates COM/inertia.
-Assigned subtotal 0.877 kg, excluding plate, pillars and other electronics.
+`odin_link` 原点是底部四孔中心，X 向前、Y 向左、Z 向上。
+数模转换 `(x,y,z)=(CAD_Z-20.4, -CAD_X, 31-CAD_Y)`，随后除以 1000。
+这不是驱动的 imu/lidar/camera 坐标。设备标定原件保留，模拟传感器 TF 已移除；车体安装外参仍待实测，见[架构](../../../docs/01_project.md)。
+
+按“车头四孔”解释为车头中央 84×30.3 mm 孔组（不是两侧万向球孔）：
+CAD X=-41.742355/42.257645 mm，Z=-140.688953/-110.388953 mm。
+孔旁表面高度已从网格核对为 Y=3.5 mm。直接贴板安装、正面朝前，
+底部孔组中心位于 base_link 的 (205.538953, 0.257645, 32.25) mm。
+官方底孔距为 84.3×30.7 mm，中心对齐后左右各差 0.15 mm、前后各差
+0.20 mm；孔组并非精确一致，不据此断言螺钉能直接装配。
+不新增未确认尺寸的支架，安装高度和俯仰尚需实车确认。
+
+官方安装建议包括视野无遮挡、四周至少 10 mm 散热间隙，并强烈建议
+设备底部离物体 0.2 m 以上。当前用户指定的贴板布局不满足该抬高建议，
+视野、散热和与已有支撑结构的间隙仍需检查；这不是通过验收的硬件安装。
+
+质量 0.280 kg 已加入；质心和惯性按均匀主体包围盒估算。
+当前已赋质量小计 0.877 kg，不含车板、铜柱及其他电子设备，非整车总重。

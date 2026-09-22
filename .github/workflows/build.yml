@@ -1,0 +1,21 @@
+name: 构建实验室导航
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container: ros:humble-ros-base-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装声明的依赖
+        shell: bash
+        run: |
+          apt-get update
+          rosdep update
+          rosdep install --from-paths src/odin_explorer --ignore-src -r -y --rosdistro humble
+      - name: 编译当前功能包
+        shell: bash
+        run: |
+          source /opt/ros/humble/setup.bash
+          colcon build --base-paths src/odin_explorer --cmake-args -DBUILD_TESTING=OFF

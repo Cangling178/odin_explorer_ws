@@ -1,0 +1,37 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index af916a0..5e36014 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -102,8 +102,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+ # Symbolization support for the SDK crash handler.
+ # -g keeps DWARF info so addr2line can report file/line, the frame-pointer and
+ # unwind-table flags keep the stack walkable, and CMAKE_ENABLE_EXPORTS adds
+-# -rdynamic so symbols pulled in from the static SDK archive land in .dynsym
+-# and become visible to dladdr()/backtrace_symbols() at runtime.
++# -rdynamic so driver symbols are visible to dladdr()/backtrace_symbols().
++# Static SDK symbols are kept local below to avoid interposing on middleware.
+ option(ODIN_ENABLE_BACKTRACE "Keep symbols and frame pointers for crash backtraces" ON)
+ if(ODIN_ENABLE_BACKTRACE)
+     set(BACKTRACE_FLAGS "-g -fno-omit-frame-pointer -funwind-tables -fasynchronous-unwind-tables")
+@@ -497,6 +497,21 @@ if(TARGET_PLATFORM STREQUAL "arm")
+     message(STATUS "Adding ARM-specific link options and RPATH")
+ endif()
+ 
++# The SDK's global MD5 symbols conflict with Fast DDS and corrupt its host ID,
++# preventing same-host shared-memory transport. Keep static SDK symbols local
++# while preserving DWARF information, frame pointers, and other driver exports.
++# Append after the ARM flags so both ROS builds retain their existing options.
++if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
++    foreach(LYD_HOST_API_LINK_LIBRARY IN LISTS LYD_HOST_API_LIB)
++        get_filename_component(LYD_HOST_API_ARCHIVE_NAME "${LYD_HOST_API_LINK_LIBRARY}" NAME)
++        if(LYD_HOST_API_ARCHIVE_NAME MATCHES "\\.a$")
++            set_property(TARGET host_sdk_sample APPEND_STRING PROPERTY LINK_FLAGS
++                " -Wl,--exclude-libs,${LYD_HOST_API_ARCHIVE_NAME}")
++            message(STATUS "Keeping SDK archive symbols local: ${LYD_HOST_API_ARCHIVE_NAME}")
++        endif()
++    endforeach()
++endif()
++
+ # Add debug information
+ message(STATUS "=======================================")
+ message(STATUS "Project: ${PROJECT_NAME}")

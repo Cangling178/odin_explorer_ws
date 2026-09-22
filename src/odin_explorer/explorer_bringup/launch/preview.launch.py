@@ -1,4 +1,4 @@
-"""Compose the model preview; real robot bringup is intentionally unimplemented."""
+"""Compose the model-only preview; live mapping has a separate launch."""
 
 from pathlib import Path
 

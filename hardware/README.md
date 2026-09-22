@@ -1,17 +1,11 @@
-# Hardware records
+# 机器人模型与硬件资料
 
-English | [Chinese](README_cn.md)
+保留本项目所用底盘、ODIN 数模、设备标定和部件清单。模型几何不等于实测传感器安装外参；导航使用的 `base_to_imu` 需要独立测量。
 
-Hardware facts and modeling assumptions belong here. Host/firmware integration and calibration procedures are in [hardware bringup](../docs/09_bringup.md).
+- [底盘与电机模型说明](mechanical/chassis_plate/README.md)
+- [ODIN 数模与安装说明](mechanical/odin1/README.md)
+- [部件清单](bom.csv)
+- [设备标定原件](mechanical/odin1/calib_device.yaml)
+- [导航标定与地图对齐](../docs/04_navigation.md)
 
-| Record | Scope |
-| --- | --- |
-| [bom.csv](bom.csv) | Inventory and unresolved electrical/device details |
-| [robot_spec.template.yaml](robot_spec.template.yaml) | Unfilled measured robot specification; not runtime parameters |
-| [platform_lock.template.yaml](platform_lock.template.yaml) | Target OS/JetPack, driver and firmware lock; not yet validated |
-| [Chassis record](mechanical/chassis_plate/README.md) | CAD source, confirmed/reference dimensions, assumptions and conversion |
-| [ODIN record](mechanical/odin1/README.md) | CAD provenance, installation assumptions and device calibration |
-
-Two rear drive motors, passive front supports and an F4 controller are confirmed. Mechanical references identify MG513X GMR 500-line, 1:28 motors; actual electrical ratings, counts per output revolution, driver, F4 board and transport remain unverified. Device point-cloud display was observed on the workstation; Jetson readiness is not established.
-
-Create `electrical/` when wiring/power records exist and `calibration/<revision>/` for measured data and residuals. Empty placeholder READMEs have been removed. Unknown specification fields remain unset; source CAD, device calibration and reference values are not a complete measured vehicle model.
+未填实测数值的通用模板已移除。实测包络、点云高度和车体外参直接按导航文档填写运行参数；本阶段不包含下位机程序或底盘通信。

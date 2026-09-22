@@ -1,83 +1,15 @@
-# ODIN1 vendor underlay
+# ODIN 厂商工作空间
 
-English | [Chinese](README_cn.md)
+`src/odin_ros_driver` 是独立的厂商仓库，包含 SDK 和原始许可证，不随主仓库提交。`COLCON_IGNORE` 防止主工作区意外把它当作普通源码一起构建。
 
-Documentation consolidated 2026-09-21; the 2026-09-11 import/build record below is retained. No driver upgrade or new firmware/device acceptance was performed.
+源码版本、补丁应用及 Jetson 构建顺序见[部署与构建](../docs/02_deployment.md)。按编号依次应用 `patches/` 中的补丁：
 
-The local checkout contains `src/odin_ros_driver` cloned from the vendor repository. Vendor sources,
-SDK binaries and underlay build products are ignored in the parent Git repository.
-`COLCON_IGNORE` prevents accidental root-level discovery. The first-party build
-uses `--base-paths src` at the root, not this directory.
+- [0001-respect-config-file.patch](patches/0001-respect-config-file.patch)：读取 launch 传入的 `config_file`。
+- [0002-isolate-sdk-symbols.patch](patches/0002-isolate-sdk-symbols.patch)：隔离静态 SDK 的导出符号，避免同名 MD5 实现干扰 FastDDS 的同机识别。
+- [0003-report-rgb-config-failure.patch](patches/0003-report-rgb-config-failure.patch)：记录 RGB 配置调用耗时和错误类别，明确配置是否得到确认；此项是诊断改善，不代表已修复设备应答超时。
 
-Before importing: check the exact release/firmware pair and review the build
-script. Keep the vendor package directly under this underlay's `src/` directory
-because the vendor documents layout assumptions. Use the audited vendor build
-procedure within this directory; the first-party foundation does not invoke it.
+- [0004-save-navigation-config.patch](patches/0004-save-navigation-config.patch)：保存当前实验室导航配置，包括主机时间模式、重定位模式和地图路径；换机时按实际工作区路径调整。
 
-The imported commit, license, SDK provenance, local build and initial point cloud
-check are recorded below; device firmware and target-platform acceptance remain pending.
-Source this underlay before the first-party overlay. See
-[ODIN1 integration](../docs/09_bringup.md) for acceptance.
-This clone contains an independent vendor source copy. The old vendor_ws/install was not migrated; rebuild here using the commands below. The first-party build does not download, build or install this underlay.
+补丁不修改定位算法。SDK 符号隔离保留 DWARF 调试信息和帧指针，但 SDK 内部函数通过 `dladdr` 获取名称的能力会减少。
 
-## Source import record — 2026-09-11
-
-- Upstream: https://github.com/manifoldsdk/odin_ros_driver.git
-- Branch at import: `main`; driver version: `v0.14.4`.
-- Imported commit: `f51051f2d861f7643d4d33d2ade2952efe1a4672`.
-- Repository license: Apache-2.0; upstream `LICENSE` retained.
-- SDK provenance: `lib/liblydHostApi_amd.a` and `lib/liblydHostApi_arm.a` from the same upstream commit.
-- Upstream-required firmware: `v0.14.0`; actual device firmware has not been checked.
-- No source patches were applied during import. The vendor build script was not run. See the local build and test record below.
-- This records the downloaded revision, not an accepted platform/firmware lock.
-
-Build review note: `script/build_ros2.sh` references undefined `WS_DIR` and runs
-`rm -rf build install log`. Resolve the build procedure before executing it.
-
-## Historical source-project build and initial test — 2026-09-11
-
-Ubuntu 22.04 / ROS 2 Humble on the development laptop. The user reported a
-successful build (`1 package finished`) and confirmed point cloud display in
-RViz. USB enumeration showed `2207:0019` at `5000M`. This is an initial point
-cloud check; image, IMU, odometry quality and vehicle integration remain unvalidated.
-Actual firmware remains unconfirmed. This is not Jetson platform acceptance.
-
-Build from the project root:
-
-```bash
-cd /home/cangling/odin_explorer_ws
-source /opt/ros/humble/setup.bash
-CMAKE_BUILD_PARALLEL_LEVEL=2 colcon --log-base vendor_ws/log build \
-  --base-paths vendor_ws/src \
-  --build-base vendor_ws/build \
-  --install-base vendor_ws/install \
-  --packages-select odin_ros_driver \
-  --executor sequential \
-  --cmake-args -DBUILD_SYSTEM=ROS2
-```
-
-For subsequent runs, source the environment and launch; rebuilding is unnecessary
-unless source or installed resources change:
-
-```bash
-source /opt/ros/humble/setup.bash
-source /home/cangling/odin_explorer_ws/vendor_ws/install/setup.bash
-ros2 launch odin_ros_driver odin1_ros2.launch.py
-```
-
-The build does not use `--symlink-install`. Rebuild after editing source YAML or
-launch files to update installed copies. The launch `config_file` argument can
-instead select a YAML directly for the main driver; auxiliary nodes still read
-the installed default configuration. Vendor source and build outputs remain
-ignored and must be obtained separately when cloning the parent repository.
-
-## Fetch vendor sources after cloning
-
-This machine already has an independent copy. Run once after cloning the parent on another machine; inspect an existing checkout instead of overwriting it.
-
-```bash
-# From the odin_explorer_ws root
-mkdir -p vendor_ws/src
-git clone https://github.com/manifoldsdk/odin_ros_driver.git vendor_ws/src/odin_ros_driver
-git -C vendor_ws/src/odin_ros_driver checkout --detach f51051f2d861f7643d4d33d2ade2952efe1a4672
-```
+先加载 ROS 环境与本厂商工作空间，再加载自有工作空间。不要把电脑编译产物直接复制到 Jetson。

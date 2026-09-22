@@ -1,0 +1,13 @@
+# 仅在 Jetson 上使用。单位：米、弧度。安装外参由 launch 参数提供，地图对齐采用 launch 中已保存的默认值。
+odin_nav_adapter:
+  ros__parameters:
+    use_sim_time: false
+    # 车体原点为后轮轴中心，当前模型轮半径为 0.03325 m；实车不同需修改。
+    floor_z_in_base: -0.03325
+    # 相对于车体原点的碰撞高度，不是雷达坐标的 z。
+    # 低于此高度的地面回波仅用于清除，不标记为障碍。
+    obstacle_min_z: 0.02
+    obstacle_max_z: 1.2
+    # PCL CropBox 自身包络：[xmin,xmax,ymin,ymax,zmin,zmax]。
+    # 此处是起始参数，需按实物调整；不要把车外障碍包含进自身包络。
+    self_box: [-0.06, 0.25, -0.16, 0.16, -0.04, 0.20]

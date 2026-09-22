@@ -1,7 +1,5 @@
 # explorer_navigation
 
-Nav2 obstacle avoidance, exploration and later waypoint patrol; contracts only, no runnable navigation launch.
+Nav2 实车参数与电脑 RViz 配置；导航算法直接使用官方组件。
 
-[Architecture](../../../docs/02_architecture.md) · [Interfaces](../../../docs/06_interfaces.md)
-
-`*.template.yaml` files are design records, not ROS runtime parameters.
+[项目结构与接口](../../../docs/01_project.md) · [部署与构建](../../../docs/02_deployment.md) · [导航与巡航](../../../docs/04_navigation.md)

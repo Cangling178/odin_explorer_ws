@@ -1,38 +1,37 @@
-# Chassis dimensions and CAD provenance
+# 底盘尺寸与 CAD 来源
 
-English | [Chinese](README_cn.md)
 
-This page records the final modeling inputs, replacing incremental descriptions that were superseded. Values supplied/approved by the owner are not independent measurements. Front is the passive-support side; `base_link` is the rear axle midpoint, x forward/y left/z up.
+本页记录最终采用的建模输入，取代逐次追加、相互覆盖的旧说明。负责人提供／认可的值不等于独立实测。前被动支撑侧为车头，`base_link` 为后轮轴中点，x 前、y 左、z 上。
 
-## CAD and conversion
+## CAD 与转换
 
-Original SolidWorks and STEP files remain in this directory. STEP SHA-256: `3034a4fd0d791a35212bf166a0775f7630fcfa31570a78389df7a697e52937d8`.
-Converted 2026-09-12 with Gmsh 4.15.2 / trimesh 5.1.0; mm to m, `(x,y,z)=(-CAD_z,CAD_x,CAD_y)`. Mesh origin is the horizontal bounding-box center and lowest z=0; bounds approximately 247.416×220×33.5 mm, 113696 triangles. Visual placement relative to the rear axle is `(0.103708,0,0.02875)` m.
+本目录保留原始 SolidWorks 和 STEP。STEP SHA-256：`3034a4fd0d791a35212bf166a0775f7630fcfa31570a78389df7a697e52937d8`。
+2026-09-12 使用 Gmsh 4.15.2／trimesh 5.1.0 转换，mm 转 m，`(x,y,z)=(-CAD_z,CAD_x,CAD_y)`。网格原点为水平包围盒中心、最低 z=0；外包约 247.416×220×33.5 mm，113696 三角面。外观相对后轴放置于 `(0.103708,0,0.02875)` m。
 
-The chassis STL is checked in and consumed directly by normal builds. One-time CAD conversion and standoff generation scripts have been removed from the current tree; restore the relevant tools from `tools/` at Git revision `508bf26` when changing CAD or regenerating base meshes. Conversion versions, units and coordinate conventions above remain the provenance record.
+现有车板 STL 已入库，日常构建直接使用该资源。一次性 CAD 转换和铜柱生成脚本已从当前工程移除；需要修改 CAD 或重新生成基础网格时，可从 Git 版本 `508bf26` 的 `tools/` 恢复对应工具。上述转换版本、单位和坐标约定继续保留。
 
-## Adopted geometry
+## 已采用的几何
 
-| Item | Current input / provenance |
+| 项目 | 当前输入／来源 |
 | --- | --- |
-| Rear wheel diameter / width / spacing | 66.5 / 26 / 257 mm, owner supplied |
-| Rear axle inward from plate rear edge | 20 mm, owner supplied |
-| Horizontal plate bottom above ground | 62 mm, owner-selected modeling height |
-| Front support ball diameter / assembly height | 15.875 / 20 mm, CY-15A product reference |
-| Support housing | Diameter 27 mm, height 16 mm, simplified cylinder |
-| Standoff hex width / length | 4.5 mm owner supplied / 42 mm derived as 62−20 |
-| Same-side mounting-hole spacing | 38.3 mm from CAD; product reference is 40 mm |
-| Front support centers in base_link | x=196.348442 mm, y=±103.111804 mm; centered between CAD holes |
-| Front support center inward from front edge | 31.067560 mm, CAD-derived |
+| 后轮直径／宽度／轮距 | 66.5／26／257 mm，负责人提供 |
+| 后轴距车板后边缘 | 向内 20 mm，负责人提供 |
+| 水平车板底面离地 | 62 mm，负责人指定建模高度 |
+| 前支撑球径／组件总高 | 15.875／20 mm，CY-15A 商品参考 |
+| 支撑壳体 | 直径 27 mm、高 16 mm，简化圆柱 |
+| 铜柱对边／长度 | 4.5 mm 负责人提供／42 mm 由 62−20 推导 |
+| 同侧安装孔距 | CAD 38.3 mm，商品参考 40 mm |
+| 前支撑球心在 base_link 下的位置 | x=196.348442 mm、y=±103.111804 mm，取 CAD 同侧两孔中点 |
+| 球心距前边缘 | 向内 31.067560 mm，CAD 推导 |
 
-These replace early 18 mm ball diameter, 208 mm ball spacing, 23 mm front offset and 57 mm plate-height assumptions. Ground is at z=−33.25 mm relative to base_link; wheel centers are y=±128.5 mm. Four CAD hole axes: X=±103.111804 mm, Z=−135.498442/−97.198442 mm, along CAD Y, radius 2 mm. In base_link the mounting axes are x=215.498442/177.198442 mm, y=±103.111804 mm, plate underside z=28.75 mm.
+以上取代早期 18 mm 球径、208 mm 球距、23 mm 前边距和 57 mm 板高假设。地面相对 base_link 为 z=−33.25 mm，后轮中心 y=±128.5 mm。四孔 CAD 轴线为 X=±103.111804 mm、Z=−135.498442／−97.198442 mm，沿 CAD Y，半径 2 mm；转换后安装轴 x=215.498442／177.198442 mm、y=±103.111804 mm，板底 z=28.75 mm。
 
-The 40 vs 38.3 mm hole spacing differs by 1.7 mm (0.85 mm per side if centered); physical assembly is unverified. A 50 mm product flange length was supplied but flange width/thickness/hole diameter were not, so the flange remains omitted. The standoffs omit threads and nuts. Xacro scales the existing base mesh to the selected dimensions.
+40 与 38.3 mm 孔距差 1.7 mm，对中时每侧差 0.85 mm，实物装配尚未验证。商品法兰总长给定 50 mm，但宽度、厚度和孔径缺失，因此仍省略法兰。铜柱省略螺纹和螺母，现有基础网格由 Xacro 按尺寸缩放。
 
-## Motors, brackets and mass
+## 电机、支架与质量
 
-Reference: two MG513X GMR 500-line, 1:28 motors. Encoder counts per output revolution and electrical ratings remain unverified. Motor-cylinder axis is 35 mm ahead of the output axle at the same height. Owner-supplied reference dimensions: axial depth 45.5 mm, motor diameter 32.6 mm, encoder diameter 32.8 mm, gearbox envelope 64.5×38 mm, output shaft diameter/length 6/14.5 mm.
+参考为两个 MG513X GMR 500 线、1:28 电机，输出轴每转计数与电气额定值待核实。电机圆筒轴线在输出轮轴前方 35 mm、两轴等高。负责人提供参考尺寸：轴向总深 45.5 mm、电机直径 32.6 mm、编码器直径 32.8 mm、减速箱包络 64.5×38 mm、输出轴直径／长度 6／14.5 mm。
 
-Approved appearance assumptions in `motor_assembly.xacro`: gearbox depth 10 mm, encoder cap 5 mm, cylinder 30.5 mm; gearbox-to-tire clearance 4 mm. L-bracket thickness 2 mm, length 64.3 mm, flange reach 20.7 mm, height 47.75 mm. Holes, fillets, shaft flats and hub details are omitted. Housings/brackets are fixed; the output shaft rotates with the wheel. These are not manufacturing drawings.
+`motor_assembly.xacro` 中经认可的外观假设：减速箱厚 10 mm、编码器盖 5 mm、圆筒 30.5 mm；减速箱至轮胎间隙 4 mm；L 支架厚 2 mm、长 64.3 mm、折边伸出 20.7 mm、高 47.75 mm。孔、圆角、D 轴扁位和轮毂细节省略；外壳和支架固定，输出轴随轮旋转。这些不是加工图。
 
-Reference masses: two motors 340 g, brackets 94 g, wheels/hubs 92 g, front support assemblies 71 g (35.5 g each, mean of 29/42 g product variants). With ODIN 280 g, the included subtotal is 877 g. Uniform boxes/cylinders estimate inertia; no separate output-shaft mass is added. Plate, standoffs and electronics remain uncounted. Only model geometry and inertia remain; contact worlds and simulated drive were removed. See [model scope](../../../src/odin_explorer/explorer_description/README.md). Hardware calibration is pending.
+参考质量：两个电机 340 g、支架 94 g、轮胎轮毂 92 g、前支撑组件 71 g（每套 35.5 g，取商品 29／42 g 均值）；加 ODIN 280 g 后已计入小计 877 g。按均匀盒体／圆柱估算惯性，输出轴不重复计重；车板、铜柱及电子设备未计入。当前仅保留模型几何与惯性，接触世界和仿真驱动已移除；尚未对照实车标定。

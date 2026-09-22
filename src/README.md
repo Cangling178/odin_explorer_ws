@@ -1,24 +1,11 @@
-# Source guide
+# 源码导航
 
-English | [简体中文](README_cn.md)
+本目录仅保留 `odin_explorer/` 下五个实际使用的 ROS 包。
 
-First-party code lives under `src/odin_explorer/`. There are six ROS 2 packages; only model/preview functionality is implemented. The other packages retain development contracts.
+- [explorer_description](odin_explorer/explorer_description/README.md)：机器人 Xacro、STL 和模型预览；安装几何仍需实测标定。
+- [explorer_bringup](odin_explorer/explorer_bringup/README.md)：模型预览、人工建图、Jetson 导航和电脑 RViz 的统一启动入口。
+- [explorer_localization](odin_explorer/explorer_localization/README.md)：ODIN 点云网关与 OctoMap 二维栅格建图接入。
+- [explorer_odin](odin_explorer/explorer_odin/README.md)：C++ 位姿、TF 与实时点云适配；通过 PCL 过滤点云。
+- [explorer_navigation](odin_explorer/explorer_navigation/README.md)：Nav2 实车参数与电脑 RViz 配置；导航算法直接使用官方组件。
 
-| Package | Responsibility | Current implementation |
-| --- | --- | --- |
-| `explorer_description` | Body, wheel, motor and ODIN housing geometry and frames | Xacro, STL, RViz configuration and preview launch |
-| `explorer_bringup` | Module composition, operating modes and launch order | Only `preview.launch.py`; no actuator or sensor connection |
-| `explorer_hardware` | Host-to-F4 transport, wheel feedback and differential base interface | Contract templates; no transport or hardware plugin |
-| `explorer_odin` | Vendor cloud/pose, clock and TF adaptation | Contract templates; actual driver lives in the vendor underlay |
-| `explorer_localization` | Continuous odometry, global localization and occupancy integration | Contract templates; no estimator or occupancy mapper |
-| `explorer_navigation` | Nav2 obstacle avoidance, exploration goals and waypoint patrol | Contract templates; no navigation launch |
-
-Each package declares ROS dependencies in `package.xml`, installs resources with `CMakeLists.txt`, and stores configuration or contracts in `config/`. Implemented launches live in `launch/`; only description has `urdf/` and `meshes/`. `*.template.yaml` files are not runtime parameters.
-
-`explorer_hardware` runs on the host. Root-level `firmware/` is reserved for F4 code and currently contains protocol notes only. The host performs differential kinematics; F4 will own wheel loops and an independent command watchdog. These functions remain unimplemented.
-
-`vendor_ws/src/odin_ros_driver/` is an independent vendor repository. It is excluded from the first-party colcon build and the parent Git push. After cloning, fetch the pinned source and build it separately using the [vendor instructions](../vendor_ws/README.md).
-
-Model dimensions and inertia include assumptions. Real mounting extrinsics require measurement. Preview publishes synthetic wheel joint states, not real base feedback.
-
-[Project structure](../README.md#project-structure) · [Architecture and data flow](../docs/02_architecture.md) · [Development](../docs/07_development.md)
+[项目结构与接口](../docs/01_project.md) · [部署](../docs/02_deployment.md)

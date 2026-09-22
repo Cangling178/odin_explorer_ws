@@ -1,7 +1,5 @@
 # explorer_bringup
 
-Currently provides only preview.launch.py for model visualization, with no actuator connection. Mapping, base and navigation launches await validated interfaces.
+模型预览、人工建图、Jetson 导航和电脑 RViz 的统一启动入口。
 
-[Architecture](../../../docs/02_architecture.md) · [Interfaces](../../../docs/06_interfaces.md)
-
-`*.template.yaml` files are design records, not ROS runtime parameters.
+[项目结构与接口](../../../docs/01_project.md) · [部署与构建](../../../docs/02_deployment.md) · [导航与巡航](../../../docs/04_navigation.md)

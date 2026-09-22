@@ -6,5 +6,14 @@
   <maintainer email="maintainer@example.invalid">Project Maintainer</maintainer>
   <license>Proprietary</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>pcl_conversions</depend>
+  <depend>libpcl-all-dev</depend>
   <export><build_type>ament_cmake</build_type></export>
 </package>

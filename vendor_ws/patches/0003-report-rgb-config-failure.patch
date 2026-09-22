@@ -1,0 +1,45 @@
+diff --git a/src/host_sdk_sample.cpp b/src/host_sdk_sample.cpp
+--- a/src/host_sdk_sample.cpp
++++ b/src/host_sdk_sample.cpp
+@@ -1726,13 +1726,38 @@
+             rgbPara.width  = (uint32_t)g_rgb_width;
+             rgbPara.height = (uint32_t)g_rgb_height;
+             rgbPara.fps    = (uint32_t)g_rgb_fps;
+-            int rgb_rc = lidar_set_rgb_parameter(odinDevice, &rgbPara);
++            const auto rgb_start = std::chrono::steady_clock::now();
++            const int rgb_rc = lidar_set_rgb_parameter(odinDevice, &rgbPara);
++            const double rgb_elapsed_ms = std::chrono::duration<double, std::milli>(
++                std::chrono::steady_clock::now() - rgb_start).count();
+             if (rgb_rc) {
++                // Negative SDK errors also cover invalid arguments and transport
++                // failures; rc=-1 alone does not establish a response timeout.
++                const char* reason = rgb_rc < 0
++                    ? "SDK failure (initialization, arguments, transport or response); inspect SDK output"
++                    : "unrecognized device error";
++                switch (rgb_rc) {
++                    case LIDAR_RGB_BAD_REQUEST: reason = "malformed RGB configuration request"; break;
++                    case LIDAR_RGB_UNSUPPORTED_FORMAT: reason = "unsupported RGB format"; break;
++                    case LIDAR_RGB_UNSUPPORTED_RESOLUTION: reason = "unsupported RGB resolution"; break;
++                    case LIDAR_RGB_UNSUPPORTED_FPS: reason = "unsupported RGB frame rate"; break;
++                    case LIDAR_RGB_INVALID_COMBINATION: reason = "invalid RGB/DTOF frame-rate combination"; break;
++                    case LIDAR_RGB_DTOF_NOT_CONFIGURED: reason = "DTOF must be configured before RGB"; break;
++                    default: break;
++                }
+                 #ifdef ROS2
+                     RCLCPP_WARN(rclcpp::get_logger("ros[host_sdk_sample]"),
+-                        "set RGB parameter failed (rc=%d): format=%d, %dx%d@%d", rgb_rc, g_rgb_format, g_rgb_width, g_rgb_height, g_rgb_fps);
++                        "RGB configuration not confirmed (rc=%d, elapsed=%.1f ms): %s; "
++                        "requested format=%d, %dx%d, %.1f fps (fps_x10=%d), DTOF=%.1f fps. "
++                        "Continuing stream startup; receiving images does not confirm these settings.",
++                        rgb_rc, rgb_elapsed_ms, reason, g_rgb_format, g_rgb_width, g_rgb_height,
++                        g_rgb_fps / 10.0, g_rgb_fps, g_dtof_fps / 10.0);
+                 #else
+-                    ROS_WARN("set RGB parameter failed (rc=%d): format=%d, %dx%d@%d", rgb_rc, g_rgb_format, g_rgb_width, g_rgb_height, g_rgb_fps);
++                    ROS_WARN("RGB configuration not confirmed (rc=%d, elapsed=%.1f ms): %s; "
++                        "requested format=%d, %dx%d, %.1f fps (fps_x10=%d), DTOF=%.1f fps. "
++                        "Continuing stream startup; receiving images does not confirm these settings.",
++                        rgb_rc, rgb_elapsed_ms, reason, g_rgb_format, g_rgb_width, g_rgb_height,
++                        g_rgb_fps / 10.0, g_rgb_fps, g_dtof_fps / 10.0);
+                 #endif
+             } else {
+                 #ifdef ROS2
